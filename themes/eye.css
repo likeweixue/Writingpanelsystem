@@ -12,31 +12,74 @@
 .writing-detail,
 .goal-setting,
 .settings-item,
-.about-content {
+.about-content,
+.drawer-panel,
+.slide-menu {
   background: #C8DBC5;
   color: #2c3e2f;
 }
+
 .sidebar-menu { background: #2c3e2f; color: #C8DBC5; }
 .sidebar-menu .menu-item { color: #d4e6d1; }
 .sidebar-menu .menu-item.active { background: #1abc9c; color: #2c3e2f; }
+
 .tab.active { background: #C8DBC5; color: #2c3e2f; }
 .tab { background: #b8c9b5; color: #3a5a3a; }
+
 .stat-card, .calendar-container, .writing-detail, .goal-setting, .settings-item, .about-content {
   background: #d4e6d1;
 }
-/* 抽屉面板跟随主题 */
-.drawer-panel {
-  background: inherit;
-  color: inherit;
-}
+
 .drawer-header {
   border-bottom-color: rgba(0,0,0,0.1);
 }
 .drawer-input {
-  background: rgba(255,255,255,0.1);
-  border-color: rgba(0,0,0,0.2);
-  color: inherit;
+  background: rgba(255,255,255,0.3);
+  border-color: #a8b8a5;
+  color: #2c3e2f;
 }
 .drawer-input:focus {
-  border-color: #007aff;
+  border-color: #1abc9c;
+}
+
+/* 书籍卡片样式 */
+.book-card {
+  background: #b8cab5;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.book-cover-gray {
+  background: #a8b8a5;
+}
+.book-cover-icon {
+  color: #2c3e2f;
+}
+.book-cover-title {
+  color: #2c3e2f;
+}
+.book-stats-gray {
+  color: #3a5a3a;
+}
+.book-info-gray {
+  background: rgba(0,0,0,0.05);
+}
+.book-title-gray {
+  color: #2c3e2f;
+}
+
+/* 按钮颜色 */
+.primary-btn,
+.small-btn,
+.drawer-btn {
+  background: #1abc9c;
+}
+.primary-btn:hover,
+.small-btn:hover,
+.drawer-btn:hover {
+  background: #16a085;
+}
+
+/* 滑块和进度条 */
+.progress-fill {
+  background: #1abc9c;
 }

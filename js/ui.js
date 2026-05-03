@@ -9,12 +9,17 @@ function escapeHtml(t) {
 function renderBooks() {
   var container = document.getElementById('booksContainer');
   if (!container) return;
+  
+  if (typeof loadGroups === 'function') loadGroups();
+  
   if (!books || books.length === 0) {
     container.innerHTML = '<div style="padding:40px;text-align:center;opacity:0.6;">暂无书籍，点击"新建书籍"开始创作</div>';
     return;
   }
+  
   container.innerHTML = '<div class="books-grid" id="booksGridInner"></div>';
   var grid = document.getElementById('booksGridInner');
+  
   for (var i = 0; i < books.length; i++) {
     var book = books[i];
     if (!book) continue;
@@ -31,18 +36,150 @@ function renderBooks() {
         }
       }
     }
+    
     var card = document.createElement('div');
     card.className = 'book-card';
-    card.onclick = (function(id) { return function() { window.openBookTab(id); }; })(book.id);
-    card.innerHTML = '<div class="book-cover-gray">' +
-      '<div class="book-cover-icon">📖</div>' +
-      '<div class="book-cover-title">' + escapeHtml(book.title || '未命名') + '</div>' +
-      '<div class="book-stats-gray">' + (book.volumes ? book.volumes.length : 0) + '卷 · ' + totalChapters + '章 · ' + totalWords + '字</div>' +
-      '</div>' +
-      '<div class="book-info-gray">' +
-      '<div class="book-title-gray">' + escapeHtml(book.title || '未命名') + '</div>' +
-      '</div>';
+    card.style.position = 'relative';
+    
+    var menuHtml = '<div class="book-menu-btn" data-id="' + book.id + '" style="position: absolute; top: 8px; right: 8px; z-index: 10; background: rgba(0,0,0,0.5); border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: white; font-size: 18px;">⋯</div>';
+    
+    if (book.cover && book.cover !== '') {
+      card.innerHTML = menuHtml +
+        '<div class="book-cover-gray" style="background-image: url(\'' + book.cover + '\'); background-size: cover; background-position: center; position: relative; height: 100%; min-height: 200px;">' +
+        '<div class="book-cover-title" style="background: rgba(0,0,0,0.5); display: inline-block; padding: 4px 8px; border-radius: 4px; color: white; position: absolute; bottom: 40px; left: 8px; right: 8px; text-align: center;">' + escapeHtml(book.title || '未命名') + '</div>' +
+        '<div class="book-stats-gray" style="position: absolute; bottom: 8px; left: 8px; right: 8px; color: white; text-shadow: 0 0 2px black; font-size: 10px; text-align: center;">' + (book.volumes ? book.volumes.length : 0) + '卷 · ' + totalChapters + '章 · ' + totalWords + '字</div>' +
+        '</div>';
+    } else {
+      card.innerHTML = menuHtml +
+        '<div class="book-cover-gray" style="height: 100%; min-height: 200px; display: flex; flex-direction: column; justify-content: center; align-items: center;">' +
+        '<div class="book-cover-icon">📖</div>' +
+        '<div class="book-cover-title" style="text-align: center;">' + escapeHtml(book.title || '未命名') + '</div>' +
+        '<div class="book-stats-gray" style="text-align: center;">' + (book.volumes ? book.volumes.length : 0) + '卷 · ' + totalChapters + '章 · ' + totalWords + '字</div>' +
+        '</div>';
+    }
+    
+    (function(bookId, element) {
+      element.onclick = function(e) {
+        if (e.target.classList && e.target.classList.contains('book-menu-btn')) return;
+        window.openBookTab(bookId);
+      };
+    })(book.id, card);
+    
     grid.appendChild(card);
+  }
+  
+  var menuBtns = document.querySelectorAll('.book-menu-btn');
+  for (var i = 0; i < menuBtns.length; i++) {
+    menuBtns[i].onclick = function(e) {
+      e.stopPropagation();
+      var bookId = parseInt(this.getAttribute('data-id'));
+      showBookMenu(bookId, this);
+    };
+  }
+}
+
+function showBookMenu(bookId, btnElement) {
+  var existingMenu = document.querySelector('.book-context-menu');
+  if (existingMenu) existingMenu.remove();
+  
+  var menu = document.createElement('div');
+  menu.className = 'book-context-menu';
+  menu.style.cssText = 'position: fixed; background: white; border: 1px solid #ddd; border-radius: 8px; padding: 4px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.15); z-index: 1000; min-width: 120px;';
+  menu.innerHTML = '<button class="delete-book" data-id="' + bookId + '" style="display: block; width: 100%; padding: 8px 16px; border: none; background: none; cursor: pointer; text-align: left;">🗑️ 删除书籍</button>' +
+    '<button class="move-book" data-id="' + bookId + '" style="display: block; width: 100%; padding: 8px 16px; border: none; background: none; cursor: pointer; text-align: left;">📁 移动到分组</button>';
+  
+  var rect = btnElement.getBoundingClientRect();
+  menu.style.top = rect.bottom + 'px';
+  menu.style.left = rect.left + 'px';
+  document.body.appendChild(menu);
+  
+  menu.querySelector('.delete-book').onclick = function() {
+    deleteBookById(bookId);
+    menu.remove();
+  };
+  
+  menu.querySelector('.move-book').onclick = function() {
+    showMoveToGroupMenu(bookId, menu);
+  };
+  
+  setTimeout(function() {
+    document.addEventListener('click', function closeMenu(e) {
+      if (!menu.contains(e.target)) { if(menu.parentNode) menu.remove(); document.removeEventListener('click', closeMenu); }
+    });
+  }, 100);
+}
+
+function deleteBookById(bookId) {
+  if (confirm('确定要删除这本书吗？书籍将移入回收站')) {
+    var bookToDelete = null;
+    for (var i = 0; i < books.length; i++) {
+      if (books[i].id === bookId) {
+        bookToDelete = books[i];
+        break;
+      }
+    }
+    if (bookToDelete) {
+      if (typeof moveToTrash === 'function') moveToTrash(bookToDelete);
+      var newBooks = [];
+      for (var i = 0; i < books.length; i++) {
+        if (books[i].id !== bookId) newBooks.push(books[i]);
+      }
+      books = newBooks;
+      saveAllData();
+      renderBooks();
+      var tabToClose = 'book_' + bookId;
+      for (var i = 0; i < openTabs.length; i++) {
+        if (openTabs[i].id === tabToClose) {
+          closeTab(tabToClose);
+          break;
+        }
+      }
+      alert('书籍已移入回收站');
+    }
+  }
+}
+
+function showMoveToGroupMenu(bookId, parentMenu) {
+  parentMenu.innerHTML = '<div style="padding: 8px 12px; font-weight: 500; border-bottom: 1px solid #eee;">移动到分组</div>';
+  
+  if (typeof groups === 'undefined' || !groups || groups.length === 0) {
+    if (typeof loadGroups === 'function') loadGroups();
+  }
+  if (!groups || groups.length === 0) { groups = [{ id: 'default', name: '默认分组', books: [] }]; }
+  
+  for (var i = 0; i < groups.length; i++) {
+    var group = groups[i];
+    var btn = document.createElement('button');
+    btn.textContent = group.name;
+    btn.style.cssText = 'display: block; width: 100%; padding: 8px 16px; border: none; background: none; cursor: pointer; text-align: left;';
+    btn.onclick = (function(gid, gname) {
+      return function() {
+        moveBookToGroup(bookId, gid);
+        if(parentMenu.parentNode) parentMenu.remove();
+        alert('已移动到 "' + gname + '" 分组');
+      };
+    })(group.id, group.name);
+    parentMenu.appendChild(btn);
+  }
+  
+  var addGroupBtn = document.createElement('button');
+  addGroupBtn.textContent = '+ 新建分组';
+  addGroupBtn.style.cssText = 'display: block; width: 100%; padding: 8px 16px; border: none; background: none; cursor: pointer; text-align: left; border-top: 1px solid #eee; color: #007aff;';
+  addGroupBtn.onclick = function() {
+    if (typeof openNewGroupDrawer === 'function') openNewGroupDrawer();
+  };
+  parentMenu.appendChild(addGroupBtn);
+}
+
+function moveBookToGroup(bookId, groupId) {
+  var book = null;
+  for (var i = 0; i < books.length; i++) {
+    if (books[i].id === bookId) { book = books[i]; break; }
+  }
+  if (book) {
+    book.groupId = groupId;
+    saveAllData();
+    renderBooks();
   }
 }
 
@@ -51,7 +188,6 @@ function renderTabs() {
   if (!container) return;
   container.innerHTML = '';
   
-  // 添加窗口控制按钮组
   var winControls = document.createElement('div');
   winControls.className = 'window-controls';
   winControls.innerHTML = '<div class="window-btn close" title="关闭"></div>' +
@@ -84,7 +220,6 @@ function renderTabs() {
   newBtn.id = 'newTabBtn';
   container.appendChild(newBtn);
   
-  // 绑定标签事件
   var tabs = document.querySelectorAll('.tab');
   for (var i = 0; i < tabs.length; i++) {
     var tab = tabs[i];
@@ -110,7 +245,6 @@ function renderTabs() {
     };
   }
   
-  // 绑定窗口控制按钮事件
   var closeWinBtn = document.querySelector('.window-btn.close');
   if (closeWinBtn) {
     closeWinBtn.onclick = function() {
@@ -190,3 +324,9 @@ function closeTab(tabId) {
     appContainer.classList.add('editing-mode');
   }
 }
+
+// 暴露全局函数
+window.showBookMenu = showBookMenu;
+window.deleteBookById = deleteBookById;
+window.showMoveToGroupMenu = showMoveToGroupMenu;
+window.moveBookToGroup = moveBookToGroup;

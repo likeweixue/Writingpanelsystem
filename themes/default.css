@@ -12,31 +12,104 @@
 .writing-detail,
 .goal-setting,
 .settings-item,
-.about-content {
+.about-content,
+.drawer-panel {
   background: #ffffff;
   color: #333;
 }
+
 .sidebar-menu { background: #1a1a2e; color: #eee; }
 .sidebar-menu .menu-item { color: #ccc; }
 .sidebar-menu .menu-item.active { background: #00d2ff; color: #1a1a2e; }
+
 .tab.active { background: #ffffff; color: #333; }
 .tab { background: #f0f0f0; color: #666; }
+
 .stat-card, .calendar-container, .writing-detail, .goal-setting, .settings-item, .about-content {
   background: #ffffff;
 }
-/* 抽屉面板跟随主题 */
-.drawer-panel {
-  background: inherit;
-  color: inherit;
-}
+
 .drawer-header {
   border-bottom-color: rgba(0,0,0,0.1);
 }
 .drawer-input {
-  background: rgba(255,255,255,0.1);
-  border-color: rgba(0,0,0,0.2);
-  color: inherit;
+  background: rgba(0,0,0,0.03);
+  border-color: #ddd;
+  color: #333;
 }
 .drawer-input:focus {
   border-color: #007aff;
+}
+
+/* 书籍卡片样式 */
+.book-card {
+  background: #e8e8e8;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+.book-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+.book-cover {
+  aspect-ratio: 1 / 1.414;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 20px;
+}
+.book-cover.no-cover {
+  background: #d0d0d0;
+}
+.book-cover.has-cover {
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+.book-cover.has-cover .book-cover-title {
+  background: rgba(0,0,0,0.5);
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  color: white;
+  margin-top: auto;
+}
+.book-cover.has-cover .book-stats {
+  background: rgba(0,0,0,0.5);
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: white;
+  font-size: 11px;
+  margin-top: 8px;
+}
+.book-cover-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+  opacity: 0.7;
+  color: #555;
+}
+.book-cover-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 8px 0;
+  color: #555;
+}
+.book-stats {
+  font-size: 11px;
+  opacity: 0.7;
+  color: #777;
+}
+/* 抽屉面板默认主题 */
+.drawer-panel {
+  background: #ffffff;
+  color: #333;
+}
+.drawer-input {
+  background: #f5f5f5;
+  border-color: #ddd;
+  color: #333;
 }

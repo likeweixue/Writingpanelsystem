@@ -1,0 +1,826 @@
+// UI 渲染函数
+function escapeHtml(t) { 
+  if (!t) return ''; 
+  var d = document.createElement('div'); 
+  d.textContent = t; 
+  return d.innerHTML; 
+}
+
+// 暴露函数到全局
+window.openNewGroupDrawer = null;
+window.closeNewGroupDrawer = null;
+window.createNewGroup = null;
+window.bindGroupCoverPreview = null;
+window.openGroupTab = null;
+window.openTrashTab = null;
+
+function renderBooks() {
+  var container = document.getElementById('booksContainer');
+  if (!container) return;
+  
+  loadGroups();
+  
+  if (!books || books.length === 0) {
+    container.innerHTML = '<div style="padding:40px;text-align:center;opacity:0.6;">暂无书籍，点击"新建书籍"开始创作</div>';
+    return;
+  }
+  
+  container.innerHTML = '';
+  
+  // 按分组显示书籍
+  for (var g = 0; g < groups.length; g++) {
+    var group = groups[g];
+    var groupBooks = [];
+    for (var i = 0; i < books.length; i++) {
+      if (books[i].groupId === group.id) {
+        groupBooks.push(books[i]);
+      }
+    }
+    
+    if (groupBooks.length === 0) continue;
+    
+    var groupSection = document.createElement('div');
+    groupSection.className = 'group-section';
+    groupSection.style.marginBottom = '30px';
+    groupSection.style.cursor = 'pointer';
+    
+    var groupHeader = document.createElement('div');
+    groupHeader.style.cssText = 'display: flex; align-items: center; gap: 12px; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid rgba(0,0,0,0.1);';
+    
+    if (group.cover) {
+      groupHeader.innerHTML = '<div style="width: 32px; height: 32px; border-radius: 8px; background-image: url(\'' + group.cover + '\'); background-size: cover;"></div>';
+    } else {
+      groupHeader.innerHTML = '<div style="font-size: 24px;">📁</div>';
+    }
+    groupHeader.innerHTML += '<h3 style="margin:0;">' + escapeHtml(group.name) + '</h3>';
+    
+    groupSection.onclick = (function(gid, gname) {
+      return function() { openGroupTab(gid, gname); };
+    })(group.id, group.name);
+    
+    groupSection.appendChild(groupHeader);
+    
+    var grid = document.createElement('div');
+    grid.className = 'books-grid';
+    
+    for (var i = 0; i < groupBooks.length; i++) {
+      var book = groupBooks[i];
+      var totalWords = 0, totalChapters = 0;
+      if (book.volumes) {
+        for (var j = 0; j < book.volumes.length; j++) {
+          var v = book.volumes[j];
+          if (v && v.chapters) {
+            totalChapters += v.chapters.length;
+            for (var k = 0; k < v.chapters.length; k++) {
+              var c = v.chapters[k];
+              if (c && c.content) totalWords += c.content.replace(/<[^>]*>/g, '').length;
+            }
+          }
+        }
+      }
+      
+      var card = document.createElement('div');
+      card.className = 'book-card';
+      card.style.position = 'relative';
+      
+      var menuHtml = '<div class="book-menu-btn" data-id="' + book.id + '" style="position: absolute; top: 8px; right: 8px; z-index: 10; background: rgba(0,0,0,0.5); border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: white; font-size: 18px;">⋯</div>';
+      
+      if (book.cover && book.cover !== '') {
+        card.innerHTML = menuHtml +
+          '<div class="book-cover-gray" style="background-image: url(\'' + book.cover + '\'); background-size: cover; background-position: center; position: relative; height: 100%; min-height: 200px;">' +
+          '<div class="book-cover-title" style="background: rgba(0,0,0,0.5); display: inline-block; padding: 4px 8px; border-radius: 4px; color: white; position: absolute; bottom: 40px; left: 8px; right: 8px; text-align: center;">' + escapeHtml(book.title || '未命名') + '</div>' +
+          '<div class="book-stats-gray" style="position: absolute; bottom: 8px; left: 8px; right: 8px; color: white; text-shadow: 0 0 2px black; font-size: 10px; text-align: center;">' + (book.volumes ? book.volumes.length : 0) + '卷 · ' + totalChapters + '章 · ' + totalWords + '字</div>' +
+          '</div>';
+      } else {
+        card.innerHTML = menuHtml +
+          '<div class="book-cover-gray" style="height: 100%; min-height: 200px; display: flex; flex-direction: column; justify-content: center; align-items: center;">' +
+          '<div class="book-cover-icon">📖</div>' +
+          '<div class="book-cover-title" style="text-align: center;">' + escapeHtml(book.title || '未命名') + '</div>' +
+          '<div class="book-stats-gray" style="text-align: center;">' + (book.volumes ? book.volumes.length : 0) + '卷 · ' + totalChapters + '章 · ' + totalWords + '字</div>' +
+          '</div>';
+      }
+      
+      (function(bookId, element) {
+        element.onclick = function(e) {
+          if (e.target.classList && e.target.classList.contains('book-menu-btn')) return;
+          window.openBookTab(bookId);
+        };
+      })(book.id, card);
+      
+      grid.appendChild(card);
+    }
+    
+    groupSection.appendChild(grid);
+    container.appendChild(groupSection);
+  }
+  
+  var menuBtns = document.querySelectorAll('.book-menu-btn');
+  for (var i = 0; i < menuBtns.length; i++) {
+    menuBtns[i].onclick = function(e) {
+      e.stopPropagation();
+      var bookId = parseInt(this.getAttribute('data-id'));
+      showBookMenu(bookId, this);
+    };
+  }
+}
+
+function showBookMenu(bookId, btnElement) {
+  var existingMenu = document.querySelector('.book-context-menu');
+  if (existingMenu) existingMenu.remove();
+  
+  var menu = document.createElement('div');
+  menu.className = 'book-context-menu';
+  menu.style.cssText = 'position: fixed; background: white; border: 1px solid #ddd; border-radius: 8px; padding: 4px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.15); z-index: 1000; min-width: 120px;';
+  menu.innerHTML = '<button class="delete-book" data-id="' + bookId + '" style="display: block; width: 100%; padding: 8px 16px; border: none; background: none; cursor: pointer; text-align: left;">🗑️ 删除书籍</button>' +
+    '<button class="move-book" data-id="' + bookId + '" style="display: block; width: 100%; padding: 8px 16px; border: none; background: none; cursor: pointer; text-align: left;">📁 移动到分组</button>';
+  
+  var rect = btnElement.getBoundingClientRect();
+  menu.style.top = rect.bottom + 'px';
+  menu.style.left = rect.left + 'px';
+  document.body.appendChild(menu);
+  
+  menu.querySelector('.delete-book').onclick = function() {
+    deleteBookById(bookId);
+    menu.remove();
+  };
+  
+  menu.querySelector('.move-book').onclick = function() {
+    showMoveToGroupMenu(bookId, menu);
+  };
+  
+  setTimeout(function() {
+    document.addEventListener('click', function closeMenu(e) {
+      if (!menu.contains(e.target)) { if(menu.parentNode) menu.remove(); document.removeEventListener('click', closeMenu); }
+    });
+  }, 100);
+}
+
+function deleteBookById(bookId) {
+  if (confirm('确定要删除这本书吗？书籍将移入回收站')) {
+    var bookToDelete = null;
+    for (var i = 0; i < books.length; i++) {
+      if (books[i].id === bookId) {
+        bookToDelete = books[i];
+        break;
+      }
+    }
+    if (bookToDelete) {
+      moveToTrash(bookToDelete);
+      var newBooks = [];
+      for (var i = 0; i < books.length; i++) {
+        if (books[i].id !== bookId) newBooks.push(books[i]);
+      }
+      books = newBooks;
+      saveAllData();
+      renderBooks();
+      
+      var tabToClose = 'book_' + bookId;
+      for (var i = 0; i < openTabs.length; i++) {
+        if (openTabs[i].id === tabToClose) {
+          closeTab(tabToClose);
+          break;
+        }
+      }
+      alert('书籍已移入回收站');
+    }
+  }
+}
+
+function showMoveToGroupMenu(bookId, parentMenu) {
+  parentMenu.innerHTML = '<div style="padding: 8px 12px; font-weight: 500; border-bottom: 1px solid #eee;">移动到分组</div>';
+  
+  if (!groups || groups.length === 0) {
+    groups = [{ id: 'default', name: '默认分组', books: [] }];
+    saveGroups();
+  }
+  
+  for (var i = 0; i < groups.length; i++) {
+    var group = groups[i];
+    var btn = document.createElement('button');
+    btn.textContent = group.name;
+    btn.style.cssText = 'display: block; width: 100%; padding: 8px 16px; border: none; background: none; cursor: pointer; text-align: left;';
+    btn.onclick = (function(gid, gname) {
+      return function() {
+        moveBookToGroup(bookId, gid);
+        if(parentMenu.parentNode) parentMenu.remove();
+        alert('已移动到 "' + gname + '" 分组');
+      };
+    })(group.id, group.name);
+    parentMenu.appendChild(btn);
+  }
+  
+  var addGroupBtn = document.createElement('button');
+  addGroupBtn.textContent = '+ 新建分组';
+  addGroupBtn.style.cssText = 'display: block; width: 100%; padding: 8px 16px; border: none; background: none; cursor: pointer; text-align: left; border-top: 1px solid #eee; color: #007aff;';
+  addGroupBtn.onclick = function() {
+    openNewGroupDrawer();
+  };
+  parentMenu.appendChild(addGroupBtn);
+}
+
+function moveBookToGroup(bookId, groupId) {
+  var book = null;
+  for (var i = 0; i < books.length; i++) {
+    if (books[i].id === bookId) { book = books[i]; break; }
+  }
+  if (book) {
+    book.groupId = groupId;
+    saveAllData();
+    renderBooks();
+  }
+}
+
+function renderTabs() {
+  var container = document.getElementById('tabsContainer');
+  if (!container) return;
+  container.innerHTML = '';
+  
+  var winControls = document.createElement('div');
+  winControls.className = 'window-controls';
+  winControls.innerHTML = '<div class="window-btn close" title="关闭"></div>' +
+    '<div class="window-btn minimize" title="最小化"></div>' +
+    '<div class="window-btn maximize" title="最大化"></div>';
+  container.appendChild(winControls);
+  
+  for (var i = 0; i < openTabs.length; i++) {
+    var tab = openTabs[i];
+    var tabEl = document.createElement('div');
+    tabEl.className = 'tab';
+    if (tab.id === activeTabId) tabEl.classList.add('active');
+    tabEl.setAttribute('data-tab', tab.id);
+    
+    tabEl.innerHTML = '<span class="tab-title">' + escapeHtml(tab.title) + '</span>';
+    
+    if (tab.type !== 'home') {
+      var closeSpan = document.createElement('span');
+      closeSpan.className = 'tab-close';
+      closeSpan.setAttribute('data-id', tab.id);
+      closeSpan.innerHTML = '×';
+      tabEl.appendChild(closeSpan);
+    }
+    container.appendChild(tabEl);
+  }
+  
+  var newBtn = document.createElement('button');
+  newBtn.className = 'new-tab-btn';
+  newBtn.innerHTML = '+';
+  newBtn.id = 'newTabBtn';
+  container.appendChild(newBtn);
+  
+  var tabs = document.querySelectorAll('.tab');
+  for (var i = 0; i < tabs.length; i++) {
+    var tab = tabs[i];
+    tab.addEventListener('click', function(e) {
+      if (e.target.classList.contains('tab-close')) return;
+      var tabId = this.getAttribute('data-tab');
+      window.switchToTab(tabId);
+    });
+    var closeBtn = tab.querySelector('.tab-close');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        var id = this.getAttribute('data-id');
+        window.closeTab(id);
+      });
+    }
+  }
+  
+  var newTabBtn = document.getElementById('newTabBtn');
+  if (newTabBtn) {
+    newTabBtn.onclick = function() { 
+      window.switchToTab('home'); 
+    };
+  }
+  
+  var closeWinBtn = document.querySelector('.window-btn.close');
+  if (closeWinBtn) {
+    closeWinBtn.onclick = function() {
+      if (confirm('确定要退出吗？')) {
+        window.close();
+      }
+    };
+  }
+  
+  var minimizeBtn = document.querySelector('.window-btn.minimize');
+  if (minimizeBtn) {
+    minimizeBtn.onclick = function() {
+      console.log('最小化');
+    };
+  }
+  
+  var maximizeBtn = document.querySelector('.window-btn.maximize');
+  if (maximizeBtn) {
+    maximizeBtn.onclick = function() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+      } else {
+        document.exitFullscreen();
+      }
+    };
+  }
+}
+
+function switchToTab(tabId) {
+  activeTabId = tabId;
+  renderTabs();
+  
+  var bookPages = document.querySelectorAll('.book-page');
+  for (var i = 0; i < bookPages.length; i++) {
+    bookPages[i].classList.remove('active');
+  }
+  
+  var targetPage = document.querySelector('.book-page[data-page="' + tabId + '"]');
+  if (targetPage) {
+    targetPage.classList.add('active');
+  }
+  
+  var appContainer = document.querySelector('.app-container');
+  if (tabId !== 'home' && tabId.indexOf('book_') === 0) {
+    appContainer.classList.add('editing-mode');
+  } else {
+    appContainer.classList.remove('editing-mode');
+  }
+}
+
+function closeTab(tabId) {
+  var index = -1;
+  for (var i = 0; i < openTabs.length; i++) {
+    if (openTabs[i].id === tabId) {
+      index = i;
+      break;
+    }
+  }
+  if (index !== -1) openTabs.splice(index, 1);
+  
+  var pageToRemove = document.querySelector('.book-page[data-page="' + tabId + '"]');
+  if (pageToRemove) pageToRemove.remove();
+  
+  if (activeTabId === tabId) {
+    var newActive = openTabs.length > 0 ? openTabs[openTabs.length - 1] : null;
+    activeTabId = newActive ? newActive.id : 'home';
+  }
+  renderTabs();
+  
+  var activePage = document.querySelector('.book-page[data-page="' + activeTabId + '"]');
+  if (activePage) activePage.classList.add('active');
+  
+  var appContainer = document.querySelector('.app-container');
+  if (activeTabId === 'home' || (activeTabId && activeTabId.indexOf('page_') === 0)) {
+    appContainer.classList.remove('editing-mode');
+  } else {
+    appContainer.classList.add('editing-mode');
+  }
+}
+
+// ========== 新建分组抽屉功能 ==========
+
+function openNewGroupDrawer() {
+  var drawer = document.getElementById('newGroupDrawer');
+  if (drawer) {
+    drawer.classList.add('open');
+    var nameInput = document.getElementById('newGroupName');
+    if (nameInput) nameInput.value = '';
+    var coverInput = document.getElementById('groupCoverInput');
+    if (coverInput) coverInput.value = '';
+    var preview = document.getElementById('groupCoverPreview');
+    if (preview) preview.style.display = 'none';
+  }
+}
+
+function closeNewGroupDrawer() {
+  var drawer = document.getElementById('newGroupDrawer');
+  if (drawer) drawer.classList.remove('open');
+}
+
+function createNewGroup() {
+  var nameInput = document.getElementById('newGroupName');
+  var name = nameInput ? nameInput.value.trim() : '';
+  if (!name) {
+    alert('请输入分组名称');
+    return;
+  }
+  
+  var coverFile = document.getElementById('groupCoverInput').files[0];
+  
+  if (coverFile) {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      createGroupWithCover(name, e.target.result);
+    };
+    reader.readAsDataURL(coverFile);
+  } else {
+    createGroupWithCover(name, null);
+  }
+}
+
+function createGroupWithCover(name, coverData) {
+  var newGroup = { 
+    id: Date.now(), 
+    name: name, 
+    books: [],
+    cover: coverData
+  };
+  groups.push(newGroup);
+  saveGroups();
+  renderBooks();
+  closeNewGroupDrawer();
+  alert('分组 "' + name + '" 创建成功');
+}
+
+function bindGroupCoverPreview() {
+  var coverInput = document.getElementById('groupCoverInput');
+  if (coverInput) {
+    coverInput.onchange = function(e) {
+      var file = e.target.files[0];
+      if (file) {
+        var reader = new FileReader();
+        reader.onload = function(ev) {
+          var preview = document.getElementById('groupCoverPreview');
+          if (preview) {
+            preview.style.backgroundImage = 'url(' + ev.target.result + ')';
+            preview.style.backgroundSize = 'cover';
+            preview.style.backgroundPosition = 'center';
+            preview.style.display = 'block';
+          }
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+  }
+}
+
+// ========== 分组标签页功能 ==========
+
+function openGroupTab(groupId, groupName) {
+  var tabId = 'group_' + groupId;
+  
+  for (var i = 0; i < openTabs.length; i++) {
+    if (openTabs[i].id === tabId) {
+      switchToTab(tabId);
+      return;
+    }
+  }
+  
+  openTabs.push({ id: tabId, title: groupName, type: 'group', groupId: groupId });
+  renderTabs();
+  
+  var pagesContainer = document.getElementById('pagesContainer');
+  var pageDiv = document.createElement('div');
+  pageDiv.className = 'book-page';
+  pageDiv.setAttribute('data-page', tabId);
+  
+  var groupBooks = [];
+  for (var i = 0; i < books.length; i++) {
+    if (books[i].groupId === groupId) {
+      groupBooks.push(books[i]);
+    }
+  }
+  
+  pageDiv.innerHTML = renderGroupBooksHTML(groupId, groupName, groupBooks);
+  pagesContainer.appendChild(pageDiv);
+  switchToTab(tabId);
+}
+
+function renderGroupBooksHTML(groupId, groupName, groupBooks) {
+  if (groupBooks.length === 0) {
+    return '<div style="padding: 40px; text-align: center; opacity: 0.6;">该分组暂无书籍</div>';
+  }
+  
+  var html = '<div style="padding: 20px;"><h2 style="margin-bottom: 20px;">📁 ' + escapeHtml(groupName) + '</h2><div class="books-grid">';
+  
+  for (var i = 0; i < groupBooks.length; i++) {
+    var book = groupBooks[i];
+    var totalWords = 0, totalChapters = 0;
+    if (book.volumes) {
+      for (var j = 0; j < book.volumes.length; j++) {
+        var v = book.volumes[j];
+        if (v && v.chapters) {
+          totalChapters += v.chapters.length;
+          for (var k = 0; k < v.chapters.length; k++) {
+            var c = v.chapters[k];
+            if (c && c.content) totalWords += c.content.replace(/<[^>]*>/g, '').length;
+          }
+        }
+      }
+    }
+    
+    html += '<div class="book-card" onclick="window.openBookTab(' + book.id + ')" style="cursor: pointer; position: relative;">' +
+      '<div class="book-cover-gray" style="height: 100%; min-height: 200px; display: flex; flex-direction: column; justify-content: center; align-items: center;">' +
+      '<div class="book-cover-icon">📖</div>' +
+      '<div class="book-cover-title" style="text-align: center;">' + escapeHtml(book.title || '未命名') + '</div>' +
+      '<div class="book-stats-gray" style="text-align: center;">' + (book.volumes ? book.volumes.length : 0) + '卷 · ' + totalChapters + '章 · ' + totalWords + '字</div>' +
+      '</div>' +
+      '</div>';
+  }
+  
+  html += '</div></div>';
+  return html;
+}
+
+// ========== 回收站功能 ==========
+
+function openTrashTab() {
+  var tabId = 'trash_can';
+  
+  for (var i = 0; i < openTabs.length; i++) {
+    if (openTabs[i].id === tabId) {
+      switchToTab(tabId);
+      return;
+    }
+  }
+  
+  loadTrash();
+  
+  openTabs.push({ id: tabId, title: '回收站', type: 'trash' });
+  renderTabs();
+  
+  var pagesContainer = document.getElementById('pagesContainer');
+  var pageDiv = document.createElement('div');
+  pageDiv.className = 'book-page';
+  pageDiv.setAttribute('data-page', tabId);
+  
+  pageDiv.innerHTML = renderTrashHTML();
+  pagesContainer.appendChild(pageDiv);
+  switchToTab(tabId);
+  bindTrashEvents();
+}
+
+function renderTrashHTML() {
+  loadTrash();
+  
+  if (!trashBooks || trashBooks.length === 0) {
+    return '<div style="padding: 40px; text-align: center; opacity: 0.6;">回收站为空</div>';
+  }
+  
+  var html = '<div style="padding: 20px;"><h2 style="margin-bottom: 20px;">🗑️ 回收站</h2><div class="books-grid">';
+  
+  for (var i = 0; i < trashBooks.length; i++) {
+    var book = trashBooks[i];
+    var totalWords = 0, totalChapters = 0;
+    if (book.volumes) {
+      for (var j = 0; j < book.volumes.length; j++) {
+        var v = book.volumes[j];
+        if (v && v.chapters) {
+          totalChapters += v.chapters.length;
+          for (var k = 0; k < v.chapters.length; k++) {
+            var c = v.chapters[k];
+            if (c && c.content) totalWords += c.content.replace(/<[^>]*>/g, '').length;
+          }
+        }
+      }
+    }
+    
+    var deletedDate = new Date(book.deletedTime).toLocaleString();
+    
+    html += '<div class="book-card" style="position: relative;">' +
+      '<div class="book-cover-gray" style="height: 100%; min-height: 200px; display: flex; flex-direction: column; justify-content: center; align-items: center;">' +
+      '<div class="book-cover-icon">📖</div>' +
+      '<div class="book-cover-title" style="text-align: center;">' + escapeHtml(book.title || '未命名') + '</div>' +
+      '<div class="book-stats-gray" style="text-align: center;">' + (book.volumes ? book.volumes.length : 0) + '卷 · ' + totalChapters + '章 · ' + totalWords + '字</div>' +
+      '<div style="font-size: 10px; color: #888; margin-top: 8px;">删除于: ' + deletedDate + '</div>' +
+      '<div style="display: flex; gap: 8px; margin-top: 12px;">' +
+      '<button class="restore-book-btn" data-id="' + book.id + '" style="padding: 4px 12px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">↩️ 恢复</button>' +
+      '<button class="permanent-delete-btn" data-id="' + book.id + '" style="padding: 4px 12px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">🗑️ 永久删除</button>' +
+      '</div>' +
+      '</div>' +
+      '</div>';
+  }
+  
+  html += '</div></div>';
+  return html;
+}
+
+function bindTrashEvents() {
+  setTimeout(function() {
+    var restoreBtns = document.querySelectorAll('.restore-book-btn');
+    for (var i = 0; i < restoreBtns.length; i++) {
+      restoreBtns[i].onclick = function(e) {
+        e.stopPropagation();
+        var bookId = parseInt(this.getAttribute('data-id'));
+        var restoredBook = restoreFromTrash(bookId);
+        if (restoredBook) {
+          saveAllData();
+          renderBooks();
+          var activePage = document.querySelector('.book-page.active');
+          if (activePage && activePage.getAttribute('data-page') === 'trash_can') {
+            activePage.innerHTML = renderTrashHTML();
+            bindTrashEvents();
+          }
+          alert('书籍已恢复');
+        }
+      };
+    }
+    
+    var permanentBtns = document.querySelectorAll('.permanent-delete-btn');
+    for (var i = 0; i < permanentBtns.length; i++) {
+      permanentBtns[i].onclick = function(e) {
+        e.stopPropagation();
+        if (confirm('确定要永久删除这本书吗？此操作不可恢复！')) {
+          var bookId = parseInt(this.getAttribute('data-id'));
+          permanentDeleteBook(bookId);
+          var activePage = document.querySelector('.book-page.active');
+          if (activePage && activePage.getAttribute('data-page') === 'trash_can') {
+            activePage.innerHTML = renderTrashHTML();
+            bindTrashEvents();
+          }
+          alert('已永久删除');
+        }
+      };
+    }
+  }, 100);
+}
+
+// 暴露全局函数
+window.openNewGroupDrawer = openNewGroupDrawer;
+window.closeNewGroupDrawer = closeNewGroupDrawer;
+window.createNewGroup = createNewGroup;
+window.bindGroupCoverPreview = bindGroupCoverPreview;
+window.openGroupTab = openGroupTab;
+window.openTrashTab = openTrashTab;
+// ========== 回收站和分组函数（确保全局可用） ==========
+
+// 打开回收站标签页
+function openTrashTab() {
+  var tabId = 'trash_can';
+  
+  for (var i = 0; i < openTabs.length; i++) {
+    if (openTabs[i].id === tabId) {
+      switchToTab(tabId);
+      return;
+    }
+  }
+  
+  loadTrash();
+  
+  openTabs.push({ id: tabId, title: '回收站', type: 'trash' });
+  renderTabs();
+  
+  var pagesContainer = document.getElementById('pagesContainer');
+  var pageDiv = document.createElement('div');
+  pageDiv.className = 'book-page';
+  pageDiv.setAttribute('data-page', tabId);
+  
+  pageDiv.innerHTML = renderTrashHTML();
+  pagesContainer.appendChild(pageDiv);
+  switchToTab(tabId);
+  bindTrashEvents();
+}
+
+// 渲染回收站界面
+function renderTrashHTML() {
+  loadTrash();
+  
+  if (!trashBooks || trashBooks.length === 0) {
+    return '<div style="padding: 40px; text-align: center; opacity: 0.6;">回收站为空</div>';
+  }
+  
+  var html = '<div style="padding: 20px;"><h2 style="margin-bottom: 20px;">🗑️ 回收站</h2><div class="books-grid">';
+  
+  for (var i = 0; i < trashBooks.length; i++) {
+    var book = trashBooks[i];
+    var totalWords = 0, totalChapters = 0;
+    if (book.volumes) {
+      for (var j = 0; j < book.volumes.length; j++) {
+        var v = book.volumes[j];
+        if (v && v.chapters) {
+          totalChapters += v.chapters.length;
+          for (var k = 0; k < v.chapters.length; k++) {
+            var c = v.chapters[k];
+            if (c && c.content) totalWords += c.content.replace(/<[^>]*>/g, '').length;
+          }
+        }
+      }
+    }
+    
+    var deletedDate = new Date(book.deletedTime).toLocaleString();
+    
+    html += '<div class="book-card" style="position: relative;">' +
+      '<div class="book-cover-gray" style="height: 100%; min-height: 200px; display: flex; flex-direction: column; justify-content: center; align-items: center;">' +
+      '<div class="book-cover-icon">📖</div>' +
+      '<div class="book-cover-title" style="text-align: center;">' + escapeHtml(book.title || '未命名') + '</div>' +
+      '<div class="book-stats-gray" style="text-align: center;">' + (book.volumes ? book.volumes.length : 0) + '卷 · ' + totalChapters + '章 · ' + totalWords + '字</div>' +
+      '<div style="font-size: 10px; color: #888; margin-top: 8px;">删除于: ' + deletedDate + '</div>' +
+      '<div style="display: flex; gap: 8px; margin-top: 12px;">' +
+      '<button class="restore-book-btn" data-id="' + book.id + '" style="padding: 4px 12px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">↩️ 恢复</button>' +
+      '<button class="permanent-delete-btn" data-id="' + book.id + '" style="padding: 4px 12px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">🗑️ 永久删除</button>' +
+      '</div>' +
+      '</div>' +
+      '</div>';
+  }
+  
+  html += '</div></div>';
+  return html;
+}
+
+// 绑定回收站按钮事件
+function bindTrashEvents() {
+  setTimeout(function() {
+    var restoreBtns = document.querySelectorAll('.restore-book-btn');
+    for (var i = 0; i < restoreBtns.length; i++) {
+      restoreBtns[i].onclick = function(e) {
+        e.stopPropagation();
+        var bookId = parseInt(this.getAttribute('data-id'));
+        var restoredBook = restoreFromTrash(bookId);
+        if (restoredBook) {
+          saveAllData();
+          renderBooks();
+          var activePage = document.querySelector('.book-page.active');
+          if (activePage && activePage.getAttribute('data-page') === 'trash_can') {
+            activePage.innerHTML = renderTrashHTML();
+            bindTrashEvents();
+          }
+          alert('书籍已恢复');
+        }
+      };
+    }
+    
+    var permanentBtns = document.querySelectorAll('.permanent-delete-btn');
+    for (var i = 0; i < permanentBtns.length; i++) {
+      permanentBtns[i].onclick = function(e) {
+        e.stopPropagation();
+        if (confirm('确定要永久删除这本书吗？此操作不可恢复！')) {
+          var bookId = parseInt(this.getAttribute('data-id'));
+          permanentDeleteBook(bookId);
+          var activePage = document.querySelector('.book-page.active');
+          if (activePage && activePage.getAttribute('data-page') === 'trash_can') {
+            activePage.innerHTML = renderTrashHTML();
+            bindTrashEvents();
+          }
+          alert('已永久删除');
+        }
+      };
+    }
+  }, 100);
+}
+
+// 打开分组标签页
+function openGroupTab(groupId, groupName) {
+  var tabId = 'group_' + groupId;
+  
+  for (var i = 0; i < openTabs.length; i++) {
+    if (openTabs[i].id === tabId) {
+      switchToTab(tabId);
+      return;
+    }
+  }
+  
+  openTabs.push({ id: tabId, title: groupName, type: 'group', groupId: groupId });
+  renderTabs();
+  
+  var pagesContainer = document.getElementById('pagesContainer');
+  var pageDiv = document.createElement('div');
+  pageDiv.className = 'book-page';
+  pageDiv.setAttribute('data-page', tabId);
+  
+  var groupBooks = [];
+  for (var i = 0; i < books.length; i++) {
+    if (books[i].groupId === groupId) {
+      groupBooks.push(books[i]);
+    }
+  }
+  
+  pageDiv.innerHTML = renderGroupBooksHTML(groupName, groupBooks);
+  pagesContainer.appendChild(pageDiv);
+  switchToTab(tabId);
+}
+
+// 渲染分组书籍列表
+function renderGroupBooksHTML(groupName, groupBooks) {
+  if (groupBooks.length === 0) {
+    return '<div style="padding: 40px; text-align: center; opacity: 0.6;">该分组暂无书籍</div>';
+  }
+  
+  var html = '<div style="padding: 20px;"><h2 style="margin-bottom: 20px;">📁 ' + escapeHtml(groupName) + '</h2><div class="books-grid">';
+  
+  for (var i = 0; i < groupBooks.length; i++) {
+    var book = groupBooks[i];
+    var totalWords = 0, totalChapters = 0;
+    if (book.volumes) {
+      for (var j = 0; j < book.volumes.length; j++) {
+        var v = book.volumes[j];
+        if (v && v.chapters) {
+          totalChapters += v.chapters.length;
+          for (var k = 0; k < v.chapters.length; k++) {
+            var c = v.chapters[k];
+            if (c && c.content) totalWords += c.content.replace(/<[^>]*>/g, '').length;
+          }
+        }
+      }
+    }
+    
+    html += '<div class="book-card" onclick="window.openBookTab(' + book.id + ')" style="cursor: pointer; position: relative;">' +
+      '<div class="book-cover-gray" style="height: 100%; min-height: 200px; display: flex; flex-direction: column; justify-content: center; align-items: center;">' +
+      '<div class="book-cover-icon">📖</div>' +
+      '<div class="book-cover-title" style="text-align: center;">' + escapeHtml(book.title || '未命名') + '</div>' +
+      '<div class="book-stats-gray" style="text-align: center;">' + (book.volumes ? book.volumes.length : 0) + '卷 · ' + totalChapters + '章 · ' + totalWords + '字</div>' +
+      '</div>' +
+      '</div>';
+  }
+  
+  html += '</div></div>';
+  return html;
+}
+
+// 确保所有函数暴露到全局
+window.openTrashTab = openTrashTab;
+window.openGroupTab = openGroupTab;

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>写作帮手 - 自由的写作软件</title>
   <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="themes/default.css" id="themeStyle">
+<link rel="stylesheet" href="themes/default.css" id="themeStyle">
 </head>
 <body>
 <div class="app-container">
@@ -43,16 +43,16 @@
     <div class="main-content">
       <div class="pages-container" id="pagesContainer">
         <!-- 首页 - 全部书籍 -->
-        <div class="book-page active" data-page="home">
-          <div class="books-header" style="padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0,0,0,0.1);">
-            <h2 style="margin:0;">我的书籍</h2>
-            <button id="newBookBtn" class="primary-btn">+ 新建书籍</button>
-          </div>
-          <div id="booksContainer" class="books-container"></div>
-        </div>
-      </div>
-    </div>
+<div class="book-page active" data-page="home">
+  <div class="books-header" style="padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0,0,0,0.1);">
+  <h2 style="margin:0;">我的书籍</h2>
+  <div style="display: flex; gap: 12px;">
+    <button id="newGroupBtn" class="primary-btn" style="background: #6c757d;">+ 新建分组</button>
+    <button id="newBookBtn" class="primary-btn">+ 新建书籍</button>
+    <button id="trashBtn" class="primary-btn" style="background: #dc3545;">🗑️ 回收站</button>
   </div>
+</div>
+  <div id="booksContainer" class="books-container"></div>
 </div>
 
 <!-- 设置滑出面板 -->
@@ -110,10 +110,10 @@
 </div>
 
 <!-- 查找替换面板 -->
-<div id="findPanel" class="slide-menu"></div>
+<div id="findPanel" class="slide-menu">
   <div class="slide-menu-header">
     <h3>查找替换</h3>
-    <button id="closeFindPanel">✕</button>
+    <button id="closeFindPanel" class="close-panel-btn">✕</button>
   </div>
   <div class="slide-menu-content">
     <input type="text" id="findText" placeholder="查找内容" style="width:100%; padding:8px; margin-bottom:12px; border:1px solid #ddd; border-radius:8px;">
@@ -135,6 +135,11 @@
   <div class="drawer-content">
     <label>书籍名称</label>
     <input type="text" id="newBookName" placeholder="请输入书籍名称" class="drawer-input">
+    
+    <label>书籍封面（可选）</label>
+    <input type="file" id="bookCoverInput" accept="image/*" class="drawer-input">
+    <div id="coverPreview" style="width: 80px; height: 80px; margin: 10px auto; border-radius: 8px; background: #f0f0f0; display: none; background-size: cover;"></div>
+    
     <button id="confirmNewBookBtn" class="drawer-btn">创建书籍</button>
   </div>
 </div>
@@ -143,5 +148,43 @@
 <script src="js/ui.js"></script>
 <script src="js/settings.js"></script>
 <script src="js/app.js"></script>
+  // 封面预览功能
+  var coverInput = document.getElementById('bookCoverInput');
+  if (coverInput) {
+    coverInput.onchange = function(e) {
+      var file = e.target.files[0];
+      if (file) {
+        var reader = new FileReader();
+        reader.onload = function(ev) {
+          var preview = document.getElementById('coverPreview');
+          if (preview) {
+            preview.style.backgroundImage = 'url(' + ev.target.result + ')';
+            preview.style.backgroundSize = 'cover';
+            preview.style.backgroundPosition = 'center';
+            preview.style.display = 'block';
+          }
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+  }
+</script>
+<!-- 新建分组抽屉面板 -->
+<div id="newGroupDrawer" class="drawer-panel">
+  <div class="drawer-header">
+    <h3>新建分组</h3>
+    <button id="closeGroupDrawerBtn" class="close-drawer">✕</button>
+  </div>
+  <div class="drawer-content">
+    <label>分组名称</label>
+    <input type="text" id="newGroupName" placeholder="请输入分组名称" class="drawer-input">
+    
+    <label>分组封面（可选）</label>
+    <input type="file" id="groupCoverInput" accept="image/*" class="drawer-input">
+    <div id="groupCoverPreview" style="width: 80px; height: 80px; margin: 10px auto; border-radius: 8px; background: #f0f0f0; display: none; background-size: cover;"></div>
+    
+    <button id="confirmNewGroupBtn" class="drawer-btn">创建分组</button>
+  </div>
+</div>
 </body>
 </html>
