@@ -105,20 +105,20 @@ function openBookTab(bookId) {
   pageDiv.innerHTML = '<div class="book-detail-page" data-book-id="' + bookId + '">' +
     '<div class="book-detail-header">' +
     '<div class="right-tools">' +
-    '<button id="findReplaceBtn" class="tool-icon">🔍 查找替换</button>' +
+    '<button id="findReplaceBtn" class="tool-icon">F 查找替换</button>' +
     '<button id="fullscreenBtn" class="tool-icon">❐ 全屏</button>' +
     '<button id="formatBtn" class="tool-icon">↹ 排版</button>' +
     '<button id="focusBtn" class="tool-icon">⍁ 闭关</button>' +
     '<button id="importBtn" class="tool-icon">↙ 导入</button>' +
     '<button id="exportBtn" class="tool-icon">↗ 导出</button>' +
-    '<button id="styleBtn" class="tool-icon">◑ 主题</button><button id="sidebarToggleBtn" class="tool-icon" style="margin-left: 4px;">📑 侧栏</button>' +
+    '<button id="styleBtn" class="tool-icon">◑ 主题</button><button id="sidebarToggleBtn" class="tool-icon" style="margin-left: 4px;"> 侧栏</button>' +
     '</div>' +
     '</div>' +
     '<div class="detail-main">' +
     '<div class="detail-chapters" id="chaptersPanel">' +
     '<div class="resize-handle" id="resizeHandle"></div>' +
     '<div class="chapters-header">' +
-    '<span id="currentBookTitle">📘 ' + escapeHtml(book.title) + '</span>' +
+    '<span id="currentBookTitle"> ' + escapeHtml(book.title) + '</span>' +
     '</div>' +
     '<div class="chapters-header">' +
     '<button id="addVolumeBtn">+ 分卷</button>' +
@@ -141,13 +141,13 @@ function openBookTab(bookId) {
     '</div>' +
     '<div class="sidebar-content">' +
     '<div class="sidebar-section">' +
-    '<div class="sidebar-item" data-tool="outline"><span class="sidebar-icon">📋</span><span class="sidebar-label">大纲</span></div>' +
-    '<div class="sidebar-item" data-tool="timeline"><span class="sidebar-icon">⏱️</span><span class="sidebar-label">时间线</span></div>' +
-    '<div class="sidebar-item" data-tool="characters"><span class="sidebar-icon">👥</span><span class="sidebar-label">角色</span></div>' +
-    '<div class="sidebar-item" data-tool="setting"><span class="sidebar-icon">⚙️</span><span class="sidebar-label">设定</span></div>' +
-    '<div class="sidebar-item" data-tool="proofread"><span class="sidebar-icon">📝</span><span class="sidebar-label">校对</span></div>' +
-    '<div class="sidebar-item" data-tool="namegen"><span class="sidebar-icon">✨</span><span class="sidebar-label">取名</span></div>' +
-    '<div class="sidebar-item" data-tool="map"><span class="sidebar-icon">🗺️</span><span class="sidebar-label">地图</span></div>' +
+    '<div class="sidebar-item" data-tool="outline"><span class="sidebar-icon"></span><span class="sidebar-label">大纲</span></div>' +
+    '<div class="sidebar-item" data-tool="timeline"><span class="sidebar-icon"> </span><span class="sidebar-label">时间线</span></div>' +
+    '<div class="sidebar-item" data-tool="characters"><span class="sidebar-icon"></span><span class="sidebar-label">角色</span></div>' +
+    '<div class="sidebar-item" data-tool="setting"><span class="sidebar-icon"></span><span class="sidebar-label">设定</span></div>' +
+    '<div class="sidebar-item" data-tool="proofread"><span class="sidebar-icon"></span><span class="sidebar-label">校对</span></div>' +
+    '<div class="sidebar-item" data-tool="namegen"><span class="sidebar-icon"></span><span class="sidebar-label">取名</span></div>' +
+    '<div class="sidebar-item" data-tool="map"><span class="sidebar-icon"> </span><span class="sidebar-label">地图</span></div>' +
     '</div>' +
     '</div>' +
     '</div>' +
@@ -187,7 +187,7 @@ function initBookPage(tabId, bookId) {
       volDiv.className = 'volume-item';
       volDiv.innerHTML = '<div class="volume-title">' +
         '<div class="volume-title-left">' +
-        '<span>📁 ' + escapeHtml(vol.name || '未命名') + '</span>' +
+        '<span> ' + escapeHtml(vol.name || '未命名') + '</span>' +
         '<span class="volume-count">(' + chapterCount + '章)</span>' +
         '</div>' +
         '<button class="volume-more" data-id="' + vol.id + '">⋯</button>' +
@@ -201,7 +201,7 @@ function initBookPage(tabId, bookId) {
           var isActive = (ch.id === currentChapterId && vol.id === currentVolumeId);
           chDiv.className = 'chapter-list-item';
           if (isActive) chDiv.className += ' active';
-          chDiv.innerHTML = '<span>📄 ' + escapeHtml(ch.title || '无标题') + '</span><button class="delete-chapter" data-id="' + ch.id + '">✖</button>';
+          chDiv.innerHTML = '<span> ' + escapeHtml(ch.title || '无标题') + '</span><button class="delete-chapter" data-id="' + ch.id + '">✖</button>';
           chDiv.querySelector('span').onclick = (function(volId, chId) { return function() { currentVolumeId = volId; currentChapterId = chId; renderVolumes(); renderCurrentChapter(); }; })(vol.id, ch.id);
           chDiv.querySelector('.delete-chapter').onclick = (function(volId, chId, chArray) { return function(e) { e.stopPropagation(); if (chArray.length === 1) { alert('每个分卷至少保留一个章节'); return; } var newChapters = []; for (var i = 0; i < chArray.length; i++) { if (chArray[i].id !== chId) newChapters.push(chArray[i]); } vol.chapters = newChapters; if (currentChapterId === chId && currentVolumeId === volId) { currentChapterId = vol.chapters[0] ? vol.chapters[0].id : null; } renderVolumes(); renderCurrentChapter(); saveAllData(); renderBooks(); }; })(vol.id, ch.id, vol.chapters);
           chapterContainer.appendChild(chDiv);
@@ -367,7 +367,7 @@ function createPages() {
   var settingsPageSource = document.createElement('div');
   settingsPageSource.id = 'settingsPageSource';
   settingsPageSource.style.display = 'none';
-  settingsPageSource.innerHTML = '<div class="settings-container"><div class="settings-item"><h4>🔐 密码保护</h4><p style="font-size:12px; color:#888; margin-bottom:12px;">设置启动密码，保护您的作品隐私</p><button id="passwordSettingsBtn" class="small-btn" style="width:100%;">设置密码保护</button></div><div class="settings-item"><h4>💾 备份策略</h4><label style="margin-right: 16px;"><input type="radio" name="backupType" value="auto" checked> 定时自动备份</label><label><input type="radio" name="backupType" value="manual"> 仅手动备份</label><div style="margin-top:12px;"><button id="manualBackupBtn" class="small-btn">立即备份</button><button id="restoreBackupBtn" class="small-btn" style="margin-left: 8px;">恢复备份</button></div></div><div class="settings-item"><h4>📂 备份文件位置</h4><p style="font-size:12px; color:#888; margin-bottom:12px;">设置备份文件保存的文件夹</p><button id="backupPathBtn" class="small-btn" style="width:100%;">设置备份路径</button></div><div class="settings-item"><h4>📋 密保问题</h4><p style="font-size:12px; color:#888; margin-bottom:12px;">设置密保问题，用于找回密码</p><button id="securityQuestionsBtn" class="small-btn" style="width:100%;">设置密保问题</button></div></div>';
+  settingsPageSource.innerHTML = '<div class="settings-container"><div class="settings-item"><h4>🔐 密码保护</h4><p style="font-size:12px; color:#888; margin-bottom:12px;">设置启动密码，保护您的作品隐私</p><button id="passwordSettingsBtn" class="small-btn" style="width:100%;">设置密码保护</button></div><div class="settings-item"><h4>💾 备份策略</h4><label style="margin-right: 16px;"><input type="radio" name="backupType" value="auto" checked> 定时自动备份</label><label><input type="radio" name="backupType" value="manual"> 仅手动备份</label><div style="margin-top:12px;"><button id="manualBackupBtn" class="small-btn">立即备份</button><button id="restoreBackupBtn" class="small-btn" style="margin-left: 8px;">恢复备份</button></div></div><div class="settings-item"><h4>📂 备份文件位置</h4><p style="font-size:12px; color:#888; margin-bottom:12px;">设置备份文件保存的文件夹</p><button id="backupPathBtn" class="small-btn" style="width:100%;">设置备份路径</button></div><div class="settings-item"><h4> 密保问题</h4><p style="font-size:12px; color:#888; margin-bottom:12px;">设置密保问题，用于找回密码</p><button id="securityQuestionsBtn" class="small-btn" style="width:100%;">设置密保问题</button></div></div>';
   var aboutPageSource = document.createElement('div');
   aboutPageSource.id = 'aboutPageSource';
   aboutPageSource.style.display = 'none';
@@ -511,7 +511,7 @@ window.openTrashTab = function() {
   var pageDiv = document.createElement('div');
   pageDiv.className = 'book-page';
   pageDiv.setAttribute('data-page', tabId);
-  pageDiv.innerHTML = '<div style="padding: 20px;"><h2>🗑️ 回收站</h2><div id="trashContent" class="books-grid"></div></div>';
+  pageDiv.innerHTML = '<div style="padding: 20px;"><h2> 回收站</h2><div id="trashContent" class="books-grid"></div></div>';
   pagesContainer.appendChild(pageDiv);
   switchToTab(tabId);
   if (typeof renderTrashContent === 'function') renderTrashContent();
@@ -2448,7 +2448,7 @@ function renderTimelineEventList(container, timeline, currentEventId, onSelect) 
     html += '<div class="timeline-event-item ' + activeClass + '" data-id="' + event.id + '">' +
       '<div class="timeline-event-title">' + escapeHtml(event.title) + '</div>' +
       '<div class="timeline-event-meta">' +
-      '<span class="timeline-event-chapter">📖 ' + escapeHtml(event.chapter || '未设置') + '</span>' +
+      '<span class="timeline-event-chapter"> ' + escapeHtml(event.chapter || '未设置') + '</span>' +
       '<span>#' + event.order + '</span>' +
       '</div>' +
       '</div>';
@@ -3066,287 +3066,3 @@ setTimeout(bindProofreadButton, 500);
   setTimeout(fixMapButton, 500);
   setTimeout(fixMapButton, 1000);
 })();
-// 在控制台执行，或添加到 app.js 末尾
-
-// ========== 简单地图生成器 ==========
-// 使用 Canvas 生成随机地图，支持自定义区域名称
-
-var currentMapData = null;
-var mapRegions = []; // 存储区域 { x, y, name, color }
-
-function generateRandomMap() {
-  var canvas = document.getElementById('mapCanvas');
-  if (!canvas) return;
-  
-  var ctx = canvas.getContext('2d');
-  var width = canvas.width;
-  var height = canvas.height;
-  
-  // 清除画布
-  ctx.clearRect(0, 0, width, height);
-  
-  // 生成随机地形
-  var gridSize = 40;
-  var cols = Math.floor(width / gridSize);
-  var rows = Math.floor(height / gridSize);
-  
-  mapRegions = [];
-  
-  for (var i = 0; i < cols; i++) {
-    for (var j = 0; j < rows; j++) {
-      // 随机决定地形类型
-      var rand = Math.random();
-      var color;
-      var type;
-      
-      if (rand < 0.3) {
-        color = '#4a7c59'; // 森林 - 绿色
-        type = '森林';
-      } else if (rand < 0.5) {
-        color = '#c8ad7b'; // 沙漠 - 土黄
-        type = '沙漠';
-      } else if (rand < 0.7) {
-        color = '#6b8cae'; // 水域 - 蓝色
-        type = '水域';
-      } else if (rand < 0.85) {
-        color = '#8b8c7a'; // 山地 - 灰色
-        type = '山地';
-      } else {
-        color = '#d4c5a9'; // 平原 - 米色
-        type = '平原';
-      }
-      
-      ctx.fillStyle = color;
-      ctx.fillRect(i * gridSize, j * gridSize, gridSize - 1, gridSize - 1);
-      
-      // 随机添加纹理
-      ctx.fillStyle = 'rgba(0,0,0,0.1)';
-      if (Math.random() > 0.7) {
-        ctx.fillRect(i * gridSize + 5, j * gridSize + 5, 5, 5);
-      }
-      
-      // 存储区域信息
-      mapRegions.push({
-        x: i * gridSize,
-        y: j * gridSize,
-        width: gridSize,
-        height: gridSize,
-        type: type,
-        name: getRandomRegionName(type),
-        color: color
-      });
-    }
-  }
-  
-  // 添加山脉标记（随机山峰）
-  ctx.fillStyle = '#a0a0a0';
-  for (var i = 0; i < 30; i++) {
-    var x = Math.random() * width;
-    var y = Math.random() * height;
-    ctx.beginPath();
-    ctx.moveTo(x, y - 8);
-    ctx.lineTo(x - 6, y + 4);
-    ctx.lineTo(x + 6, y + 4);
-    ctx.fill();
-  }
-  
-  // 添加河流（随机曲线）
-  ctx.beginPath();
-  ctx.strokeStyle = '#4a90d9';
-  ctx.lineWidth = 3;
-  var startX = Math.random() * width;
-  var startY = 0;
-  ctx.moveTo(startX, startY);
-  for (var i = 0; i < 20; i++) {
-    var x = startX + (Math.random() - 0.5) * 100;
-    var y = (i + 1) * (height / 20);
-    ctx.lineTo(x, y);
-  }
-  ctx.stroke();
-  
-  // 添加城市标记
-  for (var i = 0; i < 15; i++) {
-    var x = Math.random() * width;
-    var y = Math.random() * height;
-    ctx.fillStyle = '#ff6b6b';
-    ctx.beginPath();
-    ctx.arc(x, y, 6, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = 'white';
-    ctx.font = '10px Arial';
-    ctx.fillText(getRandomCityName(), x - 8, y - 8);
-  }
-  
-  // 更新区域列表显示
-  updateRegionList();
-  
-  currentMapData = { width: width, height: height, regions: mapRegions };
-  document.getElementById('mapLoading').style.display = 'none';
-}
-
-function getRandomRegionName(type) {
-  var names = {
-    '森林': ['翠绿林', '迷雾森林', '精灵林地', '暗影丛林', '晨曦之森'],
-    '沙漠': ['黄金沙海', '死亡沙漠', '风之谷', '烈日荒漠', '遗迹沙原'],
-    '水域': ['蓝宝石湖', '迷雾海湾', '龙息海', '星辰海峡', '翡翠河'],
-    '山地': ['巨龙峰', '云霄山脉', '铁石山', '雷云之巅', '霜冻高地'],
-    '平原': ['金色原野', '风语草原', '晨曦平原', '骏马之地', '自由旷野']
-  };
-  var list = names[type] || ['未知之地'];
-  return list[Math.floor(Math.random() * list.length)];
-}
-
-function getRandomCityName() {
-  var cities = ['王城', '铁匠铺', '魔法塔', '港口', '哨站', '神庙', '学院', '集市'];
-  return cities[Math.floor(Math.random() * cities.length)];
-}
-
-function updateRegionList() {
-  var container = document.getElementById('mapRegionList');
-  if (!container) return;
-  
-  var html = '<div style="font-weight: 600; margin-bottom: 8px;">📌 区域列表（点击可自定义名称）</div>';
-  var displayRegions = mapRegions.slice(0, 20);
-  for (var i = 0; i < displayRegions.length; i++) {
-    var r = displayRegions[i];
-    html += '<span class="region-tag" data-x="' + r.x + '" data-y="' + r.y + '">' + escapeHtml(r.name) + ' (' + r.type + ')</span>';
-  }
-  container.innerHTML = html;
-  
-  // 绑定点击事件
-  var tags = container.querySelectorAll('.region-tag');
-  for (var i = 0; i < tags.length; i++) {
-    tags[i].onclick = function() {
-      var x = parseInt(this.getAttribute('data-x'));
-      var y = parseInt(this.getAttribute('data-y'));
-      var newName = prompt('请输入新名称：', this.innerText.split(' (')[0]);
-      if (newName && newName.trim()) {
-        for (var j = 0; j < mapRegions.length; j++) {
-          if (mapRegions[j].x === x && mapRegions[j].y === y) {
-            mapRegions[j].name = newName.trim();
-            break;
-          }
-        }
-        updateRegionList();
-        alert('名称已更新');
-      }
-    };
-  }
-}
-
-function exportMapAsImage() {
-  var canvas = document.getElementById('mapCanvas');
-  if (!canvas) return;
-  var link = document.createElement('a');
-  link.download = 'fantasy-map.png';
-  link.href = canvas.toDataURL();
-  link.click();
-}
-
-function saveMapToCurrentBook() {
-  if (!currentBookId) {
-    alert('请先打开一本书籍');
-    return;
-  }
-  var mapData = {
-    bookId: currentBookId,
-    generatedAt: new Date().toISOString(),
-    regions: mapRegions
-  };
-  var key = 'book_map_' + currentBookId;
-  localStorage.setItem(key, JSON.stringify(mapData));
-  alert('地图已保存到当前书籍，下次打开可恢复');
-}
-
-function loadMapFromCurrentBook() {
-  if (!currentBookId) return;
-  var key = 'book_map_' + currentBookId;
-  var saved = localStorage.getItem(key);
-  if (saved) {
-    try {
-      var data = JSON.parse(saved);
-      if (data.regions && data.regions.length > 0) {
-        mapRegions = data.regions;
-        renderMapFromRegions();
-        updateRegionList();
-        document.getElementById('mapLoading').style.display = 'none';
-        alert('已加载上次保存的地图');
-      }
-    } catch(e) {}
-  }
-}
-
-function renderMapFromRegions() {
-  var canvas = document.getElementById('mapCanvas');
-  if (!canvas || !mapRegions.length) return;
-  var ctx = canvas.getContext('2d');
-  var width = canvas.width;
-  var height = canvas.height;
-  
-  ctx.clearRect(0, 0, width, height);
-  
-  for (var i = 0; i < mapRegions.length; i++) {
-    var r = mapRegions[i];
-    ctx.fillStyle = r.color;
-    ctx.fillRect(r.x, r.y, r.width, r.height);
-    
-    // 添加文字
-    ctx.fillStyle = '#fff';
-    ctx.font = '10px Arial';
-    ctx.shadowBlur = 0;
-    ctx.fillText(r.name, r.x + 5, r.y + 15);
-  }
-}
-
-function openMapPanel() {
-  var panel = document.getElementById('mapPanel');
-  if (!panel) return;
-  panel.classList.add('open');
-  
-  // 绑定按钮事件
-  var genBtn = document.getElementById('mapGenerateBtn');
-  var exportBtn = document.getElementById('mapExportBtn');
-  var saveBtn = document.getElementById('mapSaveToBookBtn');
-  
-  if (genBtn && !genBtn.hasAttribute('data-bound')) {
-    genBtn.setAttribute('data-bound', 'true');
-    genBtn.onclick = generateRandomMap;
-  }
-  if (exportBtn && !exportBtn.hasAttribute('data-bound')) {
-    exportBtn.setAttribute('data-bound', 'true');
-    exportBtn.onclick = exportMapAsImage;
-  }
-  if (saveBtn && !saveBtn.hasAttribute('data-bound')) {
-    saveBtn.setAttribute('data-bound', 'true');
-    saveBtn.onclick = saveMapToCurrentBook;
-  }
-  
-  // 尝试加载已保存的地图
-  loadMapFromCurrentBook();
-}
-
-function closeMapPanel() {
-  var panel = document.getElementById('mapPanel');
-  if (panel) panel.classList.remove('open');
-}
-
-// 绑定地图按钮
-function bindMapButton() {
-  var mapBtn = document.querySelector('.sidebar-item[data-tool="map"]');
-  if (mapBtn && !mapBtn.hasAttribute('data-bound')) {
-    mapBtn.setAttribute('data-bound', 'true');
-    mapBtn.onclick = function(e) {
-      e.stopPropagation();
-      openMapPanel();
-    };
-    console.log('地图按钮已绑定');
-  }
-  
-  var closeMapBtn = document.getElementById('closeMapPanel');
-  if (closeMapBtn && !closeMapBtn.hasAttribute('data-bound')) {
-    closeMapBtn.setAttribute('data-bound', 'true');
-    closeMapBtn.onclick = closeMapPanel;
-  }
-}
-
-setTimeout(bindMapButton, 500);

@@ -19,12 +19,12 @@
   color: #4a3b2c;
 }
 
-.sidebar-menu { background: #4a3b2c; color: #DFD5BD; }
+.sidebar-menu { background: #c0b69d; color: #DFD5BD; }
 .sidebar-menu .menu-item { color: #efe5cd; }
-.sidebar-menu .menu-item.active { background: #d4a373; color: #4a3b2c; }
+.sidebar-menu .menu-item.active { background: #c0b69d; color: #4a3b2c; }
 
-.tab.active { background: #DFD5BD; color: #4a3b2c; }
-.tab { background: #cfc5ad; color: #6a5a4a; }
+.tab.active { background: #cfc5ad; color: #4a3b2c; }
+.tab { background: #dfd6bd; color: #6a5a4a; }
 
 .stat-card, .calendar-container, .writing-detail, .goal-setting, .settings-item, .about-content {
   background: #efe5cd;

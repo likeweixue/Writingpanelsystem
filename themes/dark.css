@@ -19,9 +19,9 @@
   color: #e0e0e0;
 }
 
-.sidebar-menu { background: #0d0d1a; color: #e0e0e0; }
-.sidebar-menu .menu-item { color: #a0a0b0; }
-.sidebar-menu .menu-item.active { background: #007aff; color: #1e1e2e; }
+.sidebar-menu { background: #0d0d1a; color: #ffffff; }
+.sidebar-menu .menu-item { color: #ffffff; }
+.sidebar-menu .menu-item.active { background: #ffffff00; color: #ffffff; }
 
 .tab.active { background: #1e1e2e; color: #e0e0e0; }
 .tab { background: #2a2a3a; color: #a0a0b0; }

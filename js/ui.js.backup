@@ -50,7 +50,7 @@ function renderBooks() {
     if (group.cover) {
       groupHeader.innerHTML = '<div style="width: 32px; height: 32px; border-radius: 8px; background-image: url(\'' + group.cover + '\'); background-size: cover;"></div>';
     } else {
-      groupHeader.innerHTML = '<div style="font-size: 24px;">📁</div>';
+      groupHeader.innerHTML = '<div style="font-size: 24px;"></div>';
     }
     groupHeader.innerHTML += '<h3 style="margin:0;">' + escapeHtml(group.name) + '</h3>';
     
@@ -94,7 +94,7 @@ function renderBooks() {
       } else {
         card.innerHTML = menuHtml +
           '<div class="book-cover-gray" style="height: 100%; min-height: 200px; display: flex; flex-direction: column; justify-content: center; align-items: center;">' +
-          '<div class="book-cover-icon">📖</div>' +
+          '<div class="book-cover-icon"></div>' +
           '<div class="book-cover-title" style="text-align: center;">' + escapeHtml(book.title || '未命名') + '</div>' +
           '<div class="book-stats-gray" style="text-align: center;">' + (book.volumes ? book.volumes.length : 0) + '卷 · ' + totalChapters + '章 · ' + totalWords + '字</div>' +
           '</div>';
@@ -132,7 +132,7 @@ function showBookMenu(bookId, btnElement) {
   menu.className = 'book-context-menu';
   menu.style.cssText = 'position: fixed; background: white; border: 1px solid #ddd; border-radius: 8px; padding: 4px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.15); z-index: 1000; min-width: 120px;';
   menu.innerHTML = '<button class="delete-book" data-id="' + bookId + '" style="display: block; width: 100%; padding: 8px 16px; border: none; background: none; cursor: pointer; text-align: left;">🗑️ 删除书籍</button>' +
-    '<button class="move-book" data-id="' + bookId + '" style="display: block; width: 100%; padding: 8px 16px; border: none; background: none; cursor: pointer; text-align: left;">📁 移动到分组</button>';
+    '<button class="move-book" data-id="' + bookId + '" style="display: block; width: 100%; padding: 8px 16px; border: none; background: none; cursor: pointer; text-align: left;"> 移动到分组</button>';
   
   var rect = btnElement.getBoundingClientRect();
   menu.style.top = rect.bottom + 'px';
@@ -486,7 +486,7 @@ function renderGroupBooksHTML(groupId, groupName, groupBooks) {
     return '<div style="padding: 40px; text-align: center; opacity: 0.6;">该分组暂无书籍</div>';
   }
   
-  var html = '<div style="padding: 20px;"><h2 style="margin-bottom: 20px;">📁 ' + escapeHtml(groupName) + '</h2><div class="books-grid">';
+  var html = '<div style="padding: 20px;"><h2 style="margin-bottom: 20px;"> ' + escapeHtml(groupName) + '</h2><div class="books-grid">';
   
   for (var i = 0; i < groupBooks.length; i++) {
     var book = groupBooks[i];
@@ -506,7 +506,7 @@ function renderGroupBooksHTML(groupId, groupName, groupBooks) {
     
     html += '<div class="book-card" onclick="window.openBookTab(' + book.id + ')" style="cursor: pointer; position: relative;">' +
       '<div class="book-cover-gray" style="height: 100%; min-height: 200px; display: flex; flex-direction: column; justify-content: center; align-items: center;">' +
-      '<div class="book-cover-icon">📖</div>' +
+      '<div class="book-cover-icon"></div>' +
       '<div class="book-cover-title" style="text-align: center;">' + escapeHtml(book.title || '未命名') + '</div>' +
       '<div class="book-stats-gray" style="text-align: center;">' + (book.volumes ? book.volumes.length : 0) + '卷 · ' + totalChapters + '章 · ' + totalWords + '字</div>' +
       '</div>' +
@@ -552,7 +552,7 @@ function renderTrashHTML() {
     return '<div style="padding: 40px; text-align: center; opacity: 0.6;">回收站为空</div>';
   }
   
-  var html = '<div style="padding: 20px;"><h2 style="margin-bottom: 20px;">🗑️ 回收站</h2><div class="books-grid">';
+  var html = '<div style="padding: 20px;"><h2 style="margin-bottom: 20px;"> 回收站</h2><div class="books-grid">';
   
   for (var i = 0; i < trashBooks.length; i++) {
     var book = trashBooks[i];
@@ -574,7 +574,7 @@ function renderTrashHTML() {
     
     html += '<div class="book-card" style="position: relative;">' +
       '<div class="book-cover-gray" style="height: 100%; min-height: 200px; display: flex; flex-direction: column; justify-content: center; align-items: center;">' +
-      '<div class="book-cover-icon">📖</div>' +
+      '<div class="book-cover-icon"></div>' +
       '<div class="book-cover-title" style="text-align: center;">' + escapeHtml(book.title || '未命名') + '</div>' +
       '<div class="book-stats-gray" style="text-align: center;">' + (book.volumes ? book.volumes.length : 0) + '卷 · ' + totalChapters + '章 · ' + totalWords + '字</div>' +
       '<div style="font-size: 10px; color: #888; margin-top: 8px;">删除于: ' + deletedDate + '</div>' +
@@ -674,7 +674,7 @@ function renderTrashHTML() {
     return '<div style="padding: 40px; text-align: center; opacity: 0.6;">回收站为空</div>';
   }
   
-  var html = '<div style="padding: 20px;"><h2 style="margin-bottom: 20px;">🗑️ 回收站</h2><div class="books-grid">';
+  var html = '<div style="padding: 20px;"><h2 style="margin-bottom: 20px;"> 回收站</h2><div class="books-grid">';
   
   for (var i = 0; i < trashBooks.length; i++) {
     var book = trashBooks[i];
@@ -696,7 +696,7 @@ function renderTrashHTML() {
     
     html += '<div class="book-card" style="position: relative;">' +
       '<div class="book-cover-gray" style="height: 100%; min-height: 200px; display: flex; flex-direction: column; justify-content: center; align-items: center;">' +
-      '<div class="book-cover-icon">📖</div>' +
+      '<div class="book-cover-icon"></div>' +
       '<div class="book-cover-title" style="text-align: center;">' + escapeHtml(book.title || '未命名') + '</div>' +
       '<div class="book-stats-gray" style="text-align: center;">' + (book.volumes ? book.volumes.length : 0) + '卷 · ' + totalChapters + '章 · ' + totalWords + '字</div>' +
       '<div style="font-size: 10px; color: #888; margin-top: 8px;">删除于: ' + deletedDate + '</div>' +
@@ -790,7 +790,7 @@ function renderGroupBooksHTML(groupName, groupBooks) {
     return '<div style="padding: 40px; text-align: center; opacity: 0.6;">该分组暂无书籍</div>';
   }
   
-  var html = '<div style="padding: 20px;"><h2 style="margin-bottom: 20px;">📁 ' + escapeHtml(groupName) + '</h2><div class="books-grid">';
+  var html = '<div style="padding: 20px;"><h2 style="margin-bottom: 20px;"> ' + escapeHtml(groupName) + '</h2><div class="books-grid">';
   
   for (var i = 0; i < groupBooks.length; i++) {
     var book = groupBooks[i];
@@ -810,7 +810,7 @@ function renderGroupBooksHTML(groupName, groupBooks) {
     
     html += '<div class="book-card" onclick="window.openBookTab(' + book.id + ')" style="cursor: pointer; position: relative;">' +
       '<div class="book-cover-gray" style="height: 100%; min-height: 200px; display: flex; flex-direction: column; justify-content: center; align-items: center;">' +
-      '<div class="book-cover-icon">📖</div>' +
+      '<div class="book-cover-icon"></div>' +
       '<div class="book-cover-title" style="text-align: center;">' + escapeHtml(book.title || '未命名') + '</div>' +
       '<div class="book-stats-gray" style="text-align: center;">' + (book.volumes ? book.volumes.length : 0) + '卷 · ' + totalChapters + '章 · ' + totalWords + '字</div>' +
       '</div>' +

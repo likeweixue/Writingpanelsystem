@@ -19,12 +19,12 @@
   color: #2c3e2f;
 }
 
-.sidebar-menu { background: #2c3e2f; color: #C8DBC5; }
+.sidebar-menu { background: #a8b9a5; color: #C8DBC5; }
 .sidebar-menu .menu-item { color: #d4e6d1; }
-.sidebar-menu .menu-item.active { background: #1abc9c; color: #2c3e2f; }
+.sidebar-menu .menu-item.active { background: #1abc9c00; color: #2c3e2f; }
 
-.tab.active { background: #C8DBC5; color: #2c3e2f; }
-.tab { background: #b8c9b5; color: #3a5a3a; }
+.tab.active { background: #b1c4ae; color: #2c3e2f; }
+.tab { background: #b8c9b500; color: #3a5a3a; }
 
 .stat-card, .calendar-container, .writing-detail, .goal-setting, .settings-item, .about-content {
   background: #d4e6d1;
@@ -71,7 +71,7 @@
 .primary-btn,
 .small-btn,
 .drawer-btn {
-  background: #1abc9c;
+  background: #87c4b8;
 }
 .primary-btn:hover,
 .small-btn:hover,

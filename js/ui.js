@@ -157,7 +157,7 @@ function renderBooks() {
     if (group.cover) {
       leftPart.innerHTML = '<div style="width: 32px; height: 32px; border-radius: 8px; background-image: url(\'' + group.cover + '\'); background-size: cover;"></div>';
     } else {
-      leftPart.innerHTML = '<div style="font-size: 24px;">📁</div>';
+      leftPart.innerHTML = '<div style="font-size: 24px;"></div>';
     }
     leftPart.innerHTML += '<h3 style="margin:0;">' + escapeHtml(group.name) + ' <span style="font-size: 12px; font-weight: normal; opacity: 0.6;">(' + groupBooks.length + '本书)</span></h3>';
     
@@ -228,7 +228,7 @@ function renderBooks() {
         } else {
           card.innerHTML = menuHtml +
             '<div style="background: ' + coverColor + '; aspect-ratio: 1/1.4; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 16px;">' +
-            '<div style="font-size: 48px; margin-bottom: 12px; opacity: 0.7;">📖</div>' +
+            '<div style="font-size: 48px; margin-bottom: 12px; opacity: 0.7;"></div>' +
             '<div style="font-size: 16px; font-weight: 600; text-align: center; color: white; text-shadow: 0 1px 2px rgba(0,0,0,0.2);">' + escapeHtml(book.title || '未命名') + '</div>' +
             '<div style="font-size: 11px; margin-top: 8px; text-align: center; color: rgba(255,255,255,0.8);">' + (book.volumes ? book.volumes.length : 0) + '卷 · ' + totalChapters + '章 · ' + totalWords + '字</div>' +
             '</div>';
@@ -268,8 +268,8 @@ function showBookMenu(bookId, btnElement) {
   menu.style.cssText = 'position: fixed; background: white; border: 1px solid #ddd; border-radius: 8px; padding: 4px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.15); z-index: 1000; min-width: 120px;';
   menu.innerHTML = '<button class="set-cover" data-id="' + bookId + '" style="display: block; width: 100%; padding: 8px 16px; border: none; background: none; cursor: pointer; text-align: left;">🖼️ 设置封面</button>' +
     '<button class="rename-book" data-id="' + bookId + '" style="display: block; width: 100%; padding: 8px 16px; border: none; background: none; cursor: pointer; text-align: left;">✏️ 重命名</button>' +
-    '<button class="move-book" data-id="' + bookId + '" style="display: block; width: 100%; padding: 8px 16px; border: none; background: none; cursor: pointer; text-align: left;">📁 移动到分组</button>' +
-    '<button class="delete-book" data-id="' + bookId + '" style="display: block; width: 100%; padding: 8px 16px; border: none; background: none; cursor: pointer; text-align: left;">🗑️ 删除书籍</button>';
+    '<button class="move-book" data-id="' + bookId + '" style="display: block; width: 100%; padding: 8px 16px; border: none; background: none; cursor: pointer; text-align: left;"> 移动到分组</button>' +
+    '<button class="delete-book" data-id="' + bookId + '" style="display: block; width: 100%; padding: 8px 16px; border: none; background: none; cursor: pointer; text-align: left;"> 删除书籍</button>';
   
   var rect = btnElement.getBoundingClientRect();
   menu.style.top = rect.bottom + 'px';
@@ -525,7 +525,7 @@ function renderTrashContent() {
   for (var i = 0; i < trashBooks.length; i++) {
     var book = trashBooks[i];
     html += '<div class="book-card" style="padding: 16px; text-align: center; border: 1px solid #ddd; border-radius: 8px; width: 180px;">' +
-      '<div style="font-size: 48px;">📖</div>' +
+      '<div style="font-size: 48px;"></div>' +
       '<div style="font-weight: bold;">' + escapeHtml(book.title) + '</div>' +
       '<div style="font-size: 12px; color: #888;">删除于: ' + new Date(book.deletedTime).toLocaleString() + '</div>' +
       '<div><button class="restore-book-btn" data-id="' + book.id + '" style="margin: 8px; padding: 4px 12px; background: #28a745; color: white; border: none; border-radius: 4px;">恢复</button>' +
