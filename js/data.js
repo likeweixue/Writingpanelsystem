@@ -29,7 +29,7 @@ var currentBookId = null, currentVolumeId = null, currentChapterId = null;
 var autoSaveTimer = null;
 
 // 分组
-var groups = [];
+var groups = [{ id: 'default', name: '默认分组', books: [] }];
 function loadGroups() {
   var saved = localStorage.getItem('wps_groups');
   if (saved) {
@@ -70,4 +70,15 @@ function permanentDeleteBook(bookId) {
 
 function saveAllData() { 
   localStorage.setItem('wps_data', JSON.stringify({ books: books, settings: settings })); 
+}
+
+// 加载示例数据
+function loadSampleData() {
+  if (books.length === 0) {
+    var sampleChapter = new Chapter(Date.now(), '第一章', '<p>这里是属于斗气的世界...</p>');
+    var sampleVolume = new Volume(Date.now(), '第一卷', [sampleChapter]);
+    var sampleBook = new Book(Date.now(), '斗破苍穹', [sampleVolume]);
+    books.push(sampleBook);
+    saveAllData();
+  }
 }
