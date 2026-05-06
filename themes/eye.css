@@ -71,7 +71,8 @@
 .primary-btn,
 .small-btn,
 .drawer-btn {
-  background: #87c4b8;
+  background: #a8baa5;
+  border: none;  /* 完全移除边框，不会有宽度占位 */
 }
 .primary-btn:hover,
 .small-btn:hover,

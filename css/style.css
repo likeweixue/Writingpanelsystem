@@ -398,9 +398,9 @@ body {
 }
 .chapter-list-item:hover { background: rgba(0,0,0,0.04); }
 .chapter-list-item.active {
-  color: #007aff;
+  color: #729d66;
   font-weight: 500;
-  background: rgba(0,122,255,0.08);
+  background: #74767187;
 }
 .delete-chapter {
   background: none;
@@ -661,7 +661,7 @@ body {
   cursor: pointer;
   border: 2px solid transparent;
 }
-.color-preset.active { border-color: #1a1a2e; }
+.color-preset.active { border-color: #1a1a2e3b; }
 .font-option {
   display: flex;
   justify-content: space-between;

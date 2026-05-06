@@ -141,13 +141,13 @@ function openBookTab(bookId) {
     '</div>' +
     '<div class="sidebar-content">' +
     '<div class="sidebar-section">' +
-    '<div class="sidebar-item" data-tool="outline"><span class="sidebar-icon"></span><span class="sidebar-label">大纲</span></div>' +
-    '<div class="sidebar-item" data-tool="timeline"><span class="sidebar-icon"> </span><span class="sidebar-label">时间线</span></div>' +
-    '<div class="sidebar-item" data-tool="characters"><span class="sidebar-icon"></span><span class="sidebar-label">角色</span></div>' +
-    '<div class="sidebar-item" data-tool="setting"><span class="sidebar-icon"></span><span class="sidebar-label">设定</span></div>' +
-    '<div class="sidebar-item" data-tool="proofread"><span class="sidebar-icon"></span><span class="sidebar-label">校对</span></div>' +
-    '<div class="sidebar-item" data-tool="namegen"><span class="sidebar-icon"></span><span class="sidebar-label">取名</span></div>' +
-    '<div class="sidebar-item" data-tool="map"><span class="sidebar-icon"> </span><span class="sidebar-label">地图</span></div>' +
+    '<div class="sidebar-item" data-tool="outline"><span class="sidebar-label">大纲</span></div>' +
+    '<div class="sidebar-item" data-tool="timeline"><span class="sidebar-label">时间线</span></div>' +
+    '<div class="sidebar-item" data-tool="characters"><span class="sidebar-label">角色</span></div>' +
+    '<div class="sidebar-item" data-tool="setting"><span class="sidebar-label">设定</span></div>' +
+    '<div class="sidebar-item" data-tool="proofread"><span class="sidebar-label">校对</span></div>' +
+    '<div class="sidebar-item" data-tool="namegen"><span class="sidebar-label">取名</span></div>' +
+    '<div class="sidebar-item" data-tool="map"><span class="sidebar-label">地图</span></div>' +
     '</div>' +
     '</div>' +
     '</div>' +
@@ -336,7 +336,7 @@ function initBookPage(tabId, bookId) {
 }
 function newBook() { openNewBookDrawer(); }
 function switchPage(pageId) {
-  var pageTitles = { 'stats': '码字统计', 'settings': '软件设置', 'about': '关于' };
+  var pageTitles = { 'stats': '数据', 'settings': '设置', 'about': '关于' };
   var title = pageTitles[pageId] || pageId;
   var tabId = 'page_' + pageId;
   for (var i = 0; i < openTabs.length; i++) { if (openTabs[i].id === tabId) { switchToTab(tabId); return; } }
@@ -367,11 +367,11 @@ function createPages() {
   var settingsPageSource = document.createElement('div');
   settingsPageSource.id = 'settingsPageSource';
   settingsPageSource.style.display = 'none';
-  settingsPageSource.innerHTML = '<div class="settings-container"><div class="settings-item"><h4>🔐 密码保护</h4><p style="font-size:12px; color:#888; margin-bottom:12px;">设置启动密码，保护您的作品隐私</p><button id="passwordSettingsBtn" class="small-btn" style="width:100%;">设置密码保护</button></div><div class="settings-item"><h4>💾 备份策略</h4><label style="margin-right: 16px;"><input type="radio" name="backupType" value="auto" checked> 定时自动备份</label><label><input type="radio" name="backupType" value="manual"> 仅手动备份</label><div style="margin-top:12px;"><button id="manualBackupBtn" class="small-btn">立即备份</button><button id="restoreBackupBtn" class="small-btn" style="margin-left: 8px;">恢复备份</button></div></div><div class="settings-item"><h4>📂 备份文件位置</h4><p style="font-size:12px; color:#888; margin-bottom:12px;">设置备份文件保存的文件夹</p><button id="backupPathBtn" class="small-btn" style="width:100%;">设置备份路径</button></div><div class="settings-item"><h4> 密保问题</h4><p style="font-size:12px; color:#888; margin-bottom:12px;">设置密保问题，用于找回密码</p><button id="securityQuestionsBtn" class="small-btn" style="width:100%;">设置密保问题</button></div></div>';
+  settingsPageSource.innerHTML = '<div class="settings-container"><div class="settings-item"><h4>密码保护</h4><p style="font-size:12px; color:#888; margin-bottom:12px;">设置启动密码，保护您的作品隐私</p><button id="passwordSettingsBtn" class="small-btn" style="width:100%;">设置密码保护</button></div><div class="settings-item"><h4>备份策略</h4><label style="margin-right: 16px;"><input type="radio" name="backupType" value="auto" checked> 定时自动备份</label><label><input type="radio" name="backupType" value="manual"> 仅手动备份</label><div style="margin-top:12px;"><button id="manualBackupBtn" class="small-btn">立即备份</button><button id="restoreBackupBtn" class="small-btn" style="margin-left: 8px;">恢复备份</button></div></div><div class="settings-item"><h4>备份文件位置</h4><p style="font-size:12px; color:#888; margin-bottom:12px;">设置备份文件保存的文件夹</p><button id="backupPathBtn" class="small-btn" style="width:100%;">设置备份路径</button></div><div class="settings-item"><h4> 密保问题</h4><p style="font-size:12px; color:#888; margin-bottom:12px;">设置密保问题，用于找回密码</p><button id="securityQuestionsBtn" class="small-btn" style="width:100%;">设置密保问题</button></div></div>';
   var aboutPageSource = document.createElement('div');
   aboutPageSource.id = 'aboutPageSource';
   aboutPageSource.style.display = 'none';
-  aboutPageSource.innerHTML = '<div class="about-content"><h2>写作帮手</h2><p><strong>自由的写作软件</strong></p><p>版本 0.2.0 Beta 测试版</p><p>GitHub: <a href="https://github.com/likeweixue/word" target="_blank">github.com/likeweixue/word</a></p></div>';
+  aboutPageSource.innerHTML = '<div class="about-content"><h2>写作帮手</h2><p><strong>免费，开源，自由的写作软件</strong></p><p>版本 0.2.1 Beta 测试版</p><p>GitHub: <a href="https://github.com/likeweixue/word" target="_blank">github.com/likeweixue/word</a></p></div>';
   pagesContainer.appendChild(statsPageSource);
   pagesContainer.appendChild(settingsPageSource);
   pagesContainer.appendChild(aboutPageSource);

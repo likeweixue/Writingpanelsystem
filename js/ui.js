@@ -266,8 +266,8 @@ function showBookMenu(bookId, btnElement) {
   var menu = document.createElement('div');
   menu.className = 'book-context-menu';
   menu.style.cssText = 'position: fixed; background: white; border: 1px solid #ddd; border-radius: 8px; padding: 4px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.15); z-index: 1000; min-width: 120px;';
-  menu.innerHTML = '<button class="set-cover" data-id="' + bookId + '" style="display: block; width: 100%; padding: 8px 16px; border: none; background: none; cursor: pointer; text-align: left;">🖼️ 设置封面</button>' +
-    '<button class="rename-book" data-id="' + bookId + '" style="display: block; width: 100%; padding: 8px 16px; border: none; background: none; cursor: pointer; text-align: left;">✏️ 重命名</button>' +
+  menu.innerHTML = '<button class="set-cover" data-id="' + bookId + '" style="display: block; width: 100%; padding: 8px 16px; border: none; background: none; cursor: pointer; text-align: left;">设置封面</button>' +
+    '<button class="rename-book" data-id="' + bookId + '" style="display: block; width: 100%; padding: 8px 16px; border: none; background: none; cursor: pointer; text-align: left;">重命名</button>' +
     '<button class="move-book" data-id="' + bookId + '" style="display: block; width: 100%; padding: 8px 16px; border: none; background: none; cursor: pointer; text-align: left;"> 移动到分组</button>' +
     '<button class="delete-book" data-id="' + bookId + '" style="display: block; width: 100%; padding: 8px 16px; border: none; background: none; cursor: pointer; text-align: left;"> 删除书籍</button>';
   
