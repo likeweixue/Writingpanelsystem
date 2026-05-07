@@ -1362,3 +1362,137 @@ body.theme-dark .timeline-event-meta {
 .sidebar-menu .slogan {
   white-space: nowrap !important;
 }
+
+/* 江湖页面卡片样式 - 基础样式 */
+#bbsPageSource .jianghu-card {
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+#bbsPageSource .jianghu-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+#bbsPageSource .jianghu-footer {
+  margin-top: 30px;
+  padding: 16px;
+  border-radius: 12px;
+  text-align: center;
+  font-size: 13px;
+}
+
+/* 默认白色主题 */
+body.theme-default #bbsPageSource {
+  background: #f5f5f5;
+}
+
+body.theme-default #bbsPageSource .jianghu-card {
+  background: #ffffff;
+  color: #333333;
+  border: 1px solid #e0e0e0;
+}
+
+body.theme-default #bbsPageSource .jianghu-card:hover {
+  background: #f0f0f0;
+  border-color: #cccccc;
+}
+
+body.theme-default #bbsPageSource .jianghu-footer {
+  background: #ffffff;
+  color: #666666;
+  border: 1px solid #e0e0e0;
+}
+
+/* 护眼绿主题 */
+body.theme-eye #bbsPageSource {
+  background: #C8DBC5;
+}
+
+body.theme-eye #bbsPageSource .jianghu-card {
+  background: #b8caa8;
+  color: #2c3e2f;
+  border: 1px solid #a0b898;
+}
+
+body.theme-eye #bbsPageSource .jianghu-card:hover {
+  background: #a8ba98;
+  border-color: #8aa878;
+}
+
+body.theme-eye #bbsPageSource .jianghu-footer {
+  background: #b8caa8;
+  color: #2c3e2f;
+  border: 1px solid #a0b898;
+}
+
+/* 经典黄主题 */
+body.theme-warm #bbsPageSource {
+  background: #DFD5BD;
+}
+
+body.theme-warm #bbsPageSource .jianghu-card {
+  background: #c8bda0;
+  color: #4a3b2c;
+  border: 1px solid #b8a88a;
+}
+
+body.theme-warm #bbsPageSource .jianghu-card:hover {
+  background: #b8a88a;
+  border-color: #a89878;
+}
+
+body.theme-warm #bbsPageSource .jianghu-footer {
+  background: #c8bda0;
+  color: #4a3b2c;
+  border: 1px solid #b8a88a;
+}
+
+/* 暗夜黑主题 */
+body.theme-dark #bbsPageSource {
+  background: #1e1e2e;
+}
+
+body.theme-dark #bbsPageSource .jianghu-card {
+  background: #2a2a3e;
+  color: #e0e0e0;
+  border: 1px solid #3a3a4e;
+}
+
+body.theme-dark #bbsPageSource .jianghu-card:hover {
+  background: #3a3a4e;
+  border-color: #4a4a5e;
+}
+
+body.theme-dark #bbsPageSource .jianghu-footer {
+  background: #2a2a3e;
+  color: #c0c0d0;
+  border: 1px solid #3a3a4e;
+}
+
+/* 卡片内文字颜色统一 */
+#bbsPageSource .jianghu-card .card-icon {
+  opacity: 0.8;
+  font-weight: bold;
+}
+
+#bbsPageSource .jianghu-card div:first-child {
+  font-size: 32px;
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+
+#bbsPageSource .jianghu-card div:nth-child(2) {
+  font-weight: 600;
+  font-size: 16px;
+  margin-bottom: 6px;
+}
+
+#bbsPageSource .jianghu-card div:last-child {
+  font-size: 12px;
+  opacity: 0.7;
+}

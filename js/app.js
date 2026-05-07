@@ -336,7 +336,7 @@ function initBookPage(tabId, bookId) {
 }
 function newBook() { openNewBookDrawer(); }
 function switchPage(pageId) {
-  var pageTitles = { 'stats': '数据', 'settings': '设置', 'about': '关于' };
+  var pageTitles = { 'stats': '数据', 'settings': '设置', 'about': '关于','bbs': '江湖'  };
   var title = pageTitles[pageId] || pageId;
   var tabId = 'page_' + pageId;
   for (var i = 0; i < openTabs.length; i++) { if (openTabs[i].id === tabId) { switchToTab(tabId); return; } }
@@ -371,7 +371,7 @@ function createPages() {
   var aboutPageSource = document.createElement('div');
   aboutPageSource.id = 'aboutPageSource';
   aboutPageSource.style.display = 'none';
-  aboutPageSource.innerHTML = '<div class="about-content"><h2>写作帮手</h2><p><strong>免费，开源，自由的写作软件</strong></p><p>版本 0.2.2 Beta 测试版</p><p>GitHub: <a href="https://github.com/likeweixue/word" target="_blank">github.com/likeweixue/word</a></p></div>';
+  aboutPageSource.innerHTML = '<div class="about-content"><h2>写作帮手</h2><p><strong>免费，开源，自由的写作软件</strong></p><p>版本 0.2.3 Beta 测试版</p><p>GitHub: <a href="https://github.com/likeweixue/word" target="_blank">github.com/likeweixue/word</a></p></div>';
   pagesContainer.appendChild(statsPageSource);
   pagesContainer.appendChild(settingsPageSource);
   pagesContainer.appendChild(aboutPageSource);
@@ -3182,3 +3182,263 @@ setTimeout(bindProofreadButton, 500);
     };
   }
 })();
+
+// 修复 switchPage 函数，为 bbs 添加页面
+var originalSwitchPage = window.switchPage;
+if (originalSwitchPage) {
+  window.switchPage = function(pageId) {
+    var pageTitles = { 'stats': '数据', 'settings': '设置', 'about': '关于', 'bbs': '江湖' };
+    var title = pageTitles[pageId] || pageId;
+    var tabId = 'page_' + pageId;
+    
+    // 检查是否已经打开
+    for (var i = 0; i < openTabs.length; i++) {
+      if (openTabs[i].id === tabId) {
+        switchToTab(tabId);
+        return;
+      }
+    }
+    
+    openPageTab(pageId, title, tabId);
+  };
+}
+
+// 创建 bbs 江湖页面
+function createBbsPage() {
+  var existingPage = document.getElementById('bbsPageSource');
+  if (existingPage) return;
+  
+  var pagesContainer = document.getElementById('pagesContainer');
+  var bbsPageSource = document.createElement('div');
+  bbsPageSource.id = 'bbsPageSource';
+  bbsPageSource.style.display = 'none';
+  bbsPageSource.innerHTML = `
+  <div id="jianghuPage" style="padding: 30px; overflow-y: auto; height: 100%; background: inherit;">
+    <div style="max-width: 900px; margin: 0 auto;">
+      <h2 style="margin-bottom: 8px; text-align: center;">江湖</h2>
+      <p style="text-align: center; color: #666; margin-bottom: 30px;">与写作帮手的朋友们一起交流</p>
+      
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px;">
+        
+        <div onclick="window.open('https://qm.qq.com/q/你的QQ群链接', '_blank')" style="background: #fff; border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+          <div style="font-size: 48px; margin-bottom: 12px;">💬</div>
+          <div style="font-weight: 600; font-size: 16px; margin-bottom: 6px;">QQ交流群</div>
+          <div style="font-size: 12px; color: #888;">与作者们实时交流</div>
+        </div>
+        
+        <div onclick="window.open('https://你的论坛地址.com', '_blank')" style="background: #fff; border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+          <div style="font-size: 48px; margin-bottom: 12px;"></div>
+          <div style="font-weight: 600; font-size: 16px; margin-bottom: 6px;">官方论坛</div>
+          <div style="font-size: 12px; color: #888;">分享作品与技巧</div>
+        </div>
+        
+        <div onclick="window.open('https://github.com/likeweixue/word', '_blank')" style="background: #fff; border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+          <div style="font-size: 48px; margin-bottom: 12px;">🐙</div>
+          <div style="font-weight: 600; font-size: 16px; margin-bottom: 6px;">GitHub</div>
+          <div style="font-size: 12px; color: #888;">查看源码与反馈</div>
+        </div>
+        
+        <div onclick="window.open('https://你的教程链接.com', '_blank')" style="background: #fff; border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+          <div style="font-size: 48px; margin-bottom: 12px;">📖</div>
+          <div style="font-weight: 600; font-size: 16px; margin-bottom: 6px;">使用教程</div>
+          <div style="font-size: 12px; color: #888;">快速上手写作帮手</div>
+        </div>
+        
+        <div onclick="window.open('https://你的反馈链接.com', '_blank')" style="background: #fff; border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+          <div style="font-size: 48px; margin-bottom: 12px;">💡</div>
+          <div style="font-weight: 600; font-size: 16px; margin-bottom: 6px;">意见反馈</div>
+          <div style="font-size: 12px; color: #888;">告诉我们你的想法</div>
+        </div>
+        
+        <div onclick="alert('即将发布，敬请期待！')" style="background: #fff; border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+          <div style="font-size: 48px; margin-bottom: 12px;">📢</div>
+          <div style="font-weight: 600; font-size: 16px; margin-bottom: 6px;">更新日志</div>
+          <div style="font-size: 12px; color: #888;">v0.2.1 Beta版本</div>
+        </div>
+      </div>
+      
+      <div style="margin-top: 30px; padding: 16px; background: #f0f7ff; border-radius: 12px; text-align: center; font-size: 13px; color: #666;">
+        写作帮手 · 免费开源 · 数据本地存储 · 祝大家墨香
+      </div>
+    </div>
+  </div>
+  `;
+  
+  pagesContainer.appendChild(bbsPageSource);
+}
+
+// 在 createPages 函数中添加 bbs 页面
+var originalCreatePages = window.createPages;
+if (originalCreatePages) {
+  window.createPages = function() {
+    originalCreatePages();
+    createBbsPage();
+  };
+} else {
+  createBbsPage();
+}
+
+// 确保江湖按钮点击时打开 bbs 页面
+setTimeout(function() {
+  var bbsBtn = document.querySelector('.menu-item[data-page="bbs"]');
+  if (bbsBtn) {
+    bbsBtn.onclick = function(e) {
+      e.stopPropagation();
+      switchPage('bbs');
+    };
+  }
+}, 500);
+
+// 创建江湖页面内容
+function createBbsContent() {
+  var bbsSource = document.getElementById('bbsPageSource');
+  if (!bbsSource) {
+    var pagesContainer = document.getElementById('pagesContainer');
+    bbsSource = document.createElement('div');
+    bbsSource.id = 'bbsPageSource';
+    bbsSource.style.display = 'none';
+    pagesContainer.appendChild(bbsSource);
+  }
+  
+  bbsSource.innerHTML = `
+  <div style="padding: 30px; overflow-y: auto; height: 100%;">
+    <div style="max-width: 900px; margin: 0 auto;">
+      <h2 style="margin-bottom: 8px; text-align: center;">江湖</h2>
+      <p style="text-align: center; color: #666; margin-bottom: 30px;">与写作帮手的朋友们一起交流</p>
+      
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px;">
+        
+        <div onclick="window.open('https://qm.qq.com/q/你的QQ群链接', '_blank')" style="background: #fff; border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+          <div style="font-size: 36px; margin-bottom: 12px;">QQ</div>
+          <div style="font-weight: 600; font-size: 16px; margin-bottom: 6px;">QQ交流群</div>
+          <div style="font-size: 12px; color: #888;">与作者们实时交流</div>
+        </div>
+        
+        <div onclick="window.open('https://github.com/likeweixue/word', '_blank')" style="background: #fff; border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+          <div style="font-size: 36px; margin-bottom: 12px;">GH</div>
+          <div style="font-weight: 600; font-size: 16px; margin-bottom: 6px;">GitHub</div>
+          <div style="font-size: 12px; color: #888;">查看源码与反馈</div>
+        </div>
+        
+        <div onclick="window.open('https://你的论坛地址.com', '_blank')" style="background: #fff; border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+          <div style="font-size: 36px; margin-bottom: 12px;">BBS</div>
+          <div style="font-weight: 600; font-size: 16px; margin-bottom: 6px;">官方论坛</div>
+          <div style="font-size: 12px; color: #888;">分享作品与技巧</div>
+        </div>
+        
+        <div onclick="window.open('https://你的教程链接.com', '_blank')" style="background: #fff; border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+          <div style="font-size: 36px; margin-bottom: 12px;">DOC</div>
+          <div style="font-weight: 600; font-size: 16px; margin-bottom: 6px;">使用教程</div>
+          <div style="font-size: 12px; color: #888;">快速上手写作帮手</div>
+        </div>
+        
+        <div onclick="window.open('https://你的反馈链接.com', '_blank')" style="background: #fff; border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+          <div style="font-size: 36px; margin-bottom: 12px;">FB</div>
+          <div style="font-weight: 600; font-size: 16px; margin-bottom: 6px;">意见反馈</div>
+          <div style="font-size: 12px; color: #888;">告诉我们你的想法</div>
+        </div>
+        
+        <div onclick="alert('即将发布，敬请期待')" style="background: #fff; border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+          <div style="font-size: 36px; margin-bottom: 12px;">NEW</div>
+          <div style="font-weight: 600; font-size: 16px; margin-bottom: 6px;">更新日志</div>
+          <div style="font-size: 12px; color: #888;">v0.2.1 Beta版本</div>
+        </div>
+      </div>
+      
+      <div style="margin-top: 30px; padding: 16px; background: #f0f7ff; border-radius: 12px; text-align: center; font-size: 13px; color: #666;">
+        写作帮手 · 免费开源 · 数据本地存储 · 祝大家墨香
+      </div>
+    </div>
+  </div>
+  `;
+  
+  console.log('江湖页面内容已更新');
+}
+
+// 修改 switchPage 函数，为 bbs 创建内容
+var oldSwitchPage = window.switchPage;
+if (oldSwitchPage) {
+  window.switchPage = function(pageId) {
+    if (pageId === 'bbs') {
+      createBbsContent();
+    }
+    oldSwitchPage(pageId);
+  };
+}
+
+// 立即创建内容
+createBbsContent();
+
+// 重新绑定江湖按钮
+setTimeout(function() {
+  var bbsBtn = document.querySelector('.menu-item[data-page="bbs"]');
+  if (bbsBtn) {
+    bbsBtn.onclick = function(e) {
+      e.stopPropagation();
+      window.switchPage('bbs');
+    };
+    console.log('江湖按钮已重新绑定');
+  }
+}, 500);
+
+// 更新江湖页面内容，添加主题适配的class
+function updateBbsWithTheme() {
+  var bbsSource = document.getElementById('bbsPageSource');
+  if (!bbsSource) return;
+  
+  bbsSource.innerHTML = `
+  <div style="padding: 30px; overflow-y: auto; height: 100%;">
+    <div style="max-width: 900px; margin: 0 auto;">
+      <h2 style="margin-bottom: 8px; text-align: center;">江湖</h2>
+      <p style="text-align: center; color: #666; margin-bottom: 30px;">与写作帮手的朋友们一起交流</p>
+      
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px;">
+        
+        <div class="jianghu-card" onclick="window.open('https://qm.qq.com/q/你的QQ群链接', '_blank')">
+          <div class="card-icon" style="font-size: 36px; margin-bottom: 12px;">QQ</div>
+          <div style="font-weight: 600; font-size: 16px; margin-bottom: 6px;">QQ交流群</div>
+          <div style="font-size: 12px; opacity: 0.7;">与作者们实时交流</div>
+        </div>
+        
+        <div class="jianghu-card" onclick="window.open('https://github.com/likeweixue/word', '_blank')">
+          <div class="card-icon" style="font-size: 36px; margin-bottom: 12px;">GH</div>
+          <div style="font-weight: 600; font-size: 16px; margin-bottom: 6px;">GitHub</div>
+          <div style="font-size: 12px; opacity: 0.7;">查看源码与反馈</div>
+        </div>
+        
+        <div class="jianghu-card" onclick="window.open('https://你的论坛地址.com', '_blank')">
+          <div class="card-icon" style="font-size: 36px; margin-bottom: 12px;">BBS</div>
+          <div style="font-weight: 600; font-size: 16px; margin-bottom: 6px;">官方论坛</div>
+          <div style="font-size: 12px; opacity: 0.7;">分享作品与技巧</div>
+        </div>
+        
+        <div class="jianghu-card" onclick="window.open('https://你的教程链接.com', '_blank')">
+          <div class="card-icon" style="font-size: 36px; margin-bottom: 12px;">DOC</div>
+          <div style="font-weight: 600; font-size: 16px; margin-bottom: 6px;">使用教程</div>
+          <div style="font-size: 12px; opacity: 0.7;">快速上手写作帮手</div>
+        </div>
+        
+        <div class="jianghu-card" onclick="window.open('https://你的反馈链接.com', '_blank')">
+          <div class="card-icon" style="font-size: 36px; margin-bottom: 12px;">FB</div>
+          <div style="font-weight: 600; font-size: 16px; margin-bottom: 6px;">意见反馈</div>
+          <div style="font-size: 12px; opacity: 0.7;">告诉我们你的想法</div>
+        </div>
+        
+        <div class="jianghu-card" onclick="alert('即将发布，敬请期待')">
+          <div class="card-icon" style="font-size: 36px; margin-bottom: 12px;">NEW</div>
+          <div style="font-weight: 600; font-size: 16px; margin-bottom: 6px;">更新日志</div>
+          <div style="font-size: 12px; opacity: 0.7;">v0.2.1 Beta版本</div>
+        </div>
+      </div>
+      
+      <div class="jianghu-footer" style="margin-top: 30px; padding: 16px; border-radius: 12px; text-align: center; font-size: 13px;">
+        写作帮手 · 免费开源 · 数据本地存储 · 祝大家墨香
+      </div>
+    </div>
+  </div>
+  `;
+}
+
+// 替换原来的创建函数
+window.createBbsContent = updateBbsWithTheme;
+updateBbsWithTheme();
