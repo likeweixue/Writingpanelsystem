@@ -371,7 +371,7 @@ function createPages() {
   var aboutPageSource = document.createElement('div');
   aboutPageSource.id = 'aboutPageSource';
   aboutPageSource.style.display = 'none';
-  aboutPageSource.innerHTML = '<div class="about-content"><h2>写作帮手</h2><p><strong>免费，开源，自由的写作软件</strong></p><p>版本 0.2.1 Beta 测试版</p><p>GitHub: <a href="https://github.com/likeweixue/word" target="_blank">github.com/likeweixue/word</a></p></div>';
+  aboutPageSource.innerHTML = '<div class="about-content"><h2>写作帮手</h2><p><strong>免费，开源，自由的写作软件</strong></p><p>版本 0.2.2 Beta 测试版</p><p>GitHub: <a href="https://github.com/likeweixue/word" target="_blank">github.com/likeweixue/word</a></p></div>';
   pagesContainer.appendChild(statsPageSource);
   pagesContainer.appendChild(settingsPageSource);
   pagesContainer.appendChild(aboutPageSource);
@@ -3065,4 +3065,120 @@ setTimeout(bindProofreadButton, 500);
   
   setTimeout(fixMapButton, 500);
   setTimeout(fixMapButton, 1000);
+})();
+
+// 修复侧边栏关闭按钮功能
+(function fixSidebarToggle() {
+  var toggleSidebarBtn = document.getElementById('toggleSidebarBtn');
+  var sidebar = document.getElementById('detailSidebar');
+  var topSidebarBtn = document.getElementById('sidebarToggleBtn');
+  
+  if (toggleSidebarBtn && sidebar) {
+    // 移除旧的事件（如果有）
+    toggleSidebarBtn.onclick = null;
+    // 绑定新的事件
+    toggleSidebarBtn.onclick = function(e) {
+      e.stopPropagation();
+      sidebar.classList.toggle('hidden');
+      // 更新按钮文字
+      if (sidebar.classList.contains('hidden')) {
+        toggleSidebarBtn.textContent = '☰';
+      } else {
+        toggleSidebarBtn.textContent = '✕';
+      }
+      // 同步顶部按钮的状态（可选）
+      if (topSidebarBtn) {
+        topSidebarBtn.textContent = sidebar.classList.contains('hidden') ? '☰ 侧栏' : '✕ 侧栏';
+      }
+    };
+    console.log('侧边栏关闭按钮已修复');
+  }
+  
+  // 确保顶部按钮也正常工作
+  if (topSidebarBtn && sidebar) {
+    var originalClick = topSidebarBtn.onclick;
+    topSidebarBtn.onclick = function(e) {
+      e.stopPropagation();
+      sidebar.classList.toggle('hidden');
+      if (sidebar.classList.contains('hidden')) {
+        topSidebarBtn.textContent = '☰ 侧栏';
+        if (toggleSidebarBtn) toggleSidebarBtn.textContent = '☰';
+      } else {
+        topSidebarBtn.textContent = '✕ 侧栏';
+        if (toggleSidebarBtn) toggleSidebarBtn.textContent = '✕';
+      }
+    };
+    console.log('顶部侧边栏按钮已修复');
+  }
+})();
+
+// ========== 强制修复侧边栏按钮 ==========
+(function forceFixSidebarButtons() {
+  function fixButtons() {
+    var sidebar = document.getElementById('detailSidebar');
+    var toggleBtn = document.getElementById('toggleSidebarBtn');
+    var topBtn = document.getElementById('sidebarToggleBtn');
+    
+    if (!sidebar || !toggleBtn) {
+      setTimeout(fixButtons, 200);
+      return;
+    }
+    
+    // 移除所有旧的事件监听器（通过替换元素的方式）
+    var newToggleBtn = toggleBtn.cloneNode(true);
+    toggleBtn.parentNode.replaceChild(newToggleBtn, toggleBtn);
+    
+    if (topBtn) {
+      var newTopBtn = topBtn.cloneNode(true);
+      topBtn.parentNode.replaceChild(newTopBtn, topBtn);
+    }
+    
+    // 重新获取元素
+    var finalToggleBtn = document.getElementById('toggleSidebarBtn');
+    var finalTopBtn = document.getElementById('sidebarToggleBtn');
+    var finalSidebar = document.getElementById('detailSidebar');
+    
+    // 定义切换函数
+    function toggleSidebar() {
+      if (finalSidebar.classList.contains('hidden')) {
+        finalSidebar.classList.remove('hidden');
+        if (finalToggleBtn) finalToggleBtn.textContent = '✕';
+        if (finalTopBtn) finalTopBtn.textContent = '✕ 侧栏';
+      } else {
+        finalSidebar.classList.add('hidden');
+        if (finalToggleBtn) finalToggleBtn.textContent = '☰';
+        if (finalTopBtn) finalTopBtn.textContent = '☰ 侧栏';
+      }
+    }
+    
+    if (finalToggleBtn) {
+      finalToggleBtn.onclick = function(e) {
+        e.stopPropagation();
+        toggleSidebar();
+      };
+    }
+    
+    if (finalTopBtn) {
+      finalTopBtn.onclick = function(e) {
+        e.stopPropagation();
+        toggleSidebar();
+      };
+    }
+  }
+  
+  // 页面加载时执行
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', fixButtons);
+  } else {
+    fixButtons();
+  }
+  
+  // 打开新书籍时重新绑定
+  var oldOpenBookTab = window.openBookTab;
+  if (oldOpenBookTab) {
+    window.openBookTab = function(bookId) {
+      oldOpenBookTab(bookId);
+      setTimeout(fixButtons, 500);
+    };
+  }
 })();

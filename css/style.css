@@ -127,7 +127,7 @@ body {
 
 /* 左侧菜单栏 */
 .sidebar-menu {
-  width: 200px;
+  width: 67px;
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
@@ -320,7 +320,7 @@ body {
 .detail-main { display: flex; flex: 1; overflow: hidden; }
 .detail-chapters {
   width: 240px;
-  min-width: 180px;
+  min-width: 200px;
   max-width: 400px;
   border-right: 1px solid rgba(0,0,0,0.08);
   display: flex;
@@ -847,7 +847,7 @@ body.theme-dark .editor-content.show-grid {
 
 /* ========== 右侧功能栏优化样式 ========== */
 .detail-sidebar {
-  width: 200px;
+  width: 67px;
   background: rgba(0,0,0,0.03);
   border-left: 1px solid rgba(0,0,0,0.08);
   display: flex;
@@ -1134,6 +1134,7 @@ body.theme-dark .outline-content-textarea {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  background: #b9ceb6;/* ========== 2026年5月7日21:20:43添加背景样式 ========== */
 }
 
 .timeline-event-item {
@@ -1141,24 +1142,28 @@ body.theme-dark .outline-content-textarea {
   border-radius: 6px;
   cursor: pointer;
   background: rgba(0,0,0,0.03);
-  border-left: 3px solid #007aff;
+  border-left: 3px solid #007bff00;
   transition: all 0.2s;
+  background: #b9ceb6;
 }
 
 .timeline-event-item:hover {
   background: rgba(0,0,0,0.08);
   transform: translateX(3px);
+  background: #b9ceb6;
 }
 
 .timeline-event-item.active {
-  background: rgba(0,122,255,0.1);
-  border-left-color: #007aff;
+  background: #c9d5c7;
+  border-left-color: #007bff00;
+  background: #b9ceb6;
 }
 
 .timeline-event-title {
   font-weight: 600;
   font-size: 13px;
   margin-bottom: 4px;
+  background: #b9ceb6;
 }
 
 .timeline-event-meta {
@@ -1183,4 +1188,177 @@ body.theme-dark .timeline-event-item:hover {
 
 body.theme-dark .timeline-event-meta {
   color: #aaa;
+}
+
+/* 侧边栏缩小样式优化 */
+.detail-sidebar {
+  width: 67px;
+  min-width: 67px;
+}
+
+.detail-sidebar .sidebar-header h3 {
+  display: none;
+}
+
+.detail-sidebar .sidebar-header {
+  justify-content: center;
+  padding: 12px 0;
+}
+
+.sidebar-item {
+  justify-content: center;
+  flex-direction: column;
+  padding: 12px 4px;
+  text-align: center;
+}
+
+.sidebar-label {
+  font-size: 11px;
+  display: block;
+  margin-top: 6px;
+}
+
+.sidebar-icon {
+  font-size: 20px;
+}
+
+#toggleSidebarBtn {
+  font-size: 16px;
+}
+
+/* 侧边栏隐藏样式 - 强制生效 */
+.detail-sidebar.hidden {
+  width: 0px !important;
+  min-width: 0px !important;
+  max-width: 0px !important;
+  overflow: hidden !important;
+  padding: 0px !important;
+  margin: 0px !important;
+  border: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+.detail-sidebar {
+  transition: width 0.2s ease, opacity 0.2s ease;
+  overflow: hidden;
+}
+
+/* 恢复左侧主菜单栏为正常水平排列 */
+.sidebar-menu .menu-item {
+  writing-mode: horizontal-tb !important;
+  text-orientation: mixed !important;
+  text-align: left !important;
+  letter-spacing: normal !important;
+  display: block !important;
+  width: 100% !important;
+}
+
+.sidebar-menu .logo-area h3 {
+  writing-mode: horizontal-tb !important;
+}
+
+.sidebar-menu .slogan {
+  writing-mode: horizontal-tb !important;
+}
+
+.sidebar-menu .menu-footer {
+  writing-mode: horizontal-tb !important;
+}
+
+/* 恢复左侧主菜单栏为正常水平排列 */
+.sidebar-menu .menu-item {
+  writing-mode: horizontal-tb !important;
+  text-orientation: mixed !important;
+  text-align: left !important;
+  letter-spacing: normal !important;
+  display: block !important;
+  width: 100% !important;
+}
+
+.sidebar-menu .logo-area h3 {
+  writing-mode: horizontal-tb !important;
+}
+
+.sidebar-menu .slogan {
+  writing-mode: horizontal-tb !important;
+}
+
+.sidebar-menu .menu-footer {
+  writing-mode: horizontal-tb !important;
+}
+
+/* 强制恢复左侧主菜单为水平排列 */
+.sidebar-menu,
+.sidebar-menu *,
+.sidebar-menu .logo-area,
+.sidebar-menu .logo-area h3,
+.sidebar-menu .slogan,
+.sidebar-menu .menu-nav,
+.sidebar-menu .menu-item,
+.sidebar-menu .menu-footer {
+  writing-mode: horizontal-tb !important;
+  text-orientation: mixed !important;
+  letter-spacing: normal !important;
+  word-break: normal !important;
+  white-space: normal !important;
+}
+
+.sidebar-menu .menu-item {
+  display: block !important;
+  text-align: left !important;
+}
+
+/* 强制恢复左侧整个菜单为水平排列 */
+.sidebar-menu,
+.sidebar-menu .logo-area,
+.sidebar-menu .logo-area h3,
+.sidebar-menu .slogan,
+.sidebar-menu .menu-nav,
+.sidebar-menu .menu-item,
+.sidebar-menu .menu-footer {
+  writing-mode: horizontal-tb !important;
+  text-orientation: mixed !important;
+  letter-spacing: normal !important;
+  white-space: normal !important;
+  word-break: normal !important;
+}
+
+.sidebar-menu .logo-area h3 {
+  font-size: 18px;
+  margin: 0 0 8px 0;
+  display: block !important;
+}
+
+.sidebar-menu .slogan {
+  font-size: 10px;
+  opacity: 0.7;
+  display: block !important;
+}
+
+.sidebar-menu .menu-item {
+  display: block !important;
+  text-align: left !important;
+  width: 100% !important;
+  padding: 10px 20px !important;
+}
+
+.sidebar-menu .menu-footer {
+  text-align: center !important;
+}
+
+/* 强制设置左侧菜单宽度 */
+.sidebar-menu {
+  width: 200px !important;
+  min-width: 200px !important;
+}
+
+.sidebar-menu .menu-item {
+  white-space: nowrap !important;
+  overflow: visible !important;
+}
+
+.sidebar-menu .logo-area h3,
+.sidebar-menu .slogan {
+  white-space: nowrap !important;
 }
