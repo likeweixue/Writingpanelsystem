@@ -490,3 +490,44 @@ body.theme-open .right-sidebar {
     top: auto !important;
     margin: 0 !important;
 }
+
+/* ========== 图标边栏圆润 ========== */
+.icon-sidebar {
+    border-radius: 20px !important;
+    margin-left: 12px !important;
+    margin-top: 12px !important;
+    margin-bottom: 12px !important;
+    overflow: hidden !important;
+}
+
+.icon-sidebar-content {
+    border-radius: 20px !important;
+}
+
+.icon-sidebar-item {
+    border-radius: 12px !important;
+    transition: all 0.2s ease !important;
+}
+
+/* ========== 修复右侧滑出面板在 Open 主题下不可见 ========== */
+body.theme-open .right-slide-panel {
+    display: none !important;
+}
+
+body.theme-open .right-slide-panel.open {
+    display: flex !important;
+    right: 20px !important;
+    top: 100px !important;
+    transform: translateX(0) !important;
+}
+
+/* 确保新建分组和新建书籍面板在 Open 主题下默认隐藏 */
+body.theme-open #newBookSlidePanelV2,
+body.theme-open #newGroupSlidePanelV2 {
+    display: none !important;
+}
+
+body.theme-open #newBookSlidePanelV2.open,
+body.theme-open #newGroupSlidePanelV2.open {
+    display: flex !important;
+}

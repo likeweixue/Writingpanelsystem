@@ -91,16 +91,50 @@ function performBackup() {
         alert('没有书籍需要备份');
         return;
     }
-    var today = new Date();
-    var dateStr = today.getFullYear() + '年' + (today.getMonth() + 1) + '月' + today.getDate() + '日';
-    var dateFolder = today.getFullYear() + '' + String(today.getMonth() + 1).padStart(2,'0') + String(today.getDate()).padStart(2,'0');
-    var backupData = { backupTime: new Date().toISOString(), books: books, groups: groups };
-    localStorage.setItem('openwrite_backup_' + dateFolder, JSON.stringify(backupData));
-    for (var i = 0; i < books.length; i++) {
-        var book = books[i];
-        localStorage.setItem('openwrite_book_backup_' + book.id + '_' + dateFolder, JSON.stringify({ book: book, backupTime: new Date().toISOString() }));
+    
+    // 检查是否在 Electron 环境中
+    if (window.electron && window.electron.backupAllBooks) {
+        // 使用 Electron 备份到文档文件夹
+        alert('正在备份到文档文件夹，请稍候...');
+        
+        window.electron.backupAllBooks(books).then(results => {
+            let successCount = 0;
+            let message = '';
+            for (var i = 0; i < results.length; i++) {
+                var r = results[i];
+                if (r.success) {
+                    successCount++;
+                    message += `✅ ${r.bookName}: ${r.chapterCount}章, ${r.totalWords}字\n`;
+                } else {
+                    message += `❌ ${r.bookName}: 备份失败\n`;
+                }
+            }
+            alert(`备份完成！\n成功备份 ${successCount}/${results.length} 本书籍\n\n备份位置：~/Documents/写作帮手备份/\n\n${message}`);
+        }).catch(err => {
+            alert('备份失败：' + err.message);
+        });
+    } else {
+        // 浏览器环境降级到 localStorage
+        var today = new Date();
+        var dateStr = today.getFullYear() + '年' + (today.getMonth() + 1) + '月' + today.getDate() + '日';
+        var dateFolder = today.getFullYear() + '' + String(today.getMonth() + 1).padStart(2,'0') + String(today.getDate()).padStart(2,'0');
+        var backupData = { backupTime: new Date().toISOString(), books: books, groups: groups };
+        localStorage.setItem('openwrite_backup_' + dateFolder, JSON.stringify(backupData));
+        alert('备份完成！备份时间：' + dateStr + '\n（存储在浏览器中，打包后会自动备份到文档文件夹）');
     }
-    alert('备份完成！备份时间：' + dateStr);
+}
+
+// 添加打开备份文件夹的功能
+function openBackupFolder() {
+    if (window.electron && window.electron.openBackupFolder) {
+        window.electron.openBackupFolder().then(result => {
+            if (!result.success) {
+                alert('备份文件夹不存在，请先执行备份');
+            }
+        });
+    } else {
+        alert('此功能仅在桌面应用中可用');
+    }
 }
 
 function refreshBackupList() {
@@ -264,7 +298,8 @@ function renderBackupSettingsUI() {
             <h4>自动备份</h4>
             <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;"><input type="checkbox" id="autoBackupCheckbox" ${backupSettings.autoBackup ? 'checked' : ''}><span>启用自动备份</span></label>
             <div style="margin-bottom: 12px;"><label>备份间隔（分钟）：</label><select id="backupIntervalSelect" style="width: 100%; padding: 8px; margin-top: 8px;"><option value="5" ${backupSettings.backupInterval === 5 ? 'selected' : ''}>5分钟</option><option value="10" ${backupSettings.backupInterval === 10 ? 'selected' : ''}>10分钟</option><option value="30" ${backupSettings.backupInterval === 30 ? 'selected' : ''}>30分钟</option><option value="60" ${backupSettings.backupInterval === 60 ? 'selected' : ''}>1小时</option></select></div>
-            <button id="manualBackupBtn" class="btn-primary" style="margin-top: 12px;">立即备份</button>
+            <button id="manualBackupBtn" class="btn-primary" style="margin-top: 12px; width:100%;">📦 立即备份</button>
+            <button id="openBackupFolderBtn" class="btn-secondary" style="margin-top: 8px; width:100%; background:#6c757d;">📁 打开备份文件夹</button>
         </div>
         <div style="padding: 16px; background: rgba(0,0,0,0.03); border-radius: 12px;">
             <h4>恢复备份</h4>
@@ -272,6 +307,7 @@ function renderBackupSettingsUI() {
             <button id="refreshBackupListBtn" class="btn-secondary">刷新列表</button>
         </div>
     `;
+    
     document.getElementById('autoBackupCheckbox').onchange = function(e) {
         backupSettings.autoBackup = e.target.checked;
         saveBackupSettings();
@@ -286,6 +322,7 @@ function renderBackupSettingsUI() {
     };
     document.getElementById('manualBackupBtn').onclick = performBackup;
     document.getElementById('refreshBackupListBtn').onclick = refreshBackupList;
+    document.getElementById('openBackupFolderBtn').onclick = openBackupFolder;
     refreshBackupList();
 }
 
@@ -355,13 +392,12 @@ function renderSettingsPage() {
     var container = document.getElementById('settingsContainer');
     if (!container) return;
     
-    // 新的菜单分类：外观、备份、安全
+        // 菜单分类：只保留备份和安全
     var categories = [
-        { id: 'appearance', name: '外观', icon: '🎨' },
         { id: 'backup', name: '备份', icon: '💾' },
         { id: 'security', name: '安全', icon: '🔒' }
     ];
-    var activeCategory = localStorage.getItem('settings_active_tab') || 'appearance';
+    var activeCategory = localStorage.getItem('settings_active_tab') || 'backup';
     
     container.innerHTML = `
         <div style="display: flex; height: 100%; min-height: 500px; background: #fff; border-radius: 16px; overflow: hidden;">
@@ -379,12 +415,8 @@ function renderSettingsPage() {
     `;
     
     // 定义子菜单
+        // 定义子菜单（备份和安全）
     var subMenus = {
-        appearance: [
-            { id: 'theme', name: '主题', render: renderThemeUI },
-            { id: 'background', name: '背景', render: renderBackgroundUI },
-            { id: 'css', name: '自定义CSS', render: renderCssUI }
-        ],
         backup: [
             { id: 'backup_main', name: '备份设置', render: renderBackupSettingsUI }
         ],
@@ -587,22 +619,33 @@ function renderSettingsPage() {
         }
     }
     
+    renderSubMenu();
+    var defaultSub = subMenus[activeCategory] ? subMenus[activeCategory][0] : null;
+    if (defaultSub && defaultSub.render) {
+        renderContentArea(defaultSub.render);
+    }
+    
+    // 绑定分类切换事件
     var tabs = document.querySelectorAll('.settings-tab');
     for (var i = 0; i < tabs.length; i++) {
         tabs[i].onclick = function() {
             var tab = this.getAttribute('data-tab');
             localStorage.setItem('settings_active_tab', tab);
+            
+            activeCategory = tab;
+            currentSub = localStorage.getItem('settings_sub_tab') || 'theme';
+            
+            renderSubMenu();
+            
             var subs = subMenus[tab] || [];
             if (subs.length > 0) {
                 var firstSub = subs[0];
                 localStorage.setItem('settings_sub_tab', firstSub.id);
-                currentSub = firstSub.id;
+                if (firstSub && firstSub.render) {
+                    renderContentArea(firstSub.render);
+                }
             }
-            renderSubMenu();
-            var firstSubItem = subMenus[tab] ? subMenus[tab][0] : null;
-            if (firstSubItem && firstSubItem.render) {
-                renderContentArea(firstSubItem.render);
-            }
+            
             var allTabs = document.querySelectorAll('.settings-tab');
             for (var j = 0; j < allTabs.length; j++) {
                 allTabs[j].style.background = '';
@@ -615,12 +658,6 @@ function renderSettingsPage() {
             this.style.fontWeight = '600';
             this.style.color = '#333';
         };
-    }
-    
-    renderSubMenu();
-    var defaultSub = subMenus[activeCategory] ? subMenus[activeCategory][0] : null;
-    if (defaultSub && defaultSub.render) {
-        renderContentArea(defaultSub.render);
     }
 }
 

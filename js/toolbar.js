@@ -106,13 +106,14 @@ function openThemePanel() {
     var rightSidebar = document.getElementById('rightSidebar');
     var rightSidebarRect = rightSidebar ? rightSidebar.getBoundingClientRect() : null;
     var leftPos = rightSidebarRect ? (rightSidebarRect.left - 340) : (window.innerWidth - 380);
-    var topPos = rightSidebarRect ? (rightSidebarRect.top + 50) : 100;
+    var topPos = 80;
+    var topPos = 80;
     
     // 获取当前背景设置
     var currentBgImage = localStorage.getItem('custom_bg_image') || '';
     var currentBgOpacity = localStorage.getItem('custom_bg_opacity') || '30';
     
-    var html = '<div id="themeSlidePanel" style="position: fixed; left: ' + leftPos + 'px; top: ' + topPos + 'px; width: 340px; background: var(--panel-bg, rgba(255, 255, 255, 0.95)); backdrop-filter: blur(8px); border-radius: 0px; box-shadow: -2px 0 12px rgba(0,0,0,0.15); z-index: 1000; display: flex; flex-direction: column; max-height: calc(100vh - 150px);">' +
+    var html = '<div id="themeSlidePanel" style="position: fixed; left: ' + leftPos + 'px; top: ' + topPos + 'px; width: 340px; height: calc(100vh - 80px); background: var(--panel-bg, rgba(255, 255, 255, 0.95)); backdrop-filter: blur(8px); border-radius: 0px; box-shadow: -2px 0 12px rgba(0,0,0,0.15); z-index: 1000; display: flex; flex-direction: column;">' +
         '<div class="right-slide-panel-header" style="padding: 16px; border-bottom: 1px solid var(--border-color, rgba(0,0,0,0.1)); display: flex; justify-content: space-between; align-items: center;">' +
         '<h3 style="margin:0;">主题设置</h3>' +
         '<button class="right-slide-panel-close" style="background:none; border:none; font-size:20px; cursor:pointer; color: var(--text-color, #333);">✕</button>' +
@@ -311,48 +312,222 @@ function openFontPanel() {
     }
     
     var rightSidebar = document.getElementById('rightSidebar');
-    var rightSidebarHeight = rightSidebar ? rightSidebar.offsetHeight : (window.innerHeight - 100);
     var rightSidebarRect = rightSidebar ? rightSidebar.getBoundingClientRect() : null;
     var leftPos = rightSidebarRect ? (rightSidebarRect.left - 340) : (window.innerWidth - 380);
-    var topPos = rightSidebarRect ? rightSidebarRect.top : 80;
+    var topPos = 80;
+    var topPos = 80;
     
-    var html = '<div id="fontSlidePanel" style="position: fixed; left: ' + leftPos + 'px; top: ' + topPos + 'px; width: 340px; height: ' + rightSidebarHeight + 'px; background: var(--panel-bg, rgba(255, 255, 255, 0.95)); backdrop-filter: blur(8px); border-radius: 0px; box-shadow: -2px 0 12px rgba(0,0,0,0.15); z-index: 1000; display: flex; flex-direction: column;">' +
-        '<div class="right-slide-panel-header" style="padding: 16px; border-bottom: 1px solid var(--border-color, rgba(0,0,0,0.1)); display: flex; justify-content: space-between; align-items: center;"><h3 style="margin:0;">字体设置</h3><button class="right-slide-panel-close" style="background:none; border:none; font-size:20px; cursor:pointer; color: var(--text-color, #333);">✕</button></div>' +
+    var html = '<div id="fontSlidePanel" style="position: fixed; left: ' + leftPos + 'px; top: ' + topPos + 'px; width: 340px; height: calc(100vh - 80px); background: var(--panel-bg, rgba(255, 255, 255, 0.95)); backdrop-filter: blur(8px); border-radius: 0px; box-shadow: -2px 0 12px rgba(0,0,0,0.15); z-index: 1000; display: flex; flex-direction: column;">' +
+        '<div class="right-slide-panel-header" style="padding: 16px; border-bottom: 1px solid var(--border-color, rgba(0,0,0,0.1)); display: flex; justify-content: space-between; align-items: center;">' +
+        '<h3 style="margin:0;">字体设置</h3>' +
+        '<button class="right-slide-panel-close" style="background:none; border:none; font-size:20px; cursor:pointer; color: var(--text-color, #333);">✕</button>' +
+        '</div>' +
         '<div class="right-slide-panel-content" style="flex:1; overflow-y:auto; padding: 20px;">' +
-        '<label style="display:block; margin-bottom:8px;">字体：</label><select id="fontFamilySlide" style="width:100%; margin-bottom:16px; padding:8px; border-radius:6px; border:1px solid #ddd;">' +
+        
+        // 字体选择
+        '<label style="display:block; margin-bottom:8px;">🔤 字体：</label>' +
+        '<select id="fontFamilySlide" style="width:100%; margin-bottom:16px; padding:8px; border-radius:6px; border:1px solid #ddd;">' +
         '<option value="system-ui">系统默认</option>' +
         '<option value="Georgia, serif">宋体风格</option>' +
         '<option value="PingFang SC, Microsoft YaHei">苹方/雅黑</option>' +
         '<option value="KaiTi, serif">楷体</option>' +
         '<option value="Courier New, monospace">等宽字体</option>' +
-        '</select><label style="display:block; margin-bottom:8px;">字号：</label><select id="fontSizeSlide" style="width:100%; margin-bottom:16px; padding:8px; border-radius:6px; border:1px solid #ddd;">' +
+        '</select>' +
+        
+        // 上传自定义字体区域
+        '<div style="margin-bottom:20px; border:1px dashed var(--border-color, #ddd); border-radius:8px; padding:12px;">' +
+        '<label style="display:block; margin-bottom:8px; cursor:pointer;">📁 点击可上传字体</label>' +
+        '<input type="file" id="customFontUpload" accept=".ttf,.otf,.woff,.woff2" style="width:100%; padding:6px; margin-bottom:8px;">' +
+        '<div id="customFontList" style="margin-top:8px; font-size:12px; max-height:100px; overflow-y:auto;"></div>' +
+        '</div>' +
+        
+        // 字号选择
+        '<label style="display:block; margin-bottom:8px;">📏 字号：</label>' +
+        '<select id="fontSizeSlide" style="width:100%; margin-bottom:16px; padding:8px; border-radius:6px; border:1px solid #ddd;">' +
         '<option value="12">12px</option><option value="14" selected>14px</option>' +
         '<option value="16">16px</option><option value="18">18px</option>' +
         '<option value="20">20px</option><option value="24">24px</option>' +
-        '</select><label style="display:block; margin-bottom:8px;">行高：</label><select id="lineHeightSlide" style="width:100%; margin-bottom:16px; padding:8px; border-radius:6px; border:1px solid #ddd;">' +
-        '<option value="1.5">1.5</option><option value="1.8" selected>1.8</option>' +
-        '<option value="2.0">2.0</option><option value="2.5">2.5</option>' +
-        '</select></div></div>';
+        '<option value="28">28px</option><option value="32">32px</option>' +
+        '<option value="36">36px</option><option value="42">42px</option>' +
+        '<option value="48">48px</option><option value="56">56px</option>' +
+        '<option value="64">64px</option><option value="72">72px</option>' +
+        '<option value="84">84px</option><option value="100">100px</option>' +
+        '</select>' +
+        
+        // 行高选择
+        '<label style="display:block; margin-bottom:8px;">📐 行高：</label>' +
+        '<select id="lineHeightSlide" style="width:100%; margin-bottom:20px; padding:8px; border-radius:6px; border:1px solid #ddd;">' +
+        '<option value="1.2">1.2（紧凑）</option>' +
+        '<option value="1.4">1.4</option>' +
+        '<option value="1.6">1.6</option>' +
+        '<option value="1.8" selected>1.8（舒适）</option>' +
+        '<option value="2.0">2.0</option>' +
+        '<option value="2.2">2.2</option>' +
+        '<option value="2.5">2.5（宽松）</option>' +
+        '</select>' +
+        
+        '</div></div>';
+    
     document.body.insertAdjacentHTML('beforeend', html);
     
     var panelEl = document.getElementById('fontSlidePanel');
     panelEl.querySelector('.right-slide-panel-close').onclick = function() { panelEl.remove(); };
     
     var editor = document.getElementById('editor');
-    document.getElementById('fontFamilySlide').onchange = function() { if (editor) editor.style.fontFamily = this.value; localStorage.setItem('editor_font_family', this.value); };
-    document.getElementById('fontSizeSlide').onchange = function() { if (editor) editor.style.fontSize = this.value + 'px'; localStorage.setItem('editor_font_size', this.value); };
-    document.getElementById('lineHeightSlide').onchange = function() { if (editor) editor.style.lineHeight = this.value; localStorage.setItem('editor_line_height', this.value); };
     
+    // 字体选择
+    var fontSelect = document.getElementById('fontFamilySlide');
+    fontSelect.onchange = function() { 
+        if (editor) editor.style.fontFamily = this.value; 
+        localStorage.setItem('editor_font_family', this.value);
+    };
+    
+    // 字号选择
+    var sizeSelect = document.getElementById('fontSizeSlide');
+    sizeSelect.onchange = function() { 
+        if (editor) editor.style.fontSize = this.value + 'px'; 
+        localStorage.setItem('editor_font_size', this.value);
+    };
+    
+    // 行高选择
+    var lineHeightSelect = document.getElementById('lineHeightSlide');
+    lineHeightSelect.onchange = function() { 
+        if (editor) editor.style.lineHeight = this.value; 
+        localStorage.setItem('editor_line_height', this.value);
+    };
+    
+    // 加载保存的值
     var savedFont = localStorage.getItem('editor_font_family');
     var savedSize = localStorage.getItem('editor_font_size');
     var savedLine = localStorage.getItem('editor_line_height');
-    if (savedFont) document.getElementById('fontFamilySlide').value = savedFont;
-    if (savedSize) document.getElementById('fontSizeSlide').value = savedSize;
-    if (savedLine) document.getElementById('lineHeightSlide').value = savedLine;
+    if (savedFont) fontSelect.value = savedFont;
+    if (savedSize) sizeSelect.value = savedSize;
+    if (savedLine) lineHeightSelect.value = savedLine;
     if (editor) {
         if (savedFont) editor.style.fontFamily = savedFont;
         if (savedSize) editor.style.fontSize = savedSize + 'px';
         if (savedLine) editor.style.lineHeight = savedLine;
+    }
+    
+    // 加载自定义字体列表
+    loadCustomFonts();
+    
+    // 自定义字体上传
+    var fontUpload = document.getElementById('customFontUpload');
+    fontUpload.onchange = function(e) {
+        var file = e.target.files[0];
+        if (file && (file.type === 'font/ttf' || file.type === 'font/otf' || 
+                     file.name.endsWith('.ttf') || file.name.endsWith('.otf') ||
+                     file.name.endsWith('.woff') || file.name.endsWith('.woff2'))) {
+            installCustomFont(file);
+        } else {
+            alert('请选择有效的字体文件（.ttf, .otf, .woff, .woff2）');
+        }
+    };
+}
+
+// 加载自定义字体列表
+function loadCustomFonts() {
+    var fontList = localStorage.getItem('custom_fonts');
+    var fonts = fontList ? JSON.parse(fontList) : [];
+    var container = document.getElementById('customFontList');
+    if (!container) return;
+    
+    if (fonts.length === 0) {
+        container.innerHTML = '<div style="color:#888; padding:8px; text-align:center;">暂无安装的字体，点击上方按钮安装</div>';
+        return;
+    }
+    
+    var html = '';
+    for (var i = 0; i < fonts.length; i++) {
+        html += '<div style="display:flex; justify-content:space-between; align-items:center; padding:8px; border-bottom:1px solid #eee;">' +
+            '<span style="font-family:\'' + fonts[i].name + '\', system-ui;">' + fonts[i].name + '</span>' +
+            '<button class="delete-font-btn" data-font="' + fonts[i].name + '" style="padding:2px 8px; background:#dc3545; color:white; border:none; border-radius:4px; cursor:pointer;">删除</button>' +
+            '<button class="apply-font-btn" data-font="' + fonts[i].name + '" style="padding:2px 8px; background:#28a745; color:white; border:none; border-radius:4px; cursor:pointer;">应用</button>' +
+            '</div>';
+    }
+    container.innerHTML = html;
+    
+    // 删除字体
+    document.querySelectorAll('.delete-font-btn').forEach(btn => {
+        btn.onclick = function() {
+            var fontName = this.getAttribute('data-font');
+            deleteCustomFont(fontName);
+        };
+    });
+    
+    // 应用字体
+    document.querySelectorAll('.apply-font-btn').forEach(btn => {
+        btn.onclick = function() {
+            var fontName = this.getAttribute('data-font');
+            var editor = document.getElementById('editor');
+            if (editor) editor.style.fontFamily = "'" + fontName + "', system-ui";
+            localStorage.setItem('editor_font_family', "'" + fontName + "', system-ui");
+            var fontSelect = document.getElementById('fontFamilySlide');
+            if (fontSelect) fontSelect.value = "'" + fontName + "', system-ui";
+        };
+    });
+}
+
+// 安装自定义字体
+function installCustomFont(file) {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+        var fontData = e.target.result;
+        var fontName = file.name.replace(/\.(ttf|otf|woff|woff2)$/i, '');
+        
+        // 创建字体样式
+        var styleId = 'custom_font_' + fontName.replace(/[^a-zA-Z0-9]/g, '_');
+        var existingStyle = document.getElementById(styleId);
+        if (existingStyle) existingStyle.remove();
+        
+        var fontFace = '@font-face { font-family: "' + fontName + '"; src: url(' + fontData + '); }';
+        var style = document.createElement('style');
+        style.id = styleId;
+        style.textContent = fontFace;
+        document.head.appendChild(style);
+        
+        // 保存字体名称
+        var fonts = JSON.parse(localStorage.getItem('custom_fonts') || '[]');
+        var exists = fonts.some(function(f) { return f.name === fontName; });
+        if (!exists) {
+            fonts.push({ name: fontName });
+            localStorage.setItem('custom_fonts', JSON.stringify(fonts));
+        }
+        
+        // 刷新列表
+        loadCustomFonts();
+        alert('字体 "' + fontName + '" 安装成功！');
+    };
+    reader.readAsDataURL(file);
+}
+
+// 删除自定义字体
+function deleteCustomFont(fontName) {
+    if (confirm('确定要删除字体 "' + fontName + '" 吗？')) {
+        // 删除样式
+        var styleId = 'custom_font_' + fontName.replace(/[^a-zA-Z0-9]/g, '_');
+        var style = document.getElementById(styleId);
+        if (style) style.remove();
+        
+        // 从 localStorage 删除
+        var fonts = JSON.parse(localStorage.getItem('custom_fonts') || '[]');
+        fonts = fonts.filter(function(f) { return f.name !== fontName; });
+        localStorage.setItem('custom_fonts', JSON.stringify(fonts));
+        
+        // 刷新列表
+        loadCustomFonts();
+        
+        // 如果当前使用的是这个字体，恢复默认
+        var editor = document.getElementById('editor');
+        if (editor && editor.style.fontFamily.indexOf(fontName) !== -1) {
+            editor.style.fontFamily = 'system-ui';
+            localStorage.setItem('editor_font_family', 'system-ui');
+            var fontSelect = document.getElementById('fontFamilySlide');
+            if (fontSelect) fontSelect.value = 'system-ui';
+        }
+        
+        alert('字体 "' + fontName + '" 已删除');
     }
 }
 
@@ -365,12 +540,11 @@ function openExportPanel() {
     }
     
     var rightSidebar = document.getElementById('rightSidebar');
-    var rightSidebarHeight = rightSidebar ? rightSidebar.offsetHeight : (window.innerHeight - 100);
     var rightSidebarRect = rightSidebar ? rightSidebar.getBoundingClientRect() : null;
     var leftPos = rightSidebarRect ? (rightSidebarRect.left - 340) : (window.innerWidth - 380);
-    var topPos = rightSidebarRect ? rightSidebarRect.top : 80;
+    var topPos = 80;  // 固定顶部位置
     
-    var html = '<div id="exportSlidePanel" style="position: fixed; left: ' + leftPos + 'px; top: ' + topPos + 'px; width: 340px; height: ' + rightSidebarHeight + 'px; background: var(--panel-bg, rgba(255, 255, 255, 0.95)); backdrop-filter: blur(8px); border-radius: 0px; box-shadow: -2px 0 12px rgba(0,0,0,0.15); z-index: 1000; display: flex; flex-direction: column;">' +
+    var html = '<div id="exportSlidePanel" style="position: fixed; left: ' + leftPos + 'px; top: ' + topPos + 'px; width: 340px; height: calc(100vh - 80px); background: var(--panel-bg, rgba(255, 255, 255, 0.95)); backdrop-filter: blur(8px); border-radius: 0px; box-shadow: -2px 0 12px rgba(0,0,0,0.15); z-index: 1000; display: flex; flex-direction: column;">' +
         '<div class="right-slide-panel-header" style="padding: 16px; border-bottom: 1px solid var(--border-color, rgba(0,0,0,0.1)); display: flex; justify-content: space-between; align-items: center;"><h3 style="margin:0;">导出</h3><button class="right-slide-panel-close" style="background:none; border:none; font-size:20px; cursor:pointer; color: var(--text-color, #333);">✕</button></div>' +
         '<div class="right-slide-panel-content" style="flex:1; overflow-y:auto; padding: 20px;">' +
         '<button id="exportChapterBtn" class="btn-primary" style="width:100%; padding:12px; margin-bottom:12px; background:#9b784e; color:white; border:none; border-radius:8px; cursor:pointer;">导出本章</button>' +
@@ -393,12 +567,11 @@ function openSeclusionPanel() {
     }
     
     var rightSidebar = document.getElementById('rightSidebar');
-    var rightSidebarHeight = rightSidebar ? rightSidebar.offsetHeight : (window.innerHeight - 100);
     var rightSidebarRect = rightSidebar ? rightSidebar.getBoundingClientRect() : null;
     var leftPos = rightSidebarRect ? (rightSidebarRect.left - 340) : (window.innerWidth - 380);
-    var topPos = rightSidebarRect ? rightSidebarRect.top : 80;
+    var topPos = 80;  // 固定顶部位置
     
-    var html = '<div id="seclusionSlidePanel" style="position: fixed; left: ' + leftPos + 'px; top: ' + topPos + 'px; width: 340px; height: ' + rightSidebarHeight + 'px; background: var(--panel-bg, rgba(255, 255, 255, 0.95)); backdrop-filter: blur(8px); border-radius: 0px; box-shadow: -2px 0 12px rgba(0,0,0,0.15); z-index: 1000; display: flex; flex-direction: column;">' +
+    var html = '<div id="seclusionSlidePanel" style="position: fixed; left: ' + leftPos + 'px; top: ' + topPos + 'px; width: 340px; height: calc(100vh - 80px); background: var(--panel-bg, rgba(255, 255, 255, 0.95)); backdrop-filter: blur(8px); border-radius: 0px; box-shadow: -2px 0 12px rgba(0,0,0,0.15); z-index: 1000; display: flex; flex-direction: column;">' +
         '<div class="right-slide-panel-header" style="padding: 16px; border-bottom: 1px solid var(--border-color, rgba(0,0,0,0.1)); display: flex; justify-content: space-between; align-items: center;"><h3 style="margin:0;">闭关修炼</h3><button class="right-slide-panel-close" style="background:none; border:none; font-size:20px; cursor:pointer; color: var(--text-color, #333);">✕</button></div>' +
         '<div class="right-slide-panel-content" style="flex:1; overflow-y:auto; padding: 20px;">' +
         '<label style="display:block; margin-bottom:8px;">目标字数：</label><input type="number" id="seclusionGoal" value="3000" style="width:100%; margin-bottom:16px; padding:8px; border-radius:6px; border:1px solid #ddd;">' +
@@ -715,13 +888,20 @@ function toggleDualMode() {
     }
     
     var originalContent = editor.innerHTML;
+    
+    // 获取当前编辑器的字体和行高设置
+    var currentFontSize = editor.style.fontSize || localStorage.getItem('editor_font_size') + 'px' || '14px';
+    var currentLineHeight = editor.style.lineHeight || localStorage.getItem('editor_line_height') || '1.8';
+    var currentFontFamily = editor.style.fontFamily || localStorage.getItem('editor_font_family') || 'system-ui';
+    
     editor.style.display = 'none';
     
-    // 使用 CSS 变量，让背景跟随主题
+    // 左侧保持原样（使用当前编辑器的设置）
+    // 右侧使用紧凑模式（小字号、小行高）
     var dualHtml = '<div id="dualEditorContainer" style="display:flex; flex:1; height:100%; width:100%; position:relative;">' +
-        '<div id="dualLeft" contenteditable="true" style="flex:1; overflow:auto; padding:16px; outline:none; line-height:1.8; font-size:15px; background: var(--panel-bg, rgba(255,255,255,0.9)); color: var(--text-color, #333);">' + originalContent + '</div>' +
+        '<div id="dualLeft" contenteditable="true" style="flex:1; overflow:auto; padding:16px; outline:none; line-height:' + currentLineHeight + '; font-size:' + currentFontSize + '; font-family:' + currentFontFamily + '; background: var(--panel-bg, rgba(255,255,255,0.9)); color: var(--text-color, #333);">' + originalContent + '</div>' +
         '<div id="dualResizeHandle" style="width:4px; cursor:col-resize; background:rgba(0,122,255,0.3); transition:background 0.2s;"></div>' +
-        '<div id="dualRight" contenteditable="true" style="flex:1; overflow:auto; padding:16px; outline:none; line-height:1.4; font-size:13px; background: var(--panel-bg, rgba(255,255,255,0.9)); color: var(--text-color, #333);">' + originalContent + '</div>' +
+        '<div id="dualRight" contenteditable="true" style="flex:1; overflow:auto; padding:16px; outline:none; line-height:1.4; font-size:13px; font-family:system-ui; background: var(--panel-bg, rgba(255,255,255,0.9)); color: var(--text-color, #333);">' + originalContent + '</div>' +
         '<button id="exitDualBtn" style="position:absolute; bottom:16px; right:16px; padding:6px 12px; background:#dc3545; color:white; border:none; border-radius:16px; cursor:pointer; font-size:12px; z-index:10;">退出</button>' +
         '</div>';
     
@@ -771,6 +951,7 @@ function toggleDualMode() {
     resizeHandle.addEventListener('mouseover', function() { this.style.background = '#007aff'; });
     resizeHandle.addEventListener('mouseout', function() { this.style.background = 'rgba(0,122,255,0.3)'; });
     
+    // 同步左右内容（但保持各自的样式）
     leftArea.addEventListener('input', function() {
         rightArea.innerHTML = this.innerHTML;
         editor.innerHTML = this.innerHTML;
@@ -816,17 +997,23 @@ function toggleMemoMode() {
         return;
     }
     
+    // 获取当前编辑器的字体和行高设置
+    var currentFontSize = editor.style.fontSize || localStorage.getItem('editor_font_size') + 'px' || '14px';
+    var currentLineHeight = editor.style.lineHeight || localStorage.getItem('editor_line_height') || '1.8';
+    var currentFontFamily = editor.style.fontFamily || localStorage.getItem('editor_font_family') || 'system-ui';
+    
     var currentBook = typeof getCurrentBook === 'function' ? getCurrentBook() : null;
     var memoKey = 'memo_content_' + (currentBook ? currentBook.id : 'global');
     var savedMemo = localStorage.getItem(memoKey) || '';
     var originalContent = editor.innerHTML;
     editor.style.display = 'none';
     
-    // 使用 CSS 变量，让背景跟随主题
+    // 左侧保持原样（使用当前编辑器的设置）
+    // 右侧备忘录使用稍微小一点的字体，但保持可读
     var memoHtml = '<div id="memoEditorContainer" style="display:flex; flex:1; height:100%; width:100%; position:relative;">' +
-        '<div id="memoLeft" contenteditable="true" style="flex:1; overflow:auto; padding:16px; outline:none; line-height:1.7; font-size:15px; background: var(--panel-bg, rgba(255,255,255,0.9)); color: var(--text-color, #333);">' + originalContent + '</div>' +
+        '<div id="memoLeft" contenteditable="true" style="flex:1; overflow:auto; padding:16px; outline:none; line-height:' + currentLineHeight + '; font-size:' + currentFontSize + '; font-family:' + currentFontFamily + '; background: var(--panel-bg, rgba(255,255,255,0.9)); color: var(--text-color, #333);">' + originalContent + '</div>' +
         '<div id="memoResizeHandle" style="width:4px; cursor:col-resize; background:rgba(0,122,255,0.3); transition:background 0.2s;"></div>' +
-        '<div id="memoRight" contenteditable="true" style="flex:1; overflow:auto; padding:16px; outline:none; line-height:1.5; font-size:14px; background: var(--panel-bg, rgba(255,255,248,0.95)); color: var(--text-color, #333);">' + (savedMemo || '📓 备忘录\n\n在这里记录灵感、待办事项、人物设定等，内容会跨章节保存...') + '</div>' +
+        '<div id="memoRight" contenteditable="true" style="flex:1; overflow:auto; padding:16px; outline:none; line-height:1.6; font-size:14px; font-family:system-ui; background: var(--panel-bg, rgba(255,255,248,0.95)); color: var(--text-color, #333);">' + (savedMemo || '📓 备忘录\n\n在这里记录灵感、待办事项、人物设定等，内容会跨章节保存...') + '</div>' +
         '<button id="exitMemoBtn" style="position:absolute; bottom:16px; right:16px; padding:6px 12px; background:#dc3545; color:white; border:none; border-radius:16px; cursor:pointer; font-size:12px; z-index:10;">退出</button>' +
         '</div>';
     
@@ -876,11 +1063,13 @@ function toggleMemoMode() {
     resizeHandle.addEventListener('mouseover', function() { this.style.background = '#007aff'; });
     resizeHandle.addEventListener('mouseout', function() { this.style.background = 'rgba(0,122,255,0.3)'; });
     
+    // 左侧编辑时保存到章节
     leftArea.addEventListener('input', function() {
         editor.innerHTML = this.innerHTML;
         if (typeof saveCurrentChapter === 'function') saveCurrentChapter();
     });
     
+    // 右侧编辑时保存备忘录到 localStorage
     rightArea.addEventListener('input', function() {
         var book = typeof getCurrentBook === 'function' ? getCurrentBook() : null;
         var key = 'memo_content_' + (book ? book.id : 'global');

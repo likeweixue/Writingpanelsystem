@@ -2508,3 +2508,234 @@ body.theme-open .icon-sidebar {
     padding: 16px 8px !important;
     margin: 10px 0 !important;
 }
+
+/* ========== 设置面板主题适配 ========== */
+/* 默认主题 */
+body.theme-default .settings-tab.active,
+body.theme-default .settings-sub-tab.active,
+body.theme-default .settings-tab[data-tab="appearance"],
+body.theme-default .settings-sub-tab[data-sub="theme"] {
+    background: #e8e0d4 !important;
+    border-left-color: #ceb087 !important;
+    color: #4a3b2c !important;
+}
+
+/* 护眼绿主题 */
+body.theme-eye .settings-tab.active,
+body.theme-eye .settings-sub-tab.active,
+body.theme-eye .settings-tab[data-tab="appearance"],
+body.theme-eye .settings-sub-tab[data-sub="theme"] {
+    background: #b8d4a8 !important;
+    border-left-color: #6b8c42 !important;
+    color: #2c3e2f !important;
+}
+
+body.theme-eye .settings-container,
+body.theme-eye .settings-sub-menu {
+    background: rgba(200, 219, 197, 0.3) !important;
+}
+
+/* 经典黄主题 */
+body.theme-warm .settings-tab.active,
+body.theme-warm .settings-sub-tab.active,
+body.theme-warm .settings-tab[data-tab="appearance"],
+body.theme-warm .settings-sub-tab[data-sub="theme"] {
+    background: #e0d0a8 !important;
+    border-left-color: #b8953e !important;
+    color: #4a3b2c !important;
+}
+
+body.theme-warm .settings-container,
+body.theme-warm .settings-sub-menu {
+    background: rgba(223, 213, 189, 0.3) !important;
+}
+
+/* 暗夜黑主题 */
+body.theme-dark .settings-tab.active,
+body.theme-dark .settings-sub-tab.active,
+body.theme-dark .settings-tab[data-tab="appearance"],
+body.theme-dark .settings-sub-tab[data-sub="theme"] {
+    background: #3a3a4a !important;
+    border-left-color: #6b8c42 !important;
+    color: #e0e0e0 !important;
+}
+
+body.theme-dark .settings-container,
+body.theme-dark .settings-sub-menu {
+    background: rgba(30, 30, 46, 0.5) !important;
+}
+
+/* Open 主题 */
+body.theme-open .settings-tab.active,
+body.theme-open .settings-sub-tab.active,
+body.theme-open .settings-tab[data-tab="appearance"],
+body.theme-open .settings-sub-tab[data-sub="theme"] {
+    background: rgba(255, 255, 255, 0.3) !important;
+    border-left-color: #ceb087 !important;
+    color: #333 !important;
+}
+
+body.theme-open .settings-container,
+body.theme-open .settings-sub-menu {
+    background: rgba(255, 255, 255, 0.15) !important;
+    backdrop-filter: blur(10px) !important;
+}
+
+/* ========== 设置面板主题颜色 ========== */
+
+/* 默认白色主题 */
+body.theme-default .settings-container > div,
+body.theme-default .settings-sub-menu {
+    background: #f5f5f5 !important;
+}
+body.theme-default .settings-container > div > div:first-child {
+    background: #d8d9da !important;
+}
+
+/* 护眼绿主题 */
+body.theme-eye .settings-container > div,
+body.theme-eye .settings-sub-menu {
+    background: #a8b7a5 !important;
+}
+body.theme-eye .settings-container > div > div:first-child {
+    background: #93a590 !important;
+}
+body.theme-eye .settings-tab.active,
+body.theme-eye .settings-sub-tab.active {
+    background: #7a9a6e !important;
+    border-left-color: #4a6e3a !important;
+}
+
+/* 经典黄主题 */
+body.theme-warm .settings-container > div,
+body.theme-warm .settings-sub-menu {
+    background: #b2a88c !important;
+}
+body.theme-warm .settings-container > div > div:first-child {
+    background: #9a8f73 !important;
+}
+body.theme-warm .settings-tab.active,
+body.theme-warm .settings-sub-tab.active {
+    background: #c4b694 !important;
+    border-left-color: #8a7648 !important;
+}
+
+/* 暗夜黑主题 */
+body.theme-dark .settings-container > div,
+body.theme-dark .settings-sub-menu {
+    background: #252542 !important;
+}
+body.theme-dark .settings-container > div > div:first-child {
+    background: #343443 !important;
+}
+body.theme-dark .settings-tab.active,
+body.theme-dark .settings-sub-tab.active {
+    background: #3a3a5a !important;
+    border-left-color: #6b8c42 !important;
+}
+body.theme-dark .settings-tab,
+body.theme-dark .settings-sub-tab {
+    color: #c0c0c0 !important;
+}
+
+/* Open 主题 - 毛玻璃效果 */
+body.theme-open .settings-container > div,
+body.theme-open .settings-sub-menu {
+    background: rgba(255, 255, 255, 0.25) !important;
+    backdrop-filter: blur(20px) !important;
+}
+body.theme-open .settings-container > div > div:first-child {
+    background: rgba(255, 255, 255, 0.2) !important;
+}
+body.theme-open .settings-tab.active,
+body.theme-open .settings-sub-tab.active {
+    background: rgba(255, 255, 255, 0.35) !important;
+    border-left-color: #ceb087 !important;
+}
+
+/* ========== 设置面板在自定义背景时透明 ========== */
+body.has-custom-bg .settings-container > div,
+body.has-custom-bg .settings-sub-menu,
+body.has-custom-bg .settings-content-area {
+    background: rgba(0, 0, 0, 0.6) !important;
+    backdrop-filter: blur(10px) !important;
+}
+
+/* 设置面板圆角改为直角 */
+.settings-container > div,
+.settings-sub-menu,
+.settings-content-area {
+    border-radius: 0px !important;
+}
+
+/* 确保设置面板内部元素也是直角 */
+.settings-container > div > div:first-child {
+    border-radius: 0px !important;
+}
+
+/* 主题预设按钮也改为直角 */
+.theme-preset-btn {
+    border-radius: 0px !important;
+}
+
+/* 背景预览也改为直角 */
+#bgPreviewSetting,
+#customBgPreview {
+    border-radius: 0px !important;
+}
+
+/* ========== 设置面板完全透明（自定义背景时） ========== */
+body.has-custom-bg .settings-container > div,
+body.has-custom-bg .settings-sub-menu,
+body.has-custom-bg .settings-content-area,
+body.has-custom-bg .settings-container > div > div:first-child,
+body.has-custom-bg .settings-tab,
+body.has-custom-bg .settings-sub-tab {
+    background: transparent !important;
+    background-color: transparent !important;
+    backdrop-filter: blur(15px) !important;
+}
+
+/* 确保内联样式被覆盖 */
+body.has-custom-bg [style*="background: #f8f6f2"],
+body.has-custom-bg [style*="background: #e8e0d4"],
+body.has-custom-bg [style*="background: rgb(248, 246, 242)"],
+body.has-custom-bg [style*="background: rgb(232, 224, 212)"],
+body.has-custom-bg [style*="background-color: #f8f6f2"],
+body.has-custom-bg [style*="background-color: #e8e0d4"] {
+    background: transparent !important;
+    background-color: transparent !important;
+}
+
+/* 设置面板文字颜色在透明背景下 */
+body.has-custom-bg .settings-tab,
+body.has-custom-bg .settings-sub-tab,
+body.has-custom-bg .settings-content-area h3,
+body.has-custom-bg .settings-content-area label {
+    color: #fff !important;
+    text-shadow: 0 0 2px rgba(0,0,0,0.5) !important;
+}
+
+/* 设置面板按钮在透明背景下 */
+body.has-custom-bg .theme-preset-btn {
+    background: rgba(255, 255, 255, 0.2) !important;
+    color: #fff !important;
+    backdrop-filter: blur(5px) !important;
+}
+
+body.has-custom-bg .theme-preset-btn:hover {
+    background: rgba(255, 255, 255, 0.35) !important;
+}
+
+/* 设置面板边框在透明背景下 */
+body.has-custom-bg .settings-container > div,
+body.has-custom-bg .settings-sub-menu {
+    border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* 深色主题下透明背景的文字颜色 */
+body.theme-dark.has-custom-bg .settings-tab,
+body.theme-dark.has-custom-bg .settings-sub-tab,
+body.theme-dark.has-custom-bg .settings-content-area h3 {
+    color: #e0e0e0 !important;
+}

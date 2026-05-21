@@ -1,7 +1,115 @@
-const { app, BrowserWindow, Menu, shell } = require('electron');
+const { app, BrowserWindow, Menu, ipcMain, dialog } = require('electron');
 const path = require('path');
+const fs = require('fs');
+const os = require('os');
 
 let mainWindow;
+
+// 获取文档目录中的备份文件夹
+const documentsPath = path.join(os.homedir(), 'Documents', '写作帮手备份');
+
+// 确保备份目录存在
+function ensureBackupDir() {
+    if (!fs.existsSync(documentsPath)) {
+        fs.mkdirSync(documentsPath, { recursive: true });
+        console.log('创建备份目录:', documentsPath);
+    }
+}
+
+// 清理文件名中的非法字符（不能作为文件夹/文件名的字符）
+function sanitizeFileName(name) {
+    if (!name) return '未命名';
+    return name.replace(/[\\/:*?"<>|]/g, '_').replace(/\s+$/g, '');
+}
+
+// 备份单本书籍
+async function backupBook(book) {
+    ensureBackupDir();
+    
+    const today = new Date();
+    const dateStr = `${today.getFullYear()}年${today.getMonth() + 1}月${today.getDate()}日`;
+    const timeStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}_${String(today.getHours()).padStart(2, '0')}-${String(today.getMinutes()).padStart(2, '0')}`;
+    
+    const bookName = sanitizeFileName(book.title);
+    const bookFolder = path.join(documentsPath, bookName);
+    const dateFolder = path.join(bookFolder, dateStr);
+    const timeFolder = path.join(dateFolder, timeStr);
+    
+    // 创建目录
+    if (!fs.existsSync(timeFolder)) {
+        fs.mkdirSync(timeFolder, { recursive: true });
+    }
+    
+    let chapterCount = 0;
+    let totalWords = 0;
+    
+    // 保存每个分卷和章节
+    if (book.volumes && book.volumes.length > 0) {
+        for (let v = 0; v < book.volumes.length; v++) {
+            const vol = book.volumes[v];
+            const volName = sanitizeFileName(vol.name);
+            const volFolder = path.join(timeFolder, volName);
+            if (!fs.existsSync(volFolder)) {
+                fs.mkdirSync(volFolder, { recursive: true });
+            }
+            
+            if (vol.chapters && vol.chapters.length > 0) {
+                for (let c = 0; c < vol.chapters.length; c++) {
+                    const ch = vol.chapters[c];
+                    const chName = sanitizeFileName(ch.title);
+                    const fileName = `${chName}.txt`;
+                    const filePath = path.join(volFolder, fileName);
+                    // 提取纯文本内容
+                    const content = ch.content ? ch.content.replace(/<[^>]*>/g, '') : '';
+                    const words = content.length;
+                    totalWords += words;
+                    chapterCount++;
+                    
+                    const header = `【${book.title}】${vol.name} - ${ch.title}\n`;
+                    const timeHeader = `备份时间：${new Date().toLocaleString()}\n字数：${words}\n${'='.repeat(50)}\n\n`;
+                    const fullContent = header + timeHeader + content;
+                    
+                    fs.writeFileSync(filePath, fullContent, 'utf8');
+                }
+            }
+        }
+    }
+    
+    // 保存书籍信息
+    const infoPath = path.join(timeFolder, '_book_info.json');
+    fs.writeFileSync(infoPath, JSON.stringify({
+        title: book.title,
+        desc: book.desc || '',
+        backupTime: new Date().toISOString(),
+        backupTimeStr: new Date().toLocaleString(),
+        totalChapters: chapterCount,
+        totalWords: totalWords,
+        volumes: book.volumes ? book.volumes.map(v => ({ 
+            name: v.name, 
+            chapters: v.chapters ? v.chapters.map(c => ({ 
+                title: c.title, 
+                words: c.content ? c.content.replace(/<[^>]*>/g, '').length : 0 
+            })) : [] 
+        })) : []
+    }, null, 2), 'utf8');
+    
+    return { success: true, path: timeFolder, chapterCount: chapterCount, totalWords: totalWords };
+}
+
+// 备份所有书籍
+async function backupAllBooks(books) {
+    ensureBackupDir();
+    const results = [];
+    for (let i = 0; i < books.length; i++) {
+        try {
+            const result = await backupBook(books[i]);
+            results.push({ bookName: books[i].title, success: true, ...result });
+        } catch (err) {
+            results.push({ bookName: books[i].title, success: false, error: err.message });
+        }
+    }
+    return results;
+}
 
 function createWindow() {
     mainWindow = new BrowserWindow({
@@ -21,9 +129,8 @@ function createWindow() {
 
     mainWindow.loadFile('index.html');
     
-    // 处理新窗口打开 - 使用系统默认浏览器或创建新窗口
+    // 处理新窗口打开
     mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-        // 创建新的浏览器窗口而不是在内部打开
         const newWindow = new BrowserWindow({
             width: 1200,
             height: 800,
@@ -67,15 +174,33 @@ function createWindow() {
         {
             label: '帮助',
             submenu: [
-                { label: '关于', click: () => {
-                    const { dialog } = require('electron');
-                    dialog.showMessageBox(mainWindow, {
-                        type: 'info',
-                        title: '关于 OpenWrite',
-                        message: 'OpenWrite 版本 1.0.0',
-                        detail: '免费、开源、自由的写作软件\n\nGitHub: https://github.com/likeweixue/OpenWrite'
-                    });
-                }}
+                { 
+                    label: '关于', 
+                    click: () => {
+                        dialog.showMessageBox(mainWindow, {
+                            type: 'info',
+                            title: '关于 OpenWrite',
+                            message: 'OpenWrite 版本 0.4.0',
+                            detail: '免费、开源、自由的写作软件\n\nGitHub: https://github.com/likeweixue/OpenWrite\n\n备份位置：~/Documents/写作帮手备份/'
+                        });
+                    }
+                },
+                {
+                    label: '打开备份文件夹',
+                    click: () => {
+                        const { shell } = require('electron');
+                        const documentsPath = path.join(os.homedir(), 'Documents', '写作帮手备份');
+                        if (fs.existsSync(documentsPath)) {
+                            shell.openPath(documentsPath);
+                        } else {
+                            dialog.showMessageBox(mainWindow, {
+                                type: 'info',
+                                title: '提示',
+                                message: '备份文件夹尚未创建，请先执行一次备份'
+                            });
+                        }
+                    }
+                }
             ]
         }
     ];
@@ -88,8 +213,28 @@ function createWindow() {
     });
 }
 
+// IPC 事件处理
+ipcMain.handle('backup-book', async (event, { book }) => {
+    return await backupBook(book);
+});
+
+ipcMain.handle('backup-all-books', async (event, { books }) => {
+    return await backupAllBooks(books);
+});
+
+ipcMain.handle('open-backup-folder', async () => {
+    const { shell } = require('electron');
+    if (fs.existsSync(documentsPath)) {
+        shell.openPath(documentsPath);
+        return { success: true };
+    } else {
+        return { success: false, error: '备份文件夹不存在' };
+    }
+});
+
 app.whenReady().then(() => {
     createWindow();
+    ensureBackupDir();
     
     app.on('activate', () => {
         if (BrowserWindow.getAllWindows().length === 0) {
