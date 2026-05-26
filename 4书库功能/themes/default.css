@@ -1,0 +1,8 @@
+/* 默认白色主题 */
+.sidebar-menu, .page, .book-card, .stat-card, .about-content, .drawer {
+    background: #ffffff;
+    color: #333333;
+}
+.sidebar-menu { background: #f5f5f5; }
+.tab.active { background: #ffffff; }
+.tab { background: #f0f0f0; }

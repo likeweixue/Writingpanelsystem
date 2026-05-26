@@ -1976,7 +1976,7 @@ body.theme-warm .icon-sidebar {
     flex-direction: column;
     align-items: center;
     padding: 12px 0;
-    gap: 16px;
+    gap: 50px;
 }
 
 .right-sidebar .sidebar-tool-item {
@@ -2738,4 +2738,214 @@ body.theme-dark.has-custom-bg .settings-tab,
 body.theme-dark.has-custom-bg .settings-sub-tab,
 body.theme-dark.has-custom-bg .settings-content-area h3 {
     color: #e0e0e0 !important;
+}
+
+/* ========== 章节栏可调节拖动条 ========== */
+.left-sidebar {
+    position: relative !important;
+    resize: horizontal !important;
+    overflow: auto !important;
+}
+
+#resizeHandle {
+    position: absolute;
+    right: -4px;
+    top: 0;
+    width: 6px;
+    height: 100%;
+    cursor: ew-resize;
+    background: transparent;
+    z-index: 10;
+    transition: background 0.2s;
+}
+
+#resizeHandle:hover {
+    background: rgba(0, 122, 255, 0.4) !important;
+}
+
+/* 章节栏宽度过渡效果 */
+.left-sidebar {
+    transition: width 0.1s ease !important;
+}
+
+/* ========== 章节列表样式优化 ========== */
+.chapter-item {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 8px 12px !important;
+    margin: 2px 0 !important;
+    border-radius: 8px !important;
+    cursor: default !important;
+    transition: all 0.2s ease !important;
+}
+
+.chapter-item:hover {
+    background: rgba(0, 0, 0, 0.05) !important;
+}
+
+.chapter-item.dragging {
+    opacity: 0.5;
+}
+
+.chapter-title {
+    flex: 1;
+    cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.chapter-actions {
+    display: flex;
+    gap: 4px;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+}
+
+.chapter-item:hover .chapter-actions {
+    opacity: 1;
+}
+
+.chapter-actions button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.chapter-actions button:hover {
+    background: rgba(0, 0, 0, 0.1);
+    transform: scale(1.1);
+}
+
+.delete-chapter:hover {
+    color: #dc3545 !important;
+}
+
+/* ========== 分卷和章节按钮样式 ========== */
+.volume-item {
+    margin-bottom: 16px;
+    background: rgba(0, 0, 0, 0.02);
+    border-radius: 8px;
+    padding: 4px;
+}
+
+.volume-header {
+    transition: all 0.2s ease;
+}
+
+.volume-header:hover .volume-actions {
+    opacity: 1 !important;
+}
+
+.volume-actions {
+    opacity: 0;
+}
+
+.volume-actions button:hover {
+    background: rgba(0, 0, 0, 0.1);
+    transform: scale(1.05);
+}
+
+.volume-delete:hover {
+    color: #dc3545 !important;
+}
+
+/* 章节列表默认显示 */
+.chapter-list {
+    margin-left: 16px;
+    margin-top: 4px;
+}
+
+/* ========== 书库面板宽度修复 ========== */
+.library-sidebar {
+    width: 280px !important;
+    min-width: 200px !important;
+    max-width: 500px !important;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+    border-right: 1px solid rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    overflow: visible !important;
+    position: relative;
+}
+
+.library-sidebar-content {
+    overflow-y: auto !important;
+    flex: 1;
+}
+
+#libraryResizeHandle {
+    position: absolute;
+    right: -4px;
+    top: 0;
+    width: 6px;
+    height: 100%;
+    cursor: ew-resize;
+    background: transparent;
+    z-index: 10;
+    transition: background 0.2s;
+}
+
+#libraryResizeHandle:hover {
+    background: rgba(0, 122, 255, 0.4) !important;
+}
+
+/* ========== 强制章节面板显示 ========== */
+.left-sidebar {
+    display: flex !important;
+    width: 280px !important;
+    min-width: 200px !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(8px) !important;
+    border-right: 1px solid rgba(0, 0, 0, 0.08) !important;
+    flex-shrink: 0 !important;
+    position: relative !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.left-sidebar.collapsed {
+    width: 0 !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+}
+
+/* ========== 强制章节栏宽度 ========== */
+.left-sidebar {
+    width: 280px !important;
+    min-width: 280px !important;
+    flex-shrink: 0 !important;
+    flex-grow: 0 !important;
+}
+
+.left-sidebar.collapsed {
+    width: 0 !important;
+    min-width: 0 !important;
+}
+
+/* ========== 终极强制章节栏显示 ========== */
+.left-sidebar {
+    width: 280px !important;
+    min-width: 280px !important;
+    max-width: 280px !important;
+    display: flex !important;
+    flex-shrink: 0 !important;
+    flex-grow: 0 !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    border-right: 1px solid rgba(0, 0, 0, 0.08) !important;
+    position: relative !important;
+    overflow-y: auto !important;
+}
+
+/* 确保没有其他样式覆盖 */
+.left-sidebar[style*="width"] {
+    width: 280px !important;
 }

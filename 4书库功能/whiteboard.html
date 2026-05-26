@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>写作帮手-无边记 | 灵感白板 (编辑修复版)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none; /* 避免拖动时误选，但编辑区内可正常选择文本 */
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "SF Pro Text", "Helvetica Neue", Helvetica, sans-serif;
+            background: #e0e5ea;
+            height: 100vh;
+            overflow: hidden;
+            color: #1c1c1e;
+        }
+
+        /* 整体容器 */
+        .freeform-app {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background: #e0e5ea;
+            position: relative;
+        }
+
+        /* 顶部工具栏 — 毛玻璃效果 (macOS风格) */
+        .toolbar {
+            background: rgba(255, 255, 255, 0.72);
+            backdrop-filter: blur(20px);
+            border-bottom: 0.5px solid rgba(0, 0, 0, 0.1);
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            z-index: 10;
+        }
+        .toolbar-group {
+            display: flex;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.5);
+            padding: 4px 12px;
+            border-radius: 32px;
+            backdrop-filter: blur(4px);
+        }
+        .tool-btn {
+            background: transparent;
+            border: none;
+            font-size: 1.3rem;
+            cursor: pointer;
+            padding: 6px 10px;
+            border-radius: 40px;
+            transition: 0.15s;
+            color: #2c2c2e;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 500;
+        }
+        .tool-btn span { font-size: 0.85rem; }
+        .tool-btn:hover { background: rgba(0, 0, 0, 0.08); }
+        .title-badge {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #3a3a3c;
+            background: rgba(255,255,240,0.5);
+            padding: 4px 14px;
+            border-radius: 30px;
+        }
+
+        /* 无限画布区域 */
+        .canvas-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            background: #eceef2;
+            background-image: radial-gradient(circle at 1px 1px, rgba(0,0,0,0.05) 1px, transparent 1px);
+            background-size: 28px 28px;
+        }
+        #infiniteCanvas {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            cursor: grab;
+        }
+        #infiniteCanvas:active { cursor: grabbing; }
+
+        /* SVG 连线层 */
+        .lines-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 4;
+        }
+        .lines-layer svg {
+            width: 100%;
+            height: 100%;
+        }
+        .line-path {
+            stroke: #8b8a90;
+            stroke-width: 2;
+            stroke-dasharray: 5 3;
+            fill: none;
+            transition: stroke 0.1s;
+            pointer-events: stroke;
+            cursor: pointer;
+        }
+        .line-path.selected-line {
+            stroke: #007aff;
+            stroke-width: 3;
+            stroke-dasharray: none;
+        }
+
+        /* 卡片样式 — 类似无边记 */
+        .note-card {
+            position: absolute;
+            background: rgba(255, 255, 245, 0.98);
+            backdrop-filter: blur(4px);
+            border-radius: 24px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12), 0 0 0 0.5px rgba(0, 0, 0, 0.05);
+            min-width: 180px;
+            min-height: 140px;
+            padding: 14px;
+            transition: box-shadow 0.1s;
+            /* 默认不能拖拽，拖拽由专门的拖拽区处理 */
+            cursor: default;
+            display: flex;
+            flex-direction: column;
+            z-index: 5;
+            font-family: -apple-system, "SF Pro Text", system-ui;
+        }
+        /* 卡片头部区域可作为拖拽把手 */
+        .card-drag-handle {
+            cursor: move;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 40px;
+            background: transparent;
+            z-index: 2;
+        }
+        .note-card.selected {
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.2), 0 0 0 2px #007aff;
+            z-index: 20;
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-weight: 590;
+            font-size: 0.8rem;
+            color: #6c6c70;
+            border-bottom: 0.5px solid #e5e5ea;
+            padding-bottom: 5px;
+            position: relative;
+            z-index: 3;
+            pointer-events: auto;
+        }
+        .card-type-icon { font-size: 1rem; }
+        .card-actions { display: flex; gap: 12px; opacity: 0.6; }
+        .card-actions span { cursor: pointer; font-size: 0.75rem; pointer-events: auto; }
+        .card-content {
+            flex: 1;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            color: #1c1c1e;
+            outline: none;
+            white-space: pre-wrap;
+            word-break: break-word;
+            overflow-y: auto;
+            max-height: 180px;
+            cursor: text;
+            user-select: text;
+            position: relative;
+            z-index: 3;
+            background: transparent;
+        }
+        /* 让卡片内容区域可正常编辑，不会被拖拽事件干扰 */
+        .card-content:focus {
+            background: rgba(255,255,245,1);
+        }
+        .resize-handle {
+            position: absolute;
+            bottom: 6px;
+            right: 6px;
+            width: 14px;
+            height: 14px;
+            background: rgba(0,0,0,0.08);
+            border-radius: 20px;
+            cursor: nw-resize;
+            pointer-events: auto;
+            z-index: 10;
+        }
+        /* 连线模式按钮样式 */
+        .linking-mode-active {
+            background: #007aff30 !important;
+            border-radius: 40px;
+        }
+
+        /* 右侧简约面板 (仅保留连线提示) */
+        .info-panel {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            background: rgba(255, 255, 245, 0.9);
+            backdrop-filter: blur(20px);
+            border-radius: 28px;
+            padding: 12px 18px;
+            font-size: 0.7rem;
+            color: #5c5c5e;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border: 0.5px solid rgba(0,0,0,0.08);
+            z-index: 15;
+            pointer-events: none;
+        }
+        .info-panel strong {
+            color: #007aff;
+        }
+        .zoom-indicator {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(12px);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            pointer-events: none;
+            z-index: 20;
+        }
+        /* 拖拽时隐藏文本光标避免闪烁 */
+        body.dragging {
+            cursor: grabbing;
+        }
+    </style>
+</head>
+<body>
+<div class="freeform-app">
+    <div class="toolbar">
+        <div class="toolbar-group">
+            <button class="tool-btn" id="addNoteBtn">📄 <span>笔记</span></button>
+            <button class="tool-btn" id="addTodoBtn">✅ <span>待办</span></button>
+            <button class="tool-btn" id="addQuoteBtn">💡 <span>灵感</span></button>
+        </div>
+        <div class="toolbar-group">
+            <button class="tool-btn" id="linkModeBtn">🔗 <span>连线模式</span></button>
+            <button class="tool-btn" id="clearLinesBtn">✖️ <span>清空连线</span></button>
+        </div>
+        <div class="toolbar-group">
+            <button class="tool-btn" id="zoomOutBtn">🔍−</button>
+            <span class="title-badge" id="zoomLevel">100%</span>
+            <button class="tool-btn" id="zoomInBtn">🔍+</button>
+            <button class="tool-btn" id="resetViewBtn">⟳ 重置</button>
+        </div>
+        <div style="flex:1"></div>
+        <div class="toolbar-group">
+            <button class="tool-btn" id="clearStorageBtn" style="color:#ac5e3b;">🗑 清空</button>
+        </div>
+    </div>
+
+    <div class="canvas-container" id="canvasContainer">
+        <div id="infiniteCanvas" style="transform-origin: 0 0;"></div>
+        <div class="lines-layer" id="linesLayer">
+            <svg width="100%" height="100%"></svg>
+        </div>
+    </div>
+
+    <!-- 简约信息面板：仅显示卡片/连线数量 + 连线小教程 -->
+    <div class="info-panel" id="infoPanel">
+        📋 卡片: <strong id="cardCount">0</strong> &nbsp;|&nbsp; 🔗 连线: <strong id="lineCount">0</strong>
+        <div style="font-size:0.65rem; margin-top:6px;">💡 连线模式: 点击按钮 → 点卡片A → 点卡片B</div>
+        <div style="font-size:0.65rem;">✖️ Shift + 点击连线可删除</div>
+        <div style="font-size:0.65rem;">✏️ 点击卡片内文字即可编辑</div>
+    </div>
+    <div class="zoom-indicator" id="zoomIndicator" style="display:none;">100%</div>
+</div>
+
+<script>
+    // ---------- 数据结构 ----------
+    let cards = [];          // { id, type, text, x, y, width, height }
+    let connections = [];    // { id, fromId, toId }
+    let selectedCardId = null;
+    let isPanning = false;
+    let panStart = { x: 0, y: 0 };
+    let transform = { x: 0, y: 0, scale: 1 };
+    let dragTargetCardId = null;
+    let dragOffset = { x: 0, y: 0 };
+    let resizeTargetCardId = null;
+    let isDraggingCard = false;
+    let linkMode = false;          // 连线模式激活
+    let pendingLinkCardId = null;   // 连线模式中第一个选中的卡片
+
+    // DOM 元素
+    const canvas = document.getElementById('infiniteCanvas');
+    const container = document.getElementById('canvasContainer');
+    const svgLayer = document.querySelector('#linesLayer svg');
+
+    // 初始化示例卡片与连线
+    function initDemo() {
+        if (cards.length === 0) {
+            cards = [
+                { id: "card1", type: "note", text: "✨ 主线：龙渊剑封印上古龙魂，突破封印将获得力量，但也引来魔族", x: 80, y: 100, width: 260, height: 150 },
+                { id: "card2", type: "todo", text: "□ 完善落星宗势力图\n□ 叶尘情感线梳理\n□ 设计秘境试炼", x: 420, y: 70, width: 240, height: 160 },
+                { id: "card3", type: "quote", text: "「剑道尽头谁为峰，一见龙渊道成空。」", x: 760, y: 180, width: 230, height: 120 },
+                { id: "card4", type: "note", text: "魔渊与天机阁暗中勾结，云梦泽藏有上古传送阵。", x: 280, y: 340, width: 250, height: 140 }
+            ];
+            connections = [
+                { id: "conn1", fromId: "card1", toId: "card2" },
+                { id: "conn2", fromId: "card1", toId: "card4" }
+            ];
+        }
+        renderAllCards();
+        renderLines();
+        updateStatsUI();
+    }
+
+    // 渲染卡片
+    function renderAllCards() {
+        canvas.style.transform = `translate(${transform.x}px, ${transform.y}px) scale(${transform.scale})`;
+        canvas.innerHTML = '';
+        cards.forEach(card => {
+            const cardDiv = document.createElement('div');
+            cardDiv.className = 'note-card';
+            if (selectedCardId === card.id) cardDiv.classList.add('selected');
+            cardDiv.style.left = `${card.x}px`;
+            cardDiv.style.top = `${card.y}px`;
+            cardDiv.style.width = `${card.width}px`;
+            cardDiv.style.height = `${card.height}px`;
+            cardDiv.setAttribute('data-id', card.id);
+            let icon = card.type === 'note' ? '📝' : (card.type === 'todo' ? '✅' : '💡');
+            let typeName = card.type === 'note' ? '笔记' : (card.type === 'todo' ? '待办' : '灵感');
+            
+            // 增加一个透明的拖拽把手区域（便于拖拽）
+            cardDiv.innerHTML = `
+                <div class="card-drag-handle" data-drag-handle="${card.id}"></div>
+                <div class="card-header">
+                    <span class="card-type-icon">${icon} ${typeName}</span>
+                    <div class="card-actions">
+                        <span class="delete-card" data-id="${card.id}">🗑</span>
+                        <span class="duplicate-card" data-id="${card.id}">📋</span>
+                    </div>
+                </div>
+                <div class="card-content" contenteditable="true" data-id="${card.id}">${escapeHtml(card.text)}</div>
+                <div class="resize-handle" data-resize="${card.id}"></div>
+            `;
+            canvas.appendChild(cardDiv);
+        });
+        attachCardEvents();
+    }
+
+    function escapeHtml(str) { 
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m){ 
+            if(m==='&') return '&amp;'; 
+            if(m==='<') return '&lt;'; 
+            if(m==='>') return '&gt;'; 
+            return m;
+        }); 
+    }
+
+    // 渲染连线
+    function renderLines() {
+        if (!svgLayer) return;
+        svgLayer.innerHTML = '';
+        connections.forEach(conn => {
+            const fromCard = cards.find(c => c.id === conn.fromId);
+            const toCard = cards.find(c => c.id === conn.toId);
+            if (!fromCard || !toCard) return;
+            const fromX = fromCard.x + fromCard.width / 2;
+            const fromY = fromCard.y + fromCard.height / 2;
+            const toX = toCard.x + toCard.width / 2;
+            const toY = toCard.y + toCard.height / 2;
+            const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            line.setAttribute("x1", fromX);
+            line.setAttribute("y1", fromY);
+            line.setAttribute("x2", toX);
+            line.setAttribute("y2", toY);
+            line.setAttribute("class", "line-path");
+            line.setAttribute("data-conn-id", conn.id);
+            line.style.pointerEvents = "stroke";
+            line.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (e.shiftKey) {
+                    connections = connections.filter(c => c.id !== conn.id);
+                    renderLines();
+                    updateStatsUI();
+                    saveToLocal();
+                }
+            });
+            svgLayer.appendChild(line);
+        });
+        const lineCountElem = document.getElementById('lineCount');
+        if (lineCountElem) lineCountElem.innerText = connections.length;
+    }
+
+    // 卡片事件绑定（关键修复：contenteditable 区域可正常获得焦点）
+    function attachCardEvents() {
+        // 删除卡片
+        document.querySelectorAll('.delete-card').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const id = btn.getAttribute('data-id');
+                cards = cards.filter(c => c.id !== id);
+                connections = connections.filter(c => c.fromId !== id && c.toId !== id);
+                if (selectedCardId === id) selectedCardId = null;
+                if (pendingLinkCardId === id) pendingLinkCardId = null;
+                renderAllCards();
+                renderLines();
+                updateStatsUI();
+                saveToLocal();
+            });
+        });
+        
+        // 复制卡片
+        document.querySelectorAll('.duplicate-card').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const id = btn.getAttribute('data-id');
+                const original = cards.find(c => c.id === id);
+                if (original) {
+                    const newId = `card_${Date.now()}_${Math.random()}`;
+                    const newCard = { ...original, id: newId, x: original.x + 40, y: original.y + 40, text: original.text };
+                    cards.push(newCard);
+                    renderAllCards();
+                    renderLines();
+                    saveToLocal();
+                }
+            });
+        });
+        
+        // 内容编辑 - 关键修复：让 contenteditable 正常工作
+        document.querySelectorAll('.card-content').forEach(editable => {
+            editable.addEventListener('blur', (e) => {
+                e.stopPropagation();
+                const id = editable.getAttribute('data-id');
+                const card = cards.find(c => c.id === id);
+                if (card && card.text !== editable.innerText) {
+                    card.text = editable.innerText;
+                    saveToLocal();
+                }
+            });
+            // 阻止 mousedown 冒泡，这样点击编辑区不会触发卡片拖拽
+            editable.addEventListener('mousedown', (e) => {
+                e.stopPropagation();
+            });
+            editable.addEventListener('dragstart', (e) => {
+                e.stopPropagation();
+            });
+        });
+        
+        // 拖拽把手: 只有点击 drag-handle 区域才启动拖拽
+        document.querySelectorAll('.card-drag-handle').forEach(handle => {
+            handle.addEventListener('mousedown', (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                const cardId = handle.getAttribute('data-drag-handle');
+                const cardElem = handle.closest('.note-card');
+                if (!cardElem) return;
+                
+                // 连线模式优先处理
+                if (linkMode) {
+                    if (pendingLinkCardId === null) {
+                        pendingLinkCardId = cardId;
+                        cardElem.style.boxShadow = '0 0 0 2px #007aff';
+                        setTimeout(() => { if(cardElem) cardElem.style.boxShadow = ''; }, 300);
+                    } else {
+                        if (pendingLinkCardId !== cardId) {
+                            connections.push({ id: `conn_${Date.now()}_${Math.random()}`, fromId: pendingLinkCardId, toId: cardId });
+                            renderLines();
+                            saveToLocal();
+                            updateStatsUI();
+                        }
+                        pendingLinkCardId = null;
+                    }
+                    return;
+                }
+                
+                // 普通拖拽逻辑
+                selectedCardId = cardId;
+                renderAllCards();
+                dragTargetCardId = cardId;
+                const rect = cardElem.getBoundingClientRect();
+                dragOffset.x = (e.clientX - rect.left) / transform.scale;
+                dragOffset.y = (e.clientY - rect.top) / transform.scale;
+                isDraggingCard = true;
+                document.body.classList.add('dragging');
+            });
+        });
+        
+        // 缩放控制
+        document.querySelectorAll('.resize-handle').forEach(handle => {
+            handle.addEventListener('mousedown', (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                const cardId = handle.getAttribute('data-resize');
+                resizeTargetCardId = cardId;
+                startResize(e, cardId);
+            });
+        });
+        
+        // 点击卡片非内容区域时选中（但不拖拽）
+        document.querySelectorAll('.note-card').forEach(cardEl => {
+            cardEl.addEventListener('mousedown', (e) => {
+                // 如果点击的是内容区、删除按钮、复制按钮、缩放区，则不处理选中
+                if (e.target.classList.contains('card-content') || 
+                    e.target.classList.contains('delete-card') ||
+                    e.target.classList.contains('duplicate-card') ||
+                    e.target.classList.contains('resize-handle') ||
+                    e.target.closest('.card-actions')) {
+                    return;
+                }
+                const id = cardEl.getAttribute('data-id');
+                if (!linkMode) {
+                    selectedCardId = id;
+                    renderAllCards();
+                }
+            });
+        });
+    }
+
+    function startResize(e, cardId) {
+        const card = cards.find(c => c.id === cardId);
+        if (!card) return;
+        const startX = e.clientX;
+        const startY = e.clientY;
+        const startWidth = card.width;
+        const startHeight = card.height;
+        
+        const onMouseMove = (moveEvent) => {
+            const dx = (moveEvent.clientX - startX) / transform.scale;
+            const dy = (moveEvent.clientY - startY) / transform.scale;
+            card.width = Math.max(160, startWidth + dx);
+            card.height = Math.max(120, startHeight + dy);
+            renderAllCards();
+            renderLines();
+        };
+        const onMouseUp = () => {
+            window.removeEventListener('mousemove', onMouseMove);
+            window.removeEventListener('mouseup', onMouseUp);
+            resizeTargetCardId = null;
+            saveToLocal();
+        };
+        window.addEventListener('mousemove', onMouseMove);
+        window.addEventListener('mouseup', onMouseUp);
+    }
+
+    // 画布拖拽平移
+    function initCanvasPan() {
+        container.addEventListener('mousedown', (e) => {
+            // 如果点击的不是拖拽把手/卡片缩放区/编辑区，且不是连线模式下的点击，才启动画布平移
+            if (e.target === container || e.target === canvas || e.target.classList.contains('canvas-container')) {
+                isPanning = true;
+                panStart = { x: e.clientX - transform.x, y: e.clientY - transform.y };
+                container.style.cursor = 'grabbing';
+            }
+        });
+        window.addEventListener('mousemove', (e) => {
+            if (isPanning && !isDraggingCard && !resizeTargetCardId) {
+                transform.x = e.clientX - panStart.x;
+                transform.y = e.clientY - panStart.y;
+                canvas.style.transform = `translate(${transform.x}px, ${transform.y}px) scale(${transform.scale})`;
+                renderLines();
+            } else if (isDraggingCard && dragTargetCardId) {
+                const card = cards.find(c => c.id === dragTargetCardId);
+                if (card) {
+                    const newX = (e.clientX - dragOffset.x * transform.scale - transform.x) / transform.scale;
+                    const newY = (e.clientY - dragOffset.y * transform.scale - transform.y) / transform.scale;
+                    card.x = Math.max(0, newX);
+                    card.y = Math.max(0, newY);
+                    renderAllCards();
+                    renderLines();
+                }
+            }
+        });
+        window.addEventListener('mouseup', () => {
+            if (isPanning || isDraggingCard) {
+                isPanning = false;
+                isDraggingCard = false;
+                dragTargetCardId = null;
+                container.style.cursor = 'grab';
+                document.body.classList.remove('dragging');
+                if (!isDraggingCard && !resizeTargetCardId) saveToLocal();
+            }
+        });
+    }
+
+    // 缩放功能
+    function setScale(newScale) {
+        transform.scale = Math.min(2, Math.max(0.4, newScale));
+        canvas.style.transform = `translate(${transform.x}px, ${transform.y}px) scale(${transform.scale})`;
+        document.getElementById('zoomLevel').innerText = `${Math.round(transform.scale * 100)}%`;
+        const indicator = document.getElementById('zoomIndicator');
+        if (indicator) {
+            indicator.style.display = 'block';
+            setTimeout(() => { indicator.style.display = 'none'; }, 800);
+        }
+        renderLines();
+    }
+
+    // 新增卡片
+    function addCard(type) {
+        let defaultText = type === 'note' ? '双击编辑笔记...' : (type === 'todo' ? '□ 任务一\n□ 任务二' : '「写下灵感语录」');
+        const newId = `card_${Date.now()}_${Math.random()}`;
+        const viewX = -transform.x / transform.scale + 150;
+        const viewY = -transform.y / transform.scale + 150;
+        cards.push({
+            id: newId, type: type, text: defaultText,
+            x: viewX, y: viewY, width: 250, height: 150
+        });
+        renderAllCards();
+        renderLines();
+        saveToLocal();
+        updateStatsUI();
+    }
+
+    function updateStatsUI() {
+        const cardCountElem = document.getElementById('cardCount');
+        const lineCountElem = document.getElementById('lineCount');
+        if (cardCountElem) cardCountElem.innerText = cards.length;
+        if (lineCountElem) lineCountElem.innerText = connections.length;
+    }
+
+    function toggleLinkMode() {
+        linkMode = !linkMode;
+        const btn = document.getElementById('linkModeBtn');
+        if (linkMode) {
+            btn.classList.add('linking-mode-active');
+            pendingLinkCardId = null;
+            const tip = document.createElement('div');
+            tip.innerText = '🔗 连线模式已开启，依次点击两个卡片头部区域创建连线';
+            tip.style.position = 'fixed'; tip.style.bottom = '80px'; tip.style.left = '50%'; tip.style.transform = 'translateX(-50%)';
+            tip.style.background = '#2c2c2e'; tip.style.color = 'white'; tip.style.padding = '6px 16px'; tip.style.borderRadius = '40px'; tip.style.fontSize = '0.75rem'; tip.style.zIndex = '100';
+            document.body.appendChild(tip);
+            setTimeout(() => tip.remove(), 2000);
+        } else {
+            btn.classList.remove('linking-mode-active');
+            pendingLinkCardId = null;
+        }
+    }
+
+    function clearAllLines() {
+        if (confirm('删除所有连线？')) {
+            connections = [];
+            renderLines();
+            updateStatsUI();
+            saveToLocal();
+        }
+    }
+
+    function clearWhiteboard() {
+        if(confirm('清空白板（卡片和连线都将消失）？')) {
+            cards = [];
+            connections = [];
+            selectedCardId = null;
+            pendingLinkCardId = null;
+            renderAllCards();
+            renderLines();
+            updateStatsUI();
+            saveToLocal();
+        }
+    }
+
+    function saveToLocal() {
+        const store = { cards, connections, transform };
+        localStorage.setItem('freeform_connections_lite', JSON.stringify(store));
+    }
+    
+    function loadFromLocal() {
+        const raw = localStorage.getItem('freeform_connections_lite');
+        if(raw) {
+            try {
+                const data = JSON.parse(raw);
+                cards = data.cards || [];
+                connections = data.connections || [];
+                transform = data.transform || { x: 0, y: 0, scale: 1 };
+                renderAllCards();
+                renderLines();
+                updateStatsUI();
+                canvas.style.transform = `translate(${transform.x}px, ${transform.y}px) scale(${transform.scale})`;
+                document.getElementById('zoomLevel').innerText = `${Math.round(transform.scale * 100)}%`;
+            } catch(e) { initDemo(); }
+        } else { initDemo(); }
+    }
+
+    // 绑定UI按钮
+    document.getElementById('addNoteBtn').addEventListener('click', () => addCard('note'));
+    document.getElementById('addTodoBtn').addEventListener('click', () => addCard('todo'));
+    document.getElementById('addQuoteBtn').addEventListener('click', () => addCard('quote'));
+    document.getElementById('zoomInBtn').addEventListener('click', () => setScale(transform.scale + 0.1));
+    document.getElementById('zoomOutBtn').addEventListener('click', () => setScale(transform.scale - 0.1));
+    document.getElementById('resetViewBtn').addEventListener('click', () => { transform = { x: 0, y: 0, scale: 1 }; setScale(1); renderLines(); });
+    document.getElementById('clearStorageBtn').addEventListener('click', clearWhiteboard);
+    document.getElementById('linkModeBtn').addEventListener('click', toggleLinkMode);
+    document.getElementById('clearLinesBtn').addEventListener('click', clearAllLines);
+
+    initCanvasPan();
+    loadFromLocal();
+    // 定期刷新连线位置（卡片移动/缩放后重新计算）
+    setInterval(() => { renderLines(); }, 150);
+</script>
+</body>
+</html>

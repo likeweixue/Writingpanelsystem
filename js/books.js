@@ -311,9 +311,12 @@ function renderBookEditor(bookId) {
         '<div class="icon-sidebar-item" data-target="chapters" title="章节">' +
         '<div class="icon-sidebar-icon">📖</div>' +
         '</div>' +
-        '</div>' +
-        '</div>' +
-        '<div class="left-sidebar" id="leftSidebar">' +
+        '<div class="icon-sidebar-item" data-target="library" title="书库">' +
+        '<div class="icon-sidebar-icon">📚</div>' +
+        '</div>' +//这三个东西一定要保存，要不然出大事我靠了
+        '</div>' +//这三个东西一定要保存，要不然出大事我靠了
+        '</div>' +//这三个东西一定要保存，要不然出大事我靠了
+        '<div class="left-sidebar" id="leftSidebar" style="width:280px;">' +
         '<div class="left-sidebar-header">' +
         '<span> 章节</span>' +
         '<button class="toggle-left-sidebar-btn" id="toggleLeftSidebarBtn" title="收起">◀</button>' +
@@ -327,6 +330,17 @@ function renderBookEditor(bookId) {
         '<div id="volumeList" class="volume-list"></div>' +
         '</div>' +
         '</div>' +
+        // 书库面板（初始隐藏）
+        '<div class="library-sidebar" id="librarySidebar" style="display:none; width:280px;">' +
+        '<div class="library-sidebar-header">' +
+        '<span>📚 书库</span>' +
+        '<button id="closeLibraryBtn" style="background:none; border:none; font-size:16px; cursor:pointer;">✕</button>' +
+        '</div>' +
+        '<div id="libraryContent" class="library-sidebar-content" style="flex:1; overflow-y:auto; padding:12px;">' +
+        '<div style="text-align:center; padding:20px; color:#888;">加载中...</div>' +
+        '</div>' +
+        '</div>' +
+        // 编辑器
         '<div class="detail-editor">' +
         '<input type="text" id="chapterTitle" placeholder="章节标题" class="title-input">' +
         '<div id="editor" contenteditable="true" class="editor-content"><p>开始写作...</p></div>' +
@@ -379,105 +393,378 @@ function initBookEditor(tabId, bookId) {
     var trashBtn = document.getElementById('trashBtnHeader');
     if (trashBtn) trashBtn.onclick = function() { openTrashPanel(); };
 
-    // 在 initBookEditor 函数末尾添加以下代码
-
-// 左面板切换功能
-var leftSidebar = document.getElementById('leftSidebar');
-var toggleLeftBtn = document.getElementById('toggleLeftSidebarBtn');
-if (leftSidebar && toggleLeftBtn) {
-    var leftCollapsed = localStorage.getItem('leftSidebar_collapsed') === 'true';
-    if (leftCollapsed) {
-        leftSidebar.classList.add('collapsed');
-        toggleLeftBtn.innerHTML = '▶';
-        toggleLeftBtn.title = '展开章节栏';
-    }
-    toggleLeftBtn.onclick = function() {
-        leftSidebar.classList.toggle('collapsed');
-        var isCollapsed = leftSidebar.classList.contains('collapsed');
-        if (isCollapsed) {
-            toggleLeftBtn.innerHTML = '▶';
-            toggleLeftBtn.title = '展开章节栏';
-        } else {
-            toggleLeftBtn.innerHTML = '◀';
-            toggleLeftBtn.title = '收起章节栏';
+    // 添加可调节的拖动条
+    function addResizeHandle() {
+        var chaptersPanel = document.getElementById('chaptersPanel');
+        if (!chaptersPanel) {
+            // 如果没有 chaptersPanel，使用 leftSidebar
+            chaptersPanel = document.getElementById('leftSidebar');
         }
-        localStorage.setItem('leftSidebar_collapsed', isCollapsed);
-    };
-        // 图标边栏功能
-    setTimeout(function() {
-        var iconItems = document.querySelectorAll('.icon-sidebar-item');
-        var leftSidebar = document.getElementById('leftSidebar');
+        if (!chaptersPanel) return;
         
-        for (var i = 0; i < iconItems.length; i++) {
-            iconItems[i].onclick = function() {
-                var target = this.getAttribute('data-target');
-                if (target === 'chapters' && leftSidebar) {
-                    leftSidebar.classList.toggle('collapsed');
-                    var isCollapsed = leftSidebar.classList.contains('collapsed');
-                    localStorage.setItem('leftSidebar_collapsed', isCollapsed);
-                    
-                    var toggleLeftBtn = document.getElementById('toggleLeftSidebarBtn');
-                    if (toggleLeftBtn) {
-                        toggleLeftBtn.innerHTML = isCollapsed ? '▶' : '◀';
-                        toggleLeftBtn.title = isCollapsed ? '展开章节栏' : '收起章节栏';
+        // 如果已经有拖动条，不重复添加
+        if (document.getElementById('resizeHandle')) return;
+        
+        var handle = document.createElement('div');
+        handle.id = 'resizeHandle';
+        handle.style.cssText = 'position: absolute; right: -4px; top: 0; width: 6px; height: 100%; cursor: ew-resize; background: transparent; z-index: 10; transition: background 0.2s;';
+        
+        // 确保父元素有相对定位
+        if (getComputedStyle(chaptersPanel).position !== 'relative') {
+            chaptersPanel.style.position = 'relative';
+        }
+        
+        chaptersPanel.appendChild(handle);
+        
+        var isResizing = false;
+        var startX = 0;
+        var startWidth = 0;
+        
+        handle.addEventListener('mouseover', function() {
+            this.style.background = 'rgba(0, 122, 255, 0.4)';
+        });
+        
+        handle.addEventListener('mouseout', function() {
+            if (!isResizing) {
+                this.style.background = 'transparent';
+            }
+        });
+        
+        handle.addEventListener('mousedown', function(e) {
+            e.preventDefault();
+            isResizing = true;
+            startX = e.clientX;
+            startWidth = chaptersPanel.offsetWidth;
+            document.body.style.cursor = 'ew-resize';
+            document.body.style.userSelect = 'none';
+            
+            function onMouseMove(e) {
+                if (!isResizing) return;
+                var newWidth = startWidth + (e.clientX - startX);
+                if (newWidth < 180) newWidth = 180;
+                if (newWidth > 500) newWidth = 500;
+                chaptersPanel.style.width = newWidth + 'px';
+            }
+            
+            function onMouseUp() {
+                isResizing = false;
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('mouseup', onMouseUp);
+                document.body.style.cursor = '';
+                document.body.style.userSelect = '';
+                handle.style.background = 'transparent';
+                localStorage.setItem('chapters_width', chaptersPanel.style.width);
+            }
+            
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        });
+    }
+    
+    // 恢复保存的宽度
+    function restoreChaptersWidth() {
+        var chaptersPanel = document.getElementById('chaptersPanel') || document.getElementById('leftSidebar');
+        if (!chaptersPanel) return;
+        var savedWidth = localStorage.getItem('chapters_width');
+        if (savedWidth) {
+            var width = parseInt(savedWidth);
+            if (width >= 180 && width <= 500) {
+                chaptersPanel.style.width = width + 'px';
+            }
+        }
+    }
+    // 添加拖动条和恢复宽度
+    setTimeout(function() {
+        addResizeHandle();
+        restoreChaptersWidth();
+    }, 200);
+
+    // 书库面板功能
+        // 书库面板功能
+    function initLibraryPanel() {
+        var librarySidebar = document.getElementById('librarySidebar');
+        var leftSidebar = document.getElementById('leftSidebar');
+        var closeBtn = document.getElementById('closeLibraryBtn');
+        
+        if (!librarySidebar) return;
+        
+        // 关闭按钮 - 直接关闭书库面板，不打开章节面板
+        if (closeBtn) {
+            closeBtn.onclick = function(e) {
+                e.stopPropagation();
+                librarySidebar.style.display = 'none';
+                // 不自动打开章节面板，保持干净
+                console.log('书库面板已关闭');
+            };
+        }
+        
+        // 添加拖动条
+        addLibraryResizeHandle();
+        
+        // 渲染书籍列表
+        renderLibraryList();
+    }
+    
+    function addLibraryResizeHandle() {
+        var librarySidebar = document.getElementById('librarySidebar');
+        if (!librarySidebar) return;
+        if (document.getElementById('libraryResizeHandle')) return;
+        
+        librarySidebar.style.position = 'relative';
+        
+        var handle = document.createElement('div');
+        handle.id = 'libraryResizeHandle';
+        handle.style.cssText = 'position: absolute; right: -4px; top: 0; width: 6px; height: 100%; cursor: ew-resize; background: transparent; z-index: 10; transition: background 0.2s;';
+        
+        librarySidebar.appendChild(handle);
+        
+        var isResizing = false;
+        var startX = 0;
+        var startWidth = 0;
+        
+        handle.addEventListener('mouseover', function() {
+            this.style.background = 'rgba(0, 122, 255, 0.4)';
+        });
+        
+        handle.addEventListener('mouseout', function() {
+            if (!isResizing) this.style.background = 'transparent';
+        });
+        
+        handle.addEventListener('mousedown', function(e) {
+            e.preventDefault();
+            isResizing = true;
+            startX = e.clientX;
+            startWidth = librarySidebar.offsetWidth;
+            document.body.style.cursor = 'ew-resize';
+            document.body.style.userSelect = 'none';
+            
+            function onMouseMove(e) {
+                if (!isResizing) return;
+                var newWidth = startWidth + (e.clientX - startX);
+                if (newWidth < 180) newWidth = 180;
+                if (newWidth > 500) newWidth = 500;
+                librarySidebar.style.width = newWidth + 'px';
+            }
+            
+            function onMouseUp() {
+                isResizing = false;
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('mouseup', onMouseUp);
+                document.body.style.cursor = '';
+                document.body.style.userSelect = '';
+                handle.style.background = 'transparent';
+                localStorage.setItem('library_width', librarySidebar.style.width);
+            }
+            
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        });
+        
+        var savedWidth = localStorage.getItem('library_width');
+        if (savedWidth) {
+            var width = parseInt(savedWidth);
+            if (width >= 180 && width <= 500) {
+                librarySidebar.style.width = width + 'px';
+            }
+        }
+    }
+    
+    function renderLibraryList() {
+        var container = document.getElementById('libraryContent');
+        if (!container) return;
+        
+        if (!books || books.length === 0) {
+            container.innerHTML = '<div style="text-align:center; padding:20px; color:#888;">暂无书籍，点击"新建书籍"开始创作</div>';
+            return;
+        }
+        
+        var html = '';
+        for (var i = 0; i < books.length; i++) {
+            var book = books[i];
+            var totalChapters = 0;
+            if (book.volumes) {
+                for (var v = 0; v < book.volumes.length; v++) {
+                    if (book.volumes[v].chapters) {
+                        totalChapters += book.volumes[v].chapters.length;
                     }
+                }
+            }
+            
+            var isActive = (currentBookId === book.id);
+            html += '<div class="library-book-item" data-book-id="' + book.id + '" style="' + (isActive ? 'background: rgba(0,122,255,0.1); border-left: 3px solid #007aff;' : 'background: rgba(0,0,0,0.02); margin:4px 0; padding:10px; border-radius:8px; cursor:pointer; transition:all 0.2s;') + '">' +
+                '<div style="display:flex; align-items:center; gap:12px;">' +
+                '<div style="font-size:24px;">📖</div>' +
+                '<div style="flex:1;">' +
+                '<div style="font-weight:500;">' + escapeHtml(book.title) + '</div>' +
+                '<div style="font-size:11px; color:#888;">' + (book.volumes ? book.volumes.length : 0) + '卷 · ' + totalChapters + '章</div>' +
+                '</div>' +
+                (isActive ? '<div style="background:#007aff; color:white; border-radius:12px; padding:2px 8px; font-size:10px;">当前</div>' : '') +
+                '</div>' +
+                '</div>';
+        }
+        container.innerHTML = html;
+        
+        // 绑定点击事件
+        var bookItems = document.querySelectorAll('.library-book-item');
+        for (var i = 0; i < bookItems.length; i++) {
+            bookItems[i].onclick = function() {
+                var bookId = parseInt(this.getAttribute('data-book-id'));
+                if (bookId !== currentBookId) {
+                    openBookTab(bookId);
+                }
+                // 关闭书库面板，显示章节面板
+                // 在 initBookEditor 函数末尾，initLibraryPanel(); 和 bindIconSidebarEvents(); 之后添加
+                // 确保章节面板初始显示，书库面板隐藏
+                var leftSidebar = document.getElementById('leftSidebar');
+                var librarySidebar = document.getElementById('librarySidebar');
+                if (leftSidebar) leftSidebar.style.display = 'flex';
+                if (librarySidebar) librarySidebar.style.display = 'none';
+            };
+        }
+    }
+        // 图标边栏切换事件（简化版）
+    function bindIconSidebarEvents() {
+        var chapterIcon = document.querySelector('.icon-sidebar-item[data-target="chapters"]');
+        var libraryIcon = document.querySelector('.icon-sidebar-item[data-target="library"]');
+        
+        if (chapterIcon) {
+            chapterIcon.onclick = function() {
+                var leftSidebar = document.getElementById('leftSidebar');
+                var librarySidebar = document.getElementById('librarySidebar');
+                var toggleBtn = document.getElementById('toggleLeftSidebarBtn');
+                
+                // 关闭书库面板
+                if (librarySidebar) librarySidebar.style.display = 'none';
+                
+                // 打开章节面板
+                if (leftSidebar) {
+                    leftSidebar.style.display = 'flex';
+                    leftSidebar.style.setProperty('width', '280px', 'important');
+                    leftSidebar.style.setProperty('min-width', '280px', 'important');
+                    leftSidebar.style.setProperty('flex', '0 0 280px', 'important');
+                    leftSidebar.style.overflow = 'visible';
+                    if (toggleBtn) toggleBtn.innerHTML = '◀';
+                    localStorage.setItem('leftSidebar_collapsed', 'false');
                 }
             };
         }
         
-        // 恢复左面板状态
+        if (libraryIcon) {
+            libraryIcon.onclick = function() {
+                var leftSidebar = document.getElementById('leftSidebar');
+                var librarySidebar = document.getElementById('librarySidebar');
+                var toggleBtn = document.getElementById('toggleLeftSidebarBtn');
+                
+                // 关闭章节面板
+                if (leftSidebar) {
+                    leftSidebar.style.setProperty('width', '0', 'important');
+                    leftSidebar.style.setProperty('min-width', '0', 'important');
+                    leftSidebar.style.setProperty('flex', '0 0 0', 'important');
+                    leftSidebar.style.overflow = 'hidden';
+                    if (toggleBtn) toggleBtn.innerHTML = '▶';
+                    localStorage.setItem('leftSidebar_collapsed', 'true');
+                }
+                
+                // 打开书库面板
+                if (librarySidebar) {
+                    librarySidebar.style.display = 'flex';
+                    if (typeof renderLibraryList === 'function') renderLibraryList();
+                }
+            };
+        }
+    }
+     // 初始化书库
+    initLibraryPanel();
+    bindIconSidebarEvents();
+    
+    // 确保章节面板显示，书库面板隐藏
+    var leftPanel = document.getElementById('leftSidebar');
+    var libraryPanel = document.getElementById('librarySidebar');
+    if (leftPanel) leftPanel.style.display = 'flex';
+    if (libraryPanel) libraryPanel.style.display = 'none';
+    
+        // 左面板切换功能（收起/展开）- 使用内联样式
+    var leftSidebar = document.getElementById('leftSidebar');
+    var toggleLeftBtn = document.getElementById('toggleLeftSidebarBtn');
+    if (leftSidebar && toggleLeftBtn) {
+        // 恢复保存的状态
         var leftCollapsed = localStorage.getItem('leftSidebar_collapsed') === 'true';
-        if (leftSidebar && leftCollapsed) {
-            leftSidebar.classList.add('collapsed');
-            var toggleLeftBtn = document.getElementById('toggleLeftSidebarBtn');
-            if (toggleLeftBtn) toggleLeftBtn.innerHTML = '▶';
+        if (leftCollapsed) {
+            leftSidebar.style.setProperty('width', '0', 'important');
+            leftSidebar.style.setProperty('min-width', '0', 'important');
+            leftSidebar.style.setProperty('flex', '0 0 0', 'important');
+            leftSidebar.style.overflow = 'hidden';
+            toggleLeftBtn.innerHTML = '▶';
+            toggleLeftBtn.title = '展开章节栏';
+        } else {
+            leftSidebar.style.setProperty('width', '280px', 'important');
+            leftSidebar.style.setProperty('min-width', '280px', 'important');
+            leftSidebar.style.setProperty('flex', '0 0 280px', 'important');
+            leftSidebar.style.overflow = 'visible';
+            toggleLeftBtn.innerHTML = '◀';
+            toggleLeftBtn.title = '收起章节栏';
         }
         
-        // 恢复右面板状态
-        var rightSidebar = document.getElementById('rightSidebar');
-        var rightCollapsed = localStorage.getItem('rightSidebar_collapsed') === 'true';
-        if (rightSidebar && rightCollapsed) {
-            rightSidebar.classList.add('collapsed');
-            var toggleRightBtn = document.getElementById('toggleRightSidebarBtn');
-            if (toggleRightBtn) toggleRightBtn.innerHTML = '◀';
-        }
-    }, 100);
-}
-
-// 右面板切换功能
-var rightSidebar = document.getElementById('rightSidebar');
-var toggleRightBtn = document.getElementById('toggleRightSidebarBtn');
-if (rightSidebar && toggleRightBtn) {
-    var rightCollapsed = localStorage.getItem('rightSidebar_collapsed') === 'true';
-    if (rightCollapsed) {
-        rightSidebar.classList.add('collapsed');
-        toggleRightBtn.innerHTML = '◀';
-        toggleRightBtn.title = '展开工具';
-    } else {
-        toggleRightBtn.innerHTML = '▶';
+        // 绑定点击事件
+        toggleLeftBtn.onclick = function(e) {
+            e.stopPropagation();
+            var isCollapsed = leftSidebar.offsetWidth === 0;
+            if (isCollapsed) {
+                // 展开
+                leftSidebar.style.setProperty('width', '280px', 'important');
+                leftSidebar.style.setProperty('min-width', '280px', 'important');
+                leftSidebar.style.setProperty('flex', '0 0 280px', 'important');
+                leftSidebar.style.overflow = 'visible';
+                toggleLeftBtn.innerHTML = '◀';
+                toggleLeftBtn.title = '收起章节栏';
+            } else {
+                // 收起
+                leftSidebar.style.setProperty('width', '0', 'important');
+                leftSidebar.style.setProperty('min-width', '0', 'important');
+                leftSidebar.style.setProperty('flex', '0 0 0', 'important');
+                leftSidebar.style.overflow = 'hidden';
+                toggleLeftBtn.innerHTML = '▶';
+                toggleLeftBtn.title = '展开章节栏';
+            }
+            localStorage.setItem('leftSidebar_collapsed', leftSidebar.offsetWidth === 0);
+        };
     }
-    toggleRightBtn.onclick = function() {
-        rightSidebar.classList.toggle('collapsed');
-        var isCollapsed = rightSidebar.classList.contains('collapsed');
-        if (isCollapsed) {
+
+    // 右面板切换功能
+    var rightSidebar = document.getElementById('rightSidebar');
+    var toggleRightBtn = document.getElementById('toggleRightSidebarBtn');
+    if (rightSidebar && toggleRightBtn) {
+        var rightCollapsed = localStorage.getItem('rightSidebar_collapsed') === 'true';
+        if (rightCollapsed) {
+            rightSidebar.classList.add('collapsed');
             toggleRightBtn.innerHTML = '◀';
             toggleRightBtn.title = '展开工具';
         } else {
             toggleRightBtn.innerHTML = '▶';
-            toggleRightBtn.title = '收起工具';
         }
-        localStorage.setItem('rightSidebar_collapsed', isCollapsed);
-    };
-}
+        toggleRightBtn.onclick = function() {
+            rightSidebar.classList.toggle('collapsed');
+            var isCollapsed = rightSidebar.classList.contains('collapsed');
+            if (isCollapsed) {
+                toggleRightBtn.innerHTML = '◀';
+                toggleRightBtn.title = '展开工具';
+            } else {
+                toggleRightBtn.innerHTML = '▶';
+                toggleRightBtn.title = '收起工具';
+            }
+            localStorage.setItem('rightSidebar_collapsed', isCollapsed);
+        };
+    }
 
-// 绑定工具点击事件
-var tools = document.querySelectorAll('.sidebar-tool-item');
-for (var i = 0; i < tools.length; i++) {
-    tools[i].onclick = function() {
-        var tool = this.getAttribute('data-tool');
-        openSecondaryWindow(tool);
-    };
-}
+    // 绑定工具点击事件
+    var tools = document.querySelectorAll('.sidebar-tool-item');
+    for (var i = 0; i < tools.length; i++) {
+        tools[i].onclick = function() {
+            var tool = this.getAttribute('data-tool');
+            openSecondaryWindow(tool);
+        };
+    }
+    
     // 启动状态栏定时器
     startStatusBarTimers();
 }
@@ -503,33 +790,360 @@ function renderVolumeList() {
         container.innerHTML = '<div style="padding:20px;text-align:center;opacity:0.6;">暂无分卷，点击"分卷"创建</div>';
         return;
     }
+    
     for (var v = 0; v < book.volumes.length; v++) {
         var vol = book.volumes[v];
         var volDiv = document.createElement('div');
         volDiv.className = 'volume-item';
-        volDiv.innerHTML = '<div class="volume-title" data-id="' + vol.id + '"><span>' + escapeHtml(vol.name) + ' <span style="font-size:11px;">(' + (vol.chapters ? vol.chapters.length : 0) + '章)</span></span><button class="volume-more" data-id="' + vol.id + '">⋯</button></div><div class="chapter-list" data-volume="' + vol.id + '"></div>';
+        volDiv.setAttribute('data-vol-id', vol.id);
+        volDiv.setAttribute('data-vol-order', v);
+        volDiv.setAttribute('draggable', 'true');
+        
+        // 分卷头部（带按钮）
+        volDiv.innerHTML = '<div class="volume-header" style="display:flex; align-items:center; justify-content:space-between; padding:8px 12px; background:rgba(0,0,0,0.03); border-radius:8px; margin-bottom:4px;">' +
+            '<span class="volume-title" style="font-weight:600; cursor:pointer;">' + escapeHtml(vol.name) + ' <span style="font-size:11px; font-weight:normal;">(' + (vol.chapters ? vol.chapters.length : 0) + '章)</span></span>' +
+            '<div class="volume-actions" style="display:flex; gap:4px; opacity:0.6; transition:opacity 0.2s;">' +
+            '<button class="volume-move-up" title="上移" style="background:none; border:none; cursor:pointer; font-size:14px; padding:2px 6px; border-radius:4px;">⬆️</button>' +
+            '<button class="volume-move-down" title="下移" style="background:none; border:none; cursor:pointer; font-size:14px; padding:2px 6px; border-radius:4px;">⬇️</button>' +
+            '<button class="volume-rename" title="重命名" style="background:none; border:none; cursor:pointer; font-size:14px; padding:2px 6px; border-radius:4px;">✏️</button>' +
+            '<button class="volume-delete" title="删除分卷" style="background:none; border:none; cursor:pointer; font-size:14px; padding:2px 6px; border-radius:4px; color:#999;">✖</button>' +
+            '</div>' +
+            '</div>' +
+            '<div class="chapter-list" data-volume="' + vol.id + '"></div>';
+        
         var chapterContainer = volDiv.querySelector('.chapter-list');
+        
+        // 渲染章节
         if (vol.chapters && vol.chapters.length > 0) {
             for (var c = 0; c < vol.chapters.length; c++) {
                 var ch = vol.chapters[c];
                 var chDiv = document.createElement('div');
                 chDiv.className = 'chapter-item' + (ch.id === currentChapterId && vol.id === currentVolumeId ? ' active' : '');
-                chDiv.innerHTML = '<span>' + escapeHtml(ch.title) + '</span><button class="delete-chapter" data-chapter-id="' + ch.id + '" data-vol-id="' + vol.id + '">✖</button>';
-                chDiv.querySelector('span').onclick = (function(volId, chId) {
-                    return function() { currentVolumeId = volId; currentChapterId = chId; renderVolumeList(); renderCurrentChapter(); };
+                chDiv.setAttribute('data-chapter-id', ch.id);
+                chDiv.setAttribute('data-vol-id', vol.id);
+                chDiv.setAttribute('data-chapter-order', c);
+                chDiv.setAttribute('draggable', 'true');
+                
+                chDiv.innerHTML = '<span class="chapter-title" style="flex:1; cursor:pointer;">' + escapeHtml(ch.title) + '</span>' +
+                    '<div class="chapter-actions" style="display:flex; gap:4px;">' +
+                    '<button class="chapter-move-up" title="上移" style="background:none; border:none; cursor:pointer; font-size:14px;">⬆️</button>' +
+                    '<button class="chapter-move-down" title="下移" style="background:none; border:none; cursor:pointer; font-size:14px;">⬇️</button>' +
+                    '<button class="chapter-rename" title="重命名" style="background:none; border:none; cursor:pointer; font-size:14px;">✏️</button>' +
+                    '<button class="delete-chapter" title="删除" style="background:none; border:none; cursor:pointer; font-size:14px; color:#999;">✖</button>' +
+                    '</div>';
+                
+                // 章节标题点击
+                chDiv.querySelector('.chapter-title').onclick = (function(volId, chId) {
+                    return function() { 
+                        currentVolumeId = volId; 
+                        currentChapterId = chId; 
+                        renderVolumeList(); 
+                        renderCurrentChapter(); 
+                    };
                 })(vol.id, ch.id);
+                
+                // 章节上移
+                chDiv.querySelector('.chapter-move-up').onclick = (function(volId, chId, idx) {
+                    return function(e) {
+                        e.stopPropagation();
+                        moveChapter(volId, chId, idx, 'up');
+                    };
+                })(vol.id, ch.id, c);
+                
+                // 章节下移
+                chDiv.querySelector('.chapter-move-down').onclick = (function(volId, chId, idx) {
+                    return function(e) {
+                        e.stopPropagation();
+                        moveChapter(volId, chId, idx, 'down');
+                    };
+                })(vol.id, ch.id, c);
+                
+                // 章节重命名
+                chDiv.querySelector('.chapter-rename').onclick = (function(ch) {
+                    return function(e) {
+                        e.stopPropagation();
+                        var newName = prompt('请输入新的章节名称', ch.title);
+                        if (newName && newName.trim()) {
+                            ch.title = newName.trim();
+                            saveAllData();
+                            renderVolumeList();
+                            renderCurrentChapter();
+                            renderBooks();
+                        }
+                    };
+                })(ch);
+                
+                // 章节删除
+                chDiv.querySelector('.delete-chapter').onclick = (function(volId, chId, chTitle) {
+                    return function(e) {
+                        e.stopPropagation();
+                        if (confirm('确定删除章节 "' + chTitle + '" 吗？')) {
+                            var vol = getCurrentVolume();
+                            if (vol && vol.chapters.length === 1) {
+                                alert('每个分卷至少保留一个章节');
+                                return;
+                            }
+                            moveChapterToTrash(volId, chId, chTitle, '');
+                            vol.chapters = vol.chapters.filter(function(c) { return c.id !== chId; });
+                            if (currentChapterId === chId && currentVolumeId === volId) {
+                                currentChapterId = vol.chapters[0] ? vol.chapters[0].id : null;
+                            }
+                            saveAllData();
+                            renderVolumeList();
+                            renderCurrentChapter();
+                            renderBooks();
+                            alert('已移至回收站');
+                        }
+                    };
+                })(vol.id, ch.id, ch.title);
+                
                 chapterContainer.appendChild(chDiv);
             }
         }
-        volDiv.querySelector('.volume-title').onclick = function(volId) {
-            return function(e) { if (e.target.classList && e.target.classList.contains('volume-more')) return; currentVolumeId = volId; renderVolumeList(); };
-        }(vol.id);
-        volDiv.querySelector('.volume-more').onclick = function(volId) {
-            return function(e) { e.stopPropagation(); showVolumeMenu(volId); };
-        }(vol.id);
+        
+        // 分卷标题点击（展开/折叠）
+        volDiv.querySelector('.volume-title').onclick = function() {
+            var chapterList = this.closest('.volume-item').querySelector('.chapter-list');
+            if (chapterList) {
+                if (chapterList.style.display === 'none') {
+                    chapterList.style.display = 'block';
+                } else {
+                    chapterList.style.display = 'none';
+                }
+            }
+        };
+        
+        // 分卷上移
+        volDiv.querySelector('.volume-move-up').onclick = (function(volId, idx) {
+            return function(e) {
+                e.stopPropagation();
+                moveVolume(volId, idx, 'up');
+            };
+        })(vol.id, v);
+        
+        // 分卷下移
+        volDiv.querySelector('.volume-move-down').onclick = (function(volId, idx) {
+            return function(e) {
+                e.stopPropagation();
+                moveVolume(volId, idx, 'down');
+            };
+        })(vol.id, v);
+        
+        // 分卷重命名
+        volDiv.querySelector('.volume-rename').onclick = (function(vol) {
+            return function(e) {
+                e.stopPropagation();
+                var newName = prompt('请输入新的分卷名称', vol.name);
+                if (newName && newName.trim()) {
+                    vol.name = newName.trim();
+                    saveAllData();
+                    renderVolumeList();
+                    renderBooks();
+                }
+            };
+        })(vol);
+        
+        // 分卷删除
+        volDiv.querySelector('.volume-delete').onclick = (function(volId, volName, volIndex) {
+            return function(e) {
+                e.stopPropagation();
+                var book = getCurrentBook();
+                if (book.volumes.length === 1) {
+                    alert('至少保留一个分卷');
+                    return;
+                }
+                if (confirm('确定删除分卷 "' + volName + '" 吗？其中的章节也会被删除！')) {
+                    // 删除分卷中的章节到回收站
+                    var vol = book.volumes[volIndex];
+                    if (vol && vol.chapters) {
+                        for (var i = 0; i < vol.chapters.length; i++) {
+                            var ch = vol.chapters[i];
+                            moveChapterToTrash(volId, ch.id, ch.title, ch.content);
+                        }
+                    }
+                    book.volumes.splice(volIndex, 1);
+                    if (currentVolumeId == volId) {
+                        currentVolumeId = book.volumes[0] ? book.volumes[0].id : null;
+                        currentChapterId = (book.volumes[0] && book.volumes[0].chapters && book.volumes[0].chapters[0]) ? book.volumes[0].chapters[0].id : null;
+                    }
+                    saveAllData();
+                    renderVolumeList();
+                    renderCurrentChapter();
+                    renderBooks();
+                    alert('分卷已删除');
+                }
+            };
+        })(vol.id, vol.name, v);
+        
         container.appendChild(volDiv);
     }
-    bindDeleteChapterEvents();
+    
+    // 初始化拖拽排序
+    initVolumeDragAndDrop();
+    initChapterDragAndDrop();
+}
+
+// 移动分卷
+function moveVolume(volId, currentIndex, direction) {
+    var book = getCurrentBook();
+    if (!book.volumes) return;
+    
+    var newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+    if (newIndex < 0 || newIndex >= book.volumes.length) return;
+    
+    // 交换位置
+    var temp = book.volumes[currentIndex];
+    book.volumes[currentIndex] = book.volumes[newIndex];
+    book.volumes[newIndex] = temp;
+    
+    saveAllData();
+    renderVolumeList();
+    renderBooks();
+}
+
+// 初始化分卷拖拽排序
+function initVolumeDragAndDrop() {
+    var volumeItems = document.querySelectorAll('.volume-item');
+    var dragSource = null;
+    
+    volumeItems.forEach(function(item) {
+        item.setAttribute('draggable', 'true');
+        
+        item.addEventListener('dragstart', function(e) {
+            dragSource = this;
+            this.style.opacity = '0.5';
+            e.dataTransfer.setData('text/plain', this.getAttribute('data-vol-id'));
+            e.dataTransfer.effectAllowed = 'move';
+        });
+        
+        item.addEventListener('dragend', function(e) {
+            this.style.opacity = '1';
+            dragSource = null;
+        });
+        
+        item.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            this.style.borderTop = '2px solid #007aff';
+        });
+        
+        item.addEventListener('dragleave', function(e) {
+            this.style.borderTop = '';
+        });
+        
+        item.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.style.borderTop = '';
+            
+            if (!dragSource || dragSource === this) return;
+            
+            var sourceVolId = parseInt(dragSource.getAttribute('data-vol-id'));
+            var targetVolId = parseInt(this.getAttribute('data-vol-id'));
+            
+            var book = getCurrentBook();
+            var sourceIndex = book.volumes.findIndex(function(v) { return v.id == sourceVolId; });
+            var targetIndex = book.volumes.findIndex(function(v) { return v.id == targetVolId; });
+            
+            if (sourceIndex === -1 || targetIndex === -1) return;
+            
+            // 移动分卷
+            var temp = book.volumes[sourceIndex];
+            book.volumes.splice(sourceIndex, 1);
+            book.volumes.splice(targetIndex, 0, temp);
+            
+            saveAllData();
+            renderVolumeList();
+            renderBooks();
+        });
+    });
+}
+
+// 移动章节
+function moveChapter(volId, chapterId, currentIndex, direction) {
+    var book = getCurrentBook();
+    var vol = book.volumes.find(function(v) { return v.id == volId; });
+    if (!vol || !vol.chapters) return;
+    
+    var newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+    if (newIndex < 0 || newIndex >= vol.chapters.length) return;
+    
+    // 交换位置
+    var temp = vol.chapters[currentIndex];
+    vol.chapters[currentIndex] = vol.chapters[newIndex];
+    vol.chapters[newIndex] = temp;
+    
+    saveAllData();
+    renderVolumeList();
+    renderCurrentChapter();
+    renderBooks();
+}
+
+// 初始化章节拖拽排序
+function initChapterDragAndDrop() {
+    var chapterItems = document.querySelectorAll('.chapter-item');
+    var dragSource = null;
+    
+    chapterItems.forEach(function(item) {
+        item.setAttribute('draggable', 'true');
+        
+        item.addEventListener('dragstart', function(e) {
+            dragSource = this;
+            this.style.opacity = '0.5';
+            e.dataTransfer.setData('text/plain', this.getAttribute('data-chapter-id'));
+            e.dataTransfer.effectAllowed = 'move';
+        });
+        
+        item.addEventListener('dragend', function(e) {
+            this.style.opacity = '1';
+            dragSource = null;
+        });
+        
+        item.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            this.style.borderTop = '2px solid #007aff';
+        });
+        
+        item.addEventListener('dragleave', function(e) {
+            this.style.borderTop = '';
+        });
+        
+        item.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.style.borderTop = '';
+            
+            if (!dragSource || dragSource === this) return;
+            
+            var sourceVolId = parseInt(dragSource.getAttribute('data-vol-id'));
+            var sourceChapterId = parseInt(dragSource.getAttribute('data-chapter-id'));
+            var targetVolId = parseInt(this.getAttribute('data-vol-id'));
+            var targetChapterId = parseInt(this.getAttribute('data-chapter-id'));
+            
+            if (sourceVolId !== targetVolId) {
+                alert('不能跨分卷拖拽章节');
+                return;
+            }
+            
+            var book = getCurrentBook();
+            var vol = book.volumes.find(function(v) { return v.id == sourceVolId; });
+            if (!vol || !vol.chapters) return;
+            
+            var sourceIndex = vol.chapters.findIndex(function(c) { return c.id == sourceChapterId; });
+            var targetIndex = vol.chapters.findIndex(function(c) { return c.id == targetChapterId; });
+            
+            if (sourceIndex === -1 || targetIndex === -1) return;
+            
+            // 移动章节
+            var temp = vol.chapters[sourceIndex];
+            vol.chapters.splice(sourceIndex, 1);
+            vol.chapters.splice(targetIndex, 0, temp);
+            
+            saveAllData();
+            renderVolumeList();
+            renderCurrentChapter();
+            renderBooks();
+        });
+    });
 }
 
 function bindDeleteChapterEvents() {

@@ -1,0 +1,1159 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f0f2f5;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.app-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100%;
+}
+
+/* 顶部标签栏 */
+.tabs-container {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    overflow-x: auto;
+    padding: 5px 10px;
+    background: #f2f3f5;
+    gap: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    z-index: 15;
+}
+
+.window-controls {
+    display: flex;
+    gap: 8px;
+    margin-right: 12px;
+    flex-shrink: 0;
+}
+.window-btn {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+.window-btn.close { background: #ff5f56; }
+.window-btn.minimize { background: #ffbd2e; }
+.window-btn.maximize { background: #27c93f; }
+
+.tab {
+    display: flex;
+    align-items: center;
+    background: #fff;
+    height: 32px;
+    padding: 0 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    gap: 6px;
+    font-size: 13px;
+}
+.tab.active {
+    background: #fff;
+    font-weight: 600;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+.tab-close {
+    font-size: 14px;
+    color: #999;
+    cursor: pointer;
+    width: 18px;
+    text-align: center;
+}
+.tab-close:hover { color: #333; }
+
+.new-tab-btn {
+    width: 28px;
+    height: 28px;
+    background: transparent;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    border-radius: 8px;
+}
+.new-tab-btn:hover { background: #e0e0e0; }
+
+/* 一级菜单栏 - 标签页下方 (默认隐藏，编辑时显示) */
+.main-toolbar {
+    display: none;
+    align-items: center;
+    flex-shrink: 0;
+    padding: 6px 16px;
+    background: #fff;
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.main-toolbar.visible {
+    display: flex;
+}
+.toolbar-btn {
+    padding: 6px 12px;
+    background: none;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.2s;
+}
+.toolbar-btn:hover {
+    background: rgba(0,0,0,0.05);
+}
+.toolbar-btn.active {
+    background: #007aff;
+    color: white;
+}
+
+/* 主题适配 - 护眼绿和经典黄的标题输入框 */
+body.theme-eye .title-input {
+    background: #d4e6d1 !important;
+    color: #2c3e2f !important;
+    border-bottom-color: #a8b8a5 !important;
+}
+body.theme-warm .title-input {
+    background: #efe5cd !important;
+    color: #4a3b2c !important;
+    border-bottom-color: #bfb59d !important;
+}
+body.theme-dark .title-input {
+    background: #2a2a3a !important;
+    color: #e0e0e0 !important;
+    border-bottom-color: #3a3a4a !important;
+}
+body.theme-default .title-input {
+    background: #fff !important;
+    color: #333 !important;
+    border-bottom-color: rgba(0,0,0,0.08) !important;
+}
+
+/* 主内容区 */
+.main-wrapper {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+/* 左侧菜单栏 */
+.sidebar-menu {
+    width: 200px;
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    border-right: 1px solid rgba(0,0,0,0.08);
+}
+
+.logo-area {
+    padding: 20px;
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+}
+.logo-area h3 { font-size: 18px; }
+.slogan { font-size: 10px; opacity: 0.6; margin-top: 4px; }
+
+.menu-nav {
+    flex: 1;
+    padding: 16px 0;
+}
+.menu-item {
+    width: 100%;
+    padding: 10px 20px;
+    background: none;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    font-size: 14px;
+}
+.menu-item:hover { background: rgba(0,0,0,0.05); }
+.menu-item.active {
+    background: rgba(0,122,255,0.1);
+    font-weight: 600;
+    border-right: 2px solid #007aff;
+}
+
+.menu-footer {
+    padding: 16px;
+    font-size: 10px;
+    text-align: center;
+    border-top: 1px solid rgba(0,0,0,0.08);
+    opacity: 0.6;
+}
+
+/* 右侧内容区 */
+.main-content {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+}
+
+.pages-container {
+    height: 100%;
+    position: relative;
+}
+
+.page {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow-y: auto;
+    padding: 20px;
+}
+.page.active { display: block; }
+
+/* 书籍管理样式 */
+.books-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+.books-header-buttons {
+    display: flex;
+    gap: 12px;
+}
+
+.btn-primary {
+    background: #007aff;
+    color: white;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+.btn-danger {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.books-container { padding: 0 10px; }
+
+.group-section {
+    margin-bottom: 30px;
+}
+.group-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid rgba(0,0,0,0.1);
+}
+.group-header h3 { margin: 0; }
+
+.books-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 16px;
+}
+
+.book-card {
+    background: #fff;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    overflow: hidden;
+    aspect-ratio: 1 / 1.4;
+    position: relative;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+.book-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.book-card .book-menu {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(0,0,0,0.5);
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: white;
+    z-index: 10;
+}
+.book-cover {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 20px;
+}
+.book-cover h4 {
+    margin-top: 12px;
+    font-size: 14px;
+}
+.book-cover p {
+    font-size: 11px;
+    opacity: 0.7;
+    margin-top: 8px;
+}
+
+/* 书籍编辑页面样式 */
+.book-detail-page {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+.book-detail-header {
+    display: flex;
+    justify-content: flex-end;
+    padding: 8px 16px;
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+}
+.right-tools {
+    display: flex;
+    gap: 8px;
+}
+.detail-main {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+.detail-chapters {
+    width: 260px;
+    border-right: 1px solid rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+.chapters-header {
+    padding: 12px;
+    display: flex;
+    gap: 8px;
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+}
+.chapters-header button {
+    padding: 4px 12px;
+    font-size: 12px;
+    cursor: pointer;
+}
+.volume-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px;
+}
+.volume-item {
+    margin-bottom: 16px;
+}
+.volume-title {
+    font-weight: 600;
+    padding: 6px 8px;
+    display: flex;
+    justify-content: space-between;
+    cursor: pointer;
+}
+.chapter-list {
+    margin-left: 20px;
+}
+.chapter-item {
+    padding: 5px 8px;
+    cursor: pointer;
+    font-size: 13px;
+    display: flex;
+    justify-content: space-between;
+}
+.chapter-item.active {
+    color: #007aff;
+    font-weight: 500;
+}
+.detail-editor {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    margin-right: 60px;
+}
+.title-input {
+    font-size: 18px;
+    font-weight: 600;
+    border: none;
+    padding: 12px 16px;
+    outline: none;
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+}
+.editor-content {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    outline: none;
+    line-height: 1.7;
+}
+.status-bar {
+    padding: 6px 16px;
+    border-top: 1px solid rgba(0,0,0,0.08);
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+}
+
+/* 右侧边栏 - 二级菜单 */
+.right-sidebar {
+    position: fixed;
+    right: 0;
+    top: 100px;
+    width: 60px;
+    height: calc(100vh - 106px);
+    background: #fff;
+    box-shadow: -2px 0 12px rgba(0,0,0,0.1);
+    transition: right 0.3s ease;
+    z-index: 999;
+    display: flex;
+    flex-direction: column;
+    border-left: 1px solid rgba(0,0,0,0.08);
+}
+.right-sidebar.hidden {
+    right: -60px;
+}
+.right-sidebar-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px 0;
+}
+.sidebar-tool-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 4px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-bottom: 4px;
+    text-align: center;
+}
+.sidebar-tool-item:hover {
+    background: rgba(0,0,0,0.08);
+}
+.sidebar-tool-icon {
+    font-size: 20px;
+    margin-bottom: 4px;
+}
+.sidebar-tool-label {
+    font-size: 10px;
+}
+
+/* 右侧功能面板 - 在边栏左边 */
+.right-panel {
+    position: fixed;
+    right: 60px;
+    top: 100px;
+    width: 380px;
+    height: calc(100vh - 106px);
+    background: #fff;
+    box-shadow: -2px 0 12px rgba(0,0,0,0.15);
+    transition: right 0.3s ease;
+    z-index: 998;
+    display: flex;
+    flex-direction: column;
+    transform: translateX(100%);
+}
+.right-panel.open {
+    transform: translateX(0);
+}
+.right-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+.right-panel-header h3 {
+    margin: 0;
+    font-size: 16px;
+}
+.right-panel-close {
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+}
+.right-panel-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+}
+
+/* 统计页面 */
+.stats-cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    max-width: 800px;
+}
+.stat-card {
+    background: #fff;
+    padding: 20px;
+    text-align: center;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+.stat-number {
+    font-size: 32px;
+    font-weight: bold;
+    margin-top: 8px;
+}
+
+/* 关于页面 */
+.about-content {
+    text-align: center;
+    max-width: 500px;
+    margin: 50px auto;
+    padding: 40px;
+    background: #fff;
+    border-radius: 16px;
+}
+.about-content h2 { margin-bottom: 16px; }
+.about-content p { margin: 8px 0; }
+
+/* 抽屉 */
+.drawer {
+    position: fixed;
+    right: -400px;
+    top: 0;
+    width: 380px;
+    height: 100vh;
+    background: #fff;
+    box-shadow: -2px 0 20px rgba(0,0,0,0.15);
+    transition: right 0.3s ease;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+}
+.drawer.open { right: 0; }
+.drawer-header {
+    padding: 20px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+}
+.drawer-content {
+    flex: 1;
+    padding: 24px;
+}
+.drawer-content label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+.drawer-content input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+.close-drawer {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+/* 江湖/学府卡片样式 */
+.jianghu-card, .xuefu-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.jianghu-card:hover, .xuefu-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+}
+
+/* 浮层面板 */
+.floating-panel {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 360px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    z-index: 2000;
+}
+.floating-panel .panel-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid #eee;
+}
+.floating-panel .panel-content {
+    padding: 16px;
+}
+.floating-panel .close-panel {
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+/* 工具栏按钮样式 */
+.tool-btn {
+    background: none;
+    border: none;
+    padding: 6px 12px;
+    cursor: pointer;
+    border-radius: 6px;
+    font-size: 13px;
+}
+.tool-btn:hover {
+    background: rgba(0,0,0,0.08);
+}
+
+/* 边栏切换按钮 */
+#sidebarToggleBtn {
+    margin-left: auto;
+}
+
+/* 闭关面板 */
+.seclusion-panel {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 400px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    z-index: 2000;
+}
+.seclusion-panel .panel-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid #eee;
+}
+.seclusion-panel .panel-content {
+    padding: 16px;
+}
+.seclusion-progress {
+    margin: 16px 0;
+}
+.seclusion-progress-bar {
+    height: 8px;
+    background: #e0e0e0;
+    border-radius: 4px;
+    overflow: hidden;
+}
+.seclusion-progress-fill {
+    height: 100%;
+    background: #007aff;
+    width: 0%;
+    transition: width 0.3s;
+}
+
+/* 主题适配 */
+body.theme-dark .tabs-container,
+body.theme-dark .main-toolbar {
+    background: #2a2a3a;
+}
+body.theme-dark .tab {
+    background: #1e1e2e;
+    color: #e0e0e0;
+}
+body.theme-dark .tab.active {
+    background: #2a2a3a;
+}
+body.theme-dark .editor-content {
+    background: rgba(30,30,46,0.9);
+    color: #e0e0e0;
+}
+body.theme-dark .right-sidebar,
+body.theme-dark .right-panel,
+body.theme-dark .floating-panel,
+body.theme-dark .seclusion-panel {
+    background: #1e1e2e;
+    color: #e0e0e0;
+}
+body.theme-dark .sidebar-tool-item:hover {
+    background: rgba(255,255,255,0.1);
+}
+body.theme-dark .book-card,
+body.theme-dark .stat-card,
+body.theme-dark .about-content,
+body.theme-dark .jianghu-card,
+body.theme-dark .xuefu-card {
+    background: #2a2a3a;
+    color: #e0e0e0;
+}
+
+body.theme-eye .tabs-container,
+body.theme-eye .main-toolbar {
+    background: #b8c9b5;
+}
+body.theme-eye .book-card,
+body.theme-eye .stat-card,
+body.theme-eye .about-content,
+body.theme-eye .jianghu-card,
+body.theme-eye .xuefu-card {
+    background: #d4e6d1;
+    color: #2c3e2f;
+}
+body.theme-eye .right-sidebar,
+body.theme-eye .right-panel {
+    background: #C8DBC5;
+}
+body.theme-eye .editor-content {
+    background: rgba(200,219,197,0.9);
+}
+
+body.theme-warm .tabs-container,
+body.theme-warm .main-toolbar {
+    background: #cfc5ad;
+}
+body.theme-warm .book-card,
+body.theme-warm .stat-card,
+body.theme-warm .about-content,
+body.theme-warm .jianghu-card,
+body.theme-warm .xuefu-card {
+    background: #efe5cd;
+    color: #4a3b2c;
+}
+body.theme-warm .right-sidebar,
+body.theme-warm .right-panel {
+    background: #DFD5BD;
+}
+body.theme-warm .editor-content {
+    background: rgba(223,213,189,0.9);
+}
+
+/* 右侧边栏位置修复 */
+.right-sidebar {
+    top: 100px;
+    height: calc(100vh - 100px);
+}
+.right-sidebar.hidden {
+    right: -60px;
+}
+
+/* 右侧功能面板位置修复 */
+.right-panel {
+    top: 100px;
+    height: calc(100vh - 100px);
+}
+
+/* 确保主工具栏在编辑时正确显示 */
+.main-toolbar.visible {
+    display: flex;
+}
+
+/* 书籍编辑页面的头部工具栏隐藏原有按钮 */
+.book-detail-header .right-tools {
+    display: flex;
+    justify-content: flex-end;
+}
+.book-detail-header .right-tools .tool-btn {
+    background: none;
+    border: none;
+    padding: 6px 12px;
+    cursor: pointer;
+    border-radius: 6px;
+    font-size: 13px;
+}
+
+/* 右侧滑出面板通用样式 */
+.right-slide-panel {
+    position: fixed;
+    right: 0;
+    top: 100px;
+    width: 360px;
+    height: calc(100vh - 100px);
+    background: #fff;
+    box-shadow: -2px 0 12px rgba(0,0,0,0.15);
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+}
+.right-slide-panel.open {
+    transform: translateX(0);
+}
+.right-slide-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+.right-slide-panel-header h3 {
+    margin: 0;
+    font-size: 16px;
+}
+.right-slide-panel-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+}
+.right-slide-panel-close {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+/* 主题适配 */
+body.theme-dark .right-slide-panel {
+    background: #1e1e2e;
+    color: #e0e0e0;
+}
+body.theme-eye .right-slide-panel {
+    background: #C8DBC5;
+}
+body.theme-warm .right-slide-panel {
+    background: #DFD5BD;
+}
+
+/* 回收站面板 */
+.chapter-trash-item {
+    padding: 12px;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.chapter-trash-item:hover {
+    background: rgba(0,0,0,0.05);
+}
+.chapter-trash-title {
+    font-weight: 500;
+}
+.chapter-trash-time {
+    font-size: 11px;
+    color: #888;
+}
+.restore-chapter-btn, .delete-chapter-permanent-btn {
+    padding: 4px 10px;
+    margin-left: 8px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.restore-chapter-btn {
+    background: #28a745;
+    color: white;
+}
+.delete-chapter-permanent-btn {
+    background: #dc3545;
+    color: white;
+}
+
+/* 回收站按钮样式 */
+.trash-btn {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 4px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+}
+.trash-btn:hover {
+    background: #c82333;
+}
+
+/* 分卷和章节按钮样式 */
+#addVolumeBtn, #addChapterBtn {
+    background: #b8cab5 !important;
+    border: none !important;
+    color: #2c3e2f !important;
+    padding: 6px 14px !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    font-size: 12px !important;
+}
+#addVolumeBtn:hover, #addChapterBtn:hover {
+    background: #a8baa5 !important;
+}
+
+/* 分卷菜单按钮（三个点）样式 */
+.volume-more {
+    background: transparent !important;
+    border: none !important;
+    font-size: 18px !important;
+    cursor: pointer !important;
+    padding: 0 8px !important;
+    color: #666 !important;
+    width: auto !important;
+    height: auto !important;
+}
+.volume-more:hover {
+    color: #333 !important;
+}
+
+/* 删除章节按钮样式 */
+.delete-chapter {
+    background: transparent !important;
+    border: none !important;
+    font-size: 14px !important;
+    cursor: pointer !important;
+    padding: 0 6px !important;
+    color: #999 !important;
+    width: auto !important;
+    height: auto !important;
+    opacity: 0.6;
+}
+.delete-chapter:hover {
+    color: #dc3545 !important;
+    opacity: 1;
+}
+
+/* 暗夜黑主题适配 */
+body.theme-dark #addVolumeBtn, body.theme-dark #addChapterBtn {
+    background: #3a3a4a !important;
+    color: #e0e0e0 !important;
+}
+body.theme-dark .volume-more {
+    color: #a0a0b0 !important;
+}
+body.theme-dark .volume-more:hover {
+    color: #e0e0e0 !important;
+}
+
+/* 护眼绿主题适配 */
+body.theme-eye #addVolumeBtn, body.theme-eye #addChapterBtn {
+    background: #a8ba98 !important;
+}
+body.theme-warm #addVolumeBtn, body.theme-warm #addChapterBtn {
+    background: #c8bda0 !important;
+}
+
+/* 修复编辑器区域背景透明 */
+.detail-editor,
+.editor-content,
+.title-input,
+.status-bar {
+    background: rgba(255, 255, 255, 0.85) !important;
+    backdrop-filter: blur(4px);
+}
+body.theme-dark .detail-editor,
+body.theme-dark .editor-content,
+body.theme-dark .title-input,
+body.theme-dark .status-bar {
+    background: rgba(30, 30, 46, 0.9) !important;
+}
+body.theme-eye .detail-editor,
+body.theme-eye .editor-content,
+body.theme-eye .title-input,
+body.theme-eye .status-bar {
+    background: rgba(200, 219, 197, 0.9) !important;
+}
+body.theme-warm .detail-editor,
+body.theme-warm .editor-content,
+body.theme-warm .title-input,
+body.theme-warm .status-bar {
+    background: rgba(223, 213, 189, 0.9) !important;
+}
+
+/* 修复标签栏背景透明 */
+.tabs-container {
+    background: rgba(242, 243, 245, 0.95) !important;
+    backdrop-filter: blur(4px);
+}
+body.theme-dark .tabs-container {
+    background: rgba(42, 42, 58, 0.95) !important;
+}
+body.theme-eye .tabs-container {
+    background: rgba(184, 201, 181, 0.95) !important;
+}
+body.theme-warm .tabs-container {
+    background: rgba(207, 197, 173, 0.95) !important;
+}
+
+/* 修复一级菜单栏背景透明 */
+.main-toolbar {
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(4px);
+}
+body.theme-dark .main-toolbar {
+    background: rgba(42, 42, 58, 0.95) !important;
+}
+body.theme-eye .main-toolbar {
+    background: rgba(184, 201, 181, 0.95) !important;
+}
+body.theme-warm .main-toolbar {
+    background: rgba(207, 197, 173, 0.95) !important;
+}
+
+/* 修复按钮背景统一 */
+#addVolumeBtn, #addChapterBtn, #trashBtnHeader {
+    background: #b8cab5 !important;
+    border: none !important;
+}
+#trashBtnHeader {
+    background: #dc3545 !important;
+    color: white !important;
+}
+body.theme-dark #addVolumeBtn, body.theme-dark #addChapterBtn {
+    background: #3a3a4a !important;
+}
+body.theme-dark #trashBtnHeader {
+    background: #b52b3a !important;
+}
+
+/* 修复右侧边栏背景透明 */
+.right-sidebar {
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(8px);
+}
+body.theme-dark .right-sidebar {
+    background: rgba(30, 30, 46, 0.95) !important;
+}
+body.theme-eye .right-sidebar {
+    background: rgba(200, 219, 197, 0.95) !important;
+}
+body.theme-warm .right-sidebar {
+    background: rgba(223, 213, 189, 0.95) !important;
+}
+
+/* 修复右侧面板透明 */
+.right-slide-panel {
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(8px);
+}
+body.theme-dark .right-slide-panel {
+    background: rgba(30, 30, 46, 0.95) !important;
+}
+body.theme-eye .right-slide-panel {
+    background: rgba(200, 219, 197, 0.95) !important;
+}
+body.theme-warm .right-slide-panel {
+    background: rgba(223, 213, 189, 0.95) !important;
+}
+
+/* 修复编辑器区域背景透明 */
+.detail-editor,
+.editor-content,
+.title-input,
+.status-bar {
+    background: rgba(255, 255, 255, 0.85) !important;
+    backdrop-filter: blur(4px);
+}
+body.theme-dark .detail-editor,
+body.theme-dark .editor-content,
+body.theme-dark .title-input,
+body.theme-dark .status-bar {
+    background: rgba(30, 30, 46, 0.9) !important;
+}
+body.theme-eye .detail-editor,
+body.theme-eye .editor-content,
+body.theme-eye .title-input,
+body.theme-eye .status-bar {
+    background: rgba(200, 219, 197, 0.9) !important;
+}
+body.theme-warm .detail-editor,
+body.theme-warm .editor-content,
+body.theme-warm .title-input,
+body.theme-warm .status-bar {
+    background: rgba(223, 213, 189, 0.9) !important;
+}
+
+/* 修复标签栏背景透明 */
+.tabs-container {
+    background: rgba(242, 243, 245, 0.95) !important;
+    backdrop-filter: blur(4px);
+}
+body.theme-dark .tabs-container {
+    background: rgba(42, 42, 58, 0.95) !important;
+}
+body.theme-eye .tabs-container {
+    background: rgba(184, 201, 181, 0.95) !important;
+}
+body.theme-warm .tabs-container {
+    background: rgba(207, 197, 173, 0.95) !important;
+}
+
+/* 修复一级菜单栏背景透明 */
+.main-toolbar {
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(4px);
+}
+body.theme-dark .main-toolbar {
+    background: rgba(42, 42, 58, 0.95) !important;
+}
+body.theme-eye .main-toolbar {
+    background: rgba(184, 201, 181, 0.95) !important;
+}
+body.theme-warm .main-toolbar {
+    background: rgba(207, 197, 173, 0.95) !important;
+}
+
+/* 修复按钮背景统一 */
+#addVolumeBtn, #addChapterBtn, #trashBtnHeader {
+    background: #b8cab5 !important;
+    border: none !important;
+}
+#trashBtnHeader {
+    background: #dc3545 !important;
+    color: white !important;
+}
+body.theme-dark #addVolumeBtn, body.theme-dark #addChapterBtn {
+    background: #3a3a4a !important;
+}
+body.theme-dark #trashBtnHeader {
+    background: #b52b3a !important;
+}
+
+/* 修复右侧边栏背景透明 */
+.right-sidebar {
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(8px);
+}
+body.theme-dark .right-sidebar {
+    background: rgba(30, 30, 46, 0.95) !important;
+}
+body.theme-eye .right-sidebar {
+    background: rgba(200, 219, 197, 0.95) !important;
+}
+body.theme-warm .right-sidebar {
+    background: rgba(223, 213, 189, 0.95) !important;
+}
+
+/* 修复右侧面板透明 */
+.right-slide-panel {
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(8px);
+}
+body.theme-dark .right-slide-panel {
+    background: rgba(30, 30, 46, 0.95) !important;
+}
+body.theme-eye .right-slide-panel {
+    background: rgba(200, 219, 197, 0.95) !important;
+}
+body.theme-warm .right-slide-panel {
+    background: rgba(223, 213, 189, 0.95) !important;
+}

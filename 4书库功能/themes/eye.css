@@ -1,0 +1,8 @@
+/* 护眼绿主题 */
+.sidebar-menu, .page, .book-card, .stat-card, .about-content, .drawer {
+    background: #C8DBC5;
+    color: #2c3e2f;
+}
+.sidebar-menu { background: #b8c9b5; }
+.tab.active { background: #c8dbc5; }
+.tab { background: #b8c9b5; }

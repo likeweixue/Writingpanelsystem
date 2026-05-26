@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>妙笔·汉字组合生成器</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+        body { background: #f2efe7; display: flex; justify-content: center; align-items: center; min-height: 100vh; font-family: 'Segoe UI', 'Noto Sans CJK SC', 'PingFang SC', Roboto, sans-serif; padding: 20px; }
+        .generator { max-width: 1300px; width: 100%; background: #fffef7; border-radius: 32px; box-shadow: 0 20px 35px -12px rgba(0,0,0,0.15); overflow: hidden; }
+        .main-layout { display: flex; flex-wrap: wrap; }
+        .left-panel { flex: 2; min-width: 280px; background: #fdfaf2; padding: 24px 20px 28px 24px; border-right: 1px solid #ede6d8; }
+        .right-panel { flex: 1.2; min-width: 260px; background: #ffffff; padding: 24px 22px 28px 22px; display: flex; flex-direction: column; gap: 24px; }
+        .category-block { margin-bottom: 28px; }
+        .category-title { font-size: 0.85rem; font-weight: 600; letter-spacing: 1px; color: #b45f2b; background: #f3ecdf; display: inline-block; padding: 4px 12px; border-radius: 30px; margin-bottom: 15px; }
+        .chars-grid { display: flex; flex-wrap: wrap; gap: 10px 12px; }
+        .char-item { background: white; border: 1px solid #e9e2d4; border-radius: 40px; padding: 6px 18px; font-size: 1rem; font-weight: 500; color: #3a2c22; cursor: pointer; transition: all 0.2s ease; }
+        .char-item:hover { background: #f9eedd; border-color: #d1b48c; transform: translateY(-1px); }
+        .char-item.selected { background: #e8d9c6; border-color: #bc8f6b; color: #4c2e1a; font-weight: 600; }
+        .word-length-group { background: #f8f3ea; border-radius: 28px; padding: 10px 16px; margin-top: 12px; }
+        .length-buttons { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
+        .len-btn { background: white; border: 1px solid #ddd2c0; border-radius: 32px; padding: 5px 22px; font-weight: 500; cursor: pointer; }
+        .len-btn.active { background: #dac29c; border-color: #aa7e55; color: #2c1c0f; font-weight: 600; }
+        .param-row { display: flex; flex-direction: column; gap: 8px; border-bottom: 1px solid #f0e9df; padding-bottom: 18px; }
+        .param-label { font-weight: 600; color: #7c5f3e; font-size: 0.85rem; }
+        .inline-options { display: flex; flex-wrap: wrap; gap: 14px; }
+        .radio-label { display: flex; align-items: center; gap: 6px; font-size: 0.9rem; cursor: pointer; background: #fefcf8; padding: 5px 12px; border-radius: 40px; border: 1px solid #e7dfd1; }
+        .surname-area { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+        .surname-type { display: flex; gap: 15px; }
+        .custom-surname { display: flex; align-items: center; gap: 8px; flex: 2; }
+        .custom-surname input { border: 1px solid #ddd0be; border-radius: 40px; padding: 8px 12px; width: 120px; outline: none; }
+        .requirement-area { background: #fef6ed; border-radius: 24px; padding: 15px; }
+        .req-textarea { width: 100%; border: 1px solid #e2d6c6; border-radius: 20px; padding: 10px 12px; font-family: inherit; resize: vertical; background: #fffefb; }
+        .random-btn { background: #ceb087; border: none; padding: 14px 0; font-size: 1.1rem; font-weight: bold; color: white; border-radius: 48px; cursor: pointer; margin-top: 8px; }
+        .random-btn:hover { background: #b78c62; }
+        .result-card { background: #faf4ea; border-radius: 36px; padding: 18px 20px; text-align: center; border: 1px solid #e2d4c2; }
+        .result-name { font-size: 2.2rem; font-weight: 800; letter-spacing: 2px; color: #4b2c17; word-break: break-word; }
+        .extra-tip { font-size: 0.7rem; color: #ad8865; margin-top: 10px; }
+        @media (max-width: 780px) { .main-layout { flex-direction: column; } .left-panel { border-right: none; border-bottom: 1px solid #ede6d8; } }
+    </style>
+</head>
+<body>
+<div class="generator">
+    <div class="main-layout">
+        <div class="left-panel">
+            <div class="category-block"><div class="category-title">人物名典</div><div class="chars-grid" id="personGrid"></div></div>
+            <div class="category-block"><div class="category-title">势力门派</div><div class="chars-grid" id="forceGrid"></div></div>
+            <div class="category-block"><div class="category-title">地点灵境</div><div class="chars-grid" id="placeGrid"></div></div>
+            <div class="category-block"><div class="category-title">招式装备怪物</div><div class="chars-grid" id="specialGrid"></div></div>
+            <div class="category-block"><div class="category-title">性别中性</div><div class="chars-grid" id="genderGrid"></div></div>
+            <div class="word-length-group">
+                <div class="category-title" style="background:transparent; padding-left:0;">字数（不含姓氏）</div>
+                <div class="length-buttons" id="lengthGroup">
+                    <div data-len="1" class="len-btn">1字</div>
+                    <div data-len="2" class="len-btn active">2字</div>
+                    <div data-len="3" class="len-btn">3字</div>
+                    <div data-len="不限" class="len-btn">不限</div>
+                </div>
+            </div>
+            <div style="margin-top:16px; font-size:12px; color:#ab8a64; text-align:center;">点击任意汉字/词根可入选偏好池</div>
+        </div>
+        <div class="right-panel">
+            <div class="param-row">
+                <div class="param-label">姓氏</div>
+                <div class="surname-area">
+                    <div class="surname-type" id="surnameTypeGroup">
+                        <label class="radio-label"><input type="radio" name="surnameMode" value="none" checked> 无姓</label>
+                        <label class="radio-label"><input type="radio" name="surnameMode" value="single"> 单姓</label>
+                        <label class="radio-label"><input type="radio" name="surnameMode" value="double"> 复姓</label>
+                    </div>
+                    <div class="custom-surname" id="customSurnameDiv" style="display:none;">
+                        <input type="text" id="customSurnameInput" placeholder="自定义姓氏" maxlength="4">
+                    </div>
+                </div>
+            </div>
+            <div class="param-row">
+                <div class="param-label">性别倾向</div>
+                <div class="inline-options" id="genderPrefer">
+                    <label class="radio-label"><input type="radio" name="genderPref" value="all" checked> 不限</label>
+                    <label class="radio-label"><input type="radio" name="genderPref" value="男"> 男</label>
+                    <label class="radio-label"><input type="radio" name="genderPref" value="女"> 女</label>
+                    <label class="radio-label"><input type="radio" name="genderPref" value="中性"> 中性</label>
+                </div>
+            </div>
+            <div class="param-row">
+                <div class="param-label">道具/装备/怪物</div>
+                <div class="inline-options" id="themeCheck" style="gap:8px;">
+                    <label class="radio-label"><input type="checkbox" value="道具"> 道具偏好</label>
+                    <label class="radio-label"><input type="checkbox" value="装备"> 装备偏好</label>
+                    <label class="radio-label"><input type="checkbox" value="怪物"> 怪物韵味</label>
+                </div>
+            </div>
+            <div class="requirement-area">
+                <div class="req-header"><span>具体要求</span><span>剩<span id="chanceCounter">666</span>次机会</span></div>
+                <textarea id="requirementText" rows="2" class="req-textarea" placeholder="输入风格/典故/寓意等"></textarea>
+            </div>
+            <button id="randomGenBtn" class="random-btn">随机取名</button>
+            <div class="result-card"><div class="result-name" id="resultName">妙笔生花</div><div class="extra-tip">随机生成 · 灵韵天成</div></div>
+        </div>
+    </div>
+</div>
+<script>
+    const rawPersonNames = ["吕斯","龚湛","周峻峰","庄非凡","宫瑜","乔森","杜敬","史宗裕","刘津卫","游京","朱柯礼","涂湛","邹尚","白凛","殷乔","马奔","冯竣","虞归舟","成然","汪昀","纪云霆"];
+    const forces = ["青云阁","月影楼","玄天宗","凌霄殿","听雨轩","破军府","百花谷","流云渡"];
+    const places = ["沧澜江","断龙崖","落星原","凤凰台","无涯海","青丘山","归墟境","白露洲"];
+    const specials = ["破空斩","霜月刃","星陨","麒麟臂","幻影步","青冥剑","啸月狼","烛龙","赤焰甲","玄冰蛊"];
+    const genderNeutral = ["然","兮","云","霄","逸","澄","安","临"];
+    const maleWords = ["锋","刚","毅","辰","豪","渊","烈","铮"];
+    const femaleWords = ["柔","婉","雅","汐","梦","萱","婵","瑶"];
+    const neutralWords = ["清","霁","和","宁","初","随","玄","微"];
+    let allCharItems = [];
+    function buildData() {
+        let items = [];
+        rawPersonNames.forEach(name => { items.push({ display: name, value: name, group: "person" }); });
+        forces.forEach(f => { items.push({ display: f, value: f, group: "force" }); });
+        places.forEach(p => { items.push({ display: p, value: p, group: "place" }); });
+        specials.forEach(s => { items.push({ display: s, value: s, group: "special" }); });
+        genderNeutral.forEach(gn => { items.push({ display: gn, value: gn, group: "gender" }); });
+        maleWords.forEach(mw => { items.push({ display: mw, value: mw, group: "gender" }); });
+        femaleWords.forEach(fw => { items.push({ display: fw, value: fw, group: "gender" }); });
+        neutralWords.forEach(nw => { items.push({ display: nw, value: nw, group: "gender" }); });
+        return items;
+    }
+    allCharItems = buildData();
+    let selectedItemsSet = new Set();
+    function renderLeftPanels() {
+        const personGrid = document.getElementById('personGrid');
+        const forceGrid = document.getElementById('forceGrid');
+        const placeGrid = document.getElementById('placeGrid');
+        const specialGrid = document.getElementById('specialGrid');
+        const genderGrid = document.getElementById('genderGrid');
+        personGrid.innerHTML = forceGrid.innerHTML = placeGrid.innerHTML = specialGrid.innerHTML = genderGrid.innerHTML = '';
+        allCharItems.forEach(item => {
+            const span = document.createElement('span');
+            span.className = 'char-item';
+            if (selectedItemsSet.has(item.value)) span.classList.add('selected');
+            span.textContent = item.display;
+            span.onclick = () => {
+                if (selectedItemsSet.has(item.value)) { selectedItemsSet.delete(item.value); span.classList.remove('selected'); }
+                else { selectedItemsSet.add(item.value); span.classList.add('selected'); }
+            };
+            if (item.group === "person") personGrid.appendChild(span);
+            else if (item.group === "force") forceGrid.appendChild(span);
+            else if (item.group === "place") placeGrid.appendChild(span);
+            else if (item.group === "special") specialGrid.appendChild(span);
+            else if (item.group === "gender") genderGrid.appendChild(span);
+        });
+    }
+    let selectedLength = "2";
+    let surnameMode = "none";
+    let customSurname = "";
+    let genderPref = "all";
+    let themePrefs = { 道具: false, 装备: false, 怪物: false };
+    let chanceLeft = 666;
+    function generateName() {
+        let targetLen = selectedLength;
+        let finalNameLen = targetLen === "1" ? 1 : (targetLen === "2" ? 2 : (targetLen === "3" ? 3 : Math.floor(Math.random() * 3) + 1));
+        let candidatePool = selectedItemsSet.size > 0 ? Array.from(selectedItemsSet) : allCharItems.map(item => item.value);
+        if (candidatePool.length === 0) candidatePool = ["云","风","逸","远","清","明"];
+        let genderFilteredPool = [...candidatePool];
+        if (genderPref !== "all") {
+            let prefChars = genderPref === "男" ? maleWords : (genderPref === "女" ? femaleWords : neutralWords);
+            let matched = candidatePool.filter(v => prefChars.some(pc => v.includes(pc) || pc === v));
+            if (matched.length > 0) genderFilteredPool = matched;
+        }
+        let themeExtra = [];
+        if (themePrefs.道具) themeExtra.push("珠","玉","环","铃","伞");
+        if (themePrefs.装备) themeExtra.push("剑","刀","甲","铠","弓");
+        if (themePrefs.怪物) themeExtra.push("煞","魇","妖","魔","兽");
+        let finalPool = [...genderFilteredPool, ...themeExtra];
+        if (finalPool.length === 0) finalPool = candidatePool;
+        let nameBody = "";
+        for(let i=0; i<finalNameLen; i++) {
+            let randChar = finalPool[Math.floor(Math.random() * finalPool.length)];
+            if (randChar.length > 1 && finalNameLen === 1) randChar = randChar[0];
+            else if (randChar.length > 2) randChar = randChar.substring(0,2);
+            nameBody += randChar;
+        }
+        if(nameBody.length > finalNameLen) nameBody = nameBody.slice(0, finalNameLen);
+        let fullName = "";
+        if (surnameMode === "single") {
+            let defaultSingle = ["李","王","张","刘","陈","赵","周","吴","郑"];
+            let surname = (customSurname && customSurname.trim()) ? customSurname.trim().slice(0,2) : defaultSingle[Math.floor(Math.random() * defaultSingle.length)];
+            fullName = surname + nameBody;
+        } else if (surnameMode === "double") {
+            let defaultDouble = ["欧阳","慕容","上官","诸葛","司徒","令狐"];
+            let surname = (customSurname && customSurname.trim()) ? customSurname.trim().slice(0,2) : defaultDouble[Math.floor(Math.random() * defaultDouble.length)];
+            fullName = surname + nameBody;
+        } else {
+            fullName = nameBody;
+        }
+        if(chanceLeft > 0) { chanceLeft--; document.getElementById('chanceCounter').innerText = chanceLeft; }
+        return fullName;
+    }
+    function updateResult() { document.getElementById('resultName').innerText = generateName(); }
+    function bindEvents() {
+        document.querySelectorAll('.len-btn').forEach(btn => {
+            btn.onclick = () => {
+                document.querySelectorAll('.len-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                selectedLength = btn.getAttribute('data-len');
+            };
+        });
+        document.querySelectorAll('input[name="surnameMode"]').forEach(radio => {
+            radio.onchange = (e) => {
+                surnameMode = e.target.value;
+                document.getElementById('customSurnameDiv').style.display = (surnameMode === 'single' || surnameMode === 'double') ? 'flex' : 'none';
+            };
+        });
+        document.getElementById('customSurnameInput').oninput = (e) => { customSurname = e.target.value; };
+        document.querySelectorAll('input[name="genderPref"]').forEach(r => { r.onchange = (e) => { if(e.target.checked) genderPref = e.target.value; }; });
+        document.querySelectorAll('#themeCheck input[type="checkbox"]').forEach(cb => { cb.onchange = (e) => { themePrefs[e.target.value] = e.target.checked; }; });
+        document.getElementById('randomGenBtn').onclick = updateResult;
+    }
+    renderLeftPanels();
+    bindEvents();
+    updateResult();
+    document.getElementById('customSurnameDiv').style.display = 'none';
+    document.getElementById('chanceCounter').innerText = chanceLeft;
+</script>
+</body>
+</html>

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>写作帮手-写作数据看板</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { margin:0; padding:0;  background: #e9e3d7; font-family: 'Segoe UI', 'Noto Sans CJK SC', 'PingFang SC', Roboto, sans-serif; padding: 24px; min-height: 100vh; }
+        .dashboard-container { max-width: 1600px; margin: 0 auto; background: #fffef7; border-radius: 32px; box-shadow: 0 20px 35px -12px rgba(0,0,0,0.2); overflow: hidden; display: flex; flex-direction: column; }
+        .dashboard-header { background: #fcf9f2; padding: 18px 28px; border-bottom: 1px solid #ede3d4; display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; }
+        .title-section h1 { font-size: 1.6rem; font-weight: 600; color: #5c3e25; letter-spacing: 2px; }
+        .title-section p { font-size: 0.75rem; color: #b48b62; margin-top: 4px; }
+        .date-badge { background: #f3ecdf; border-radius: 40px; padding: 6px 16px; font-size: 0.8rem; color: #9b6e48; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; padding: 28px; }
+        .card { background: #ffffff; border-radius: 28px; border: 1px solid #ede3d6; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+        .card-header { background: #fefaf4; padding: 16px 20px; border-bottom: 1px solid #f0e5d8; font-weight: 600; color: #5c3e25; font-size: 1.1rem; display: flex; align-items: center; gap: 8px; }
+        .card-body { margin:0; padding:0;  padding: 20px; }
+        .kpi-row { display: flex; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; }
+        .kpi-item { text-align: center; flex: 1; padding: 8px; }
+        .kpi-number { font-size: 2rem; font-weight: 800; color: #b87c4a; }
+        .kpi-label { font-size: 0.7rem; color: #a5815c; margin-top: 4px; }
+        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .calendar-nav button { background: none; border: none; font-size: 1.2rem; cursor: pointer; padding: 0 8px; color: #9b784e; }
+        .calendar-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 0.75rem; color: #b08862; margin-bottom: 8px; }
+        .calendar-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+        .cal-day { aspect-ratio: 1 / 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.8rem; border-radius: 20px; background: #fefcf8; cursor: pointer; transition: 0.1s; border: 1px solid #f1e8df; position: relative; }
+        .cal-day.today { background: #eedfcb; border-color: #ceb087; font-weight: bold; }
+        .cal-day.has-event { background: #f5ede2; border-color: #dabf9c; }
+        .event-dot { width: 4px; height: 4px; background: #b87c4a; border-radius: 50%; margin-top: 2px; }
+        .cal-day:hover { background: #e8ddcf; }
+        .todo-list { max-height: 300px; overflow-y: auto; }
+        .todo-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #f2eadf; }
+        .todo-check { width: 20px; height: 20px; cursor: pointer; accent-color: #ceb087; }
+        .todo-text { flex: 1; font-size: 0.85rem; }
+        .todo-text.completed { text-decoration: line-through; color: #b8a58c; }
+        .todo-delete { color: #c28b6b; cursor: pointer; font-size: 0.7rem; }
+        .add-todo { margin-top: 16px; display: flex; gap: 8px; }
+        .add-todo input { flex: 1; border: 1px solid #e2d4c4; border-radius: 40px; padding: 8px 12px; background: white; }
+        .add-todo button { background: #ceb087; border: none; border-radius: 40px; padding: 8px 16px; color: white; cursor: pointer; }
+        .typing-stats { background: #fef9f0; border-radius: 24px; padding: 16px; margin-top: 8px; }
+        .progress-bar { background: #ece1d2; border-radius: 30px; height: 12px; margin: 12px 0; overflow: hidden; }
+        .progress-fill { background: #ceb087; width: 0%; height: 100%; border-radius: 30px; }
+        .daily-input { display: flex; gap: 12px; margin-top: 16px; }
+        .daily-input input { flex: 1; border: 1px solid #e2d4c4; border-radius: 40px; padding: 8px 12px; }
+        .week-chart { display: flex; justify-content: space-around; margin-top: 20px; align-items: flex-end; height: 120px; }
+        .bar-item { text-align: center; width: 30px; }
+        .bar { background: #dac29c; width: 24px; border-radius: 12px; transition: height 0.2s; margin: 0 auto; }
+        .bar-label { font-size: 0.6rem; margin-top: 6px; color: #9b784e; }
+        .badge-list { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
+        .stat-badge { background: #f3ecdf; border-radius: 40px; padding: 6px 16px; font-size: 0.75rem; }
+        @media (max-width: 780px) { .stats-grid { grid-template-columns: 1fr; padding: 20px; } }
+        .footer-note { text-align: center; font-size: 0.7rem; color: #c7ad8a; padding: 16px 28px; border-top: 1px solid #f1e8dd; }
+        button { cursor: pointer; }
+    </style>
+</head>
+<body>
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <div class="title-section"><h1>写作数据看板</h1><p>灵感追踪 · 进度可视化</p></div>
+        <div class="date-badge" id="currentDateDisplay"></div>
+    </div>
+    <div class="stats-grid">
+        <div class="card">
+            <div class="card-header">✍️ 写作总览</div>
+            <div class="card-body">
+                <div class="kpi-row">
+                    <div class="kpi-item"><div class="kpi-number" id="totalWords">0</div><div class="kpi-label">总字数</div></div>
+                    <div class="kpi-item"><div class="kpi-number" id="todayWords">0</div><div class="kpi-label">今日码字</div></div>
+                    <div class="kpi-item"><div class="kpi-number" id="weekAvg">0</div><div class="kpi-label">近7日均量</div></div>
+                </div>
+                <div class="kpi-row">
+                    <div class="kpi-item"><div class="kpi-number" id="totalNotes">0</div><div class="kpi-label">笔记总数</div></div>
+                    <div class="kpi-item"><div class="kpi-number" id="totalChapters">0</div><div class="kpi-label">章纲数</div></div>
+                    <div class="kpi-item"><div class="kpi-number" id="streakDays">0</div><div class="kpi-label">连续写作</div></div>
+                </div>
+                <div class="progress-bar"><div class="progress-fill" id="monthProgress" style="width:0%"></div></div>
+                <div class="daily-input"><input type="number" id="dailyWordInput" placeholder="今日新增字数" value="0"><button id="addWordBtn">➕ 记录</button></div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header">📅 写作日历</div>
+            <div class="card-body">
+                <div class="calendar-header"><button id="prevMonthBtn">◀</button><span id="calendarMonthYear"></span><button id="nextMonthBtn">▶</button></div>
+                <div class="calendar-weekdays"><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span></div>
+                <div id="calendarDays" class="calendar-days"></div>
+                <div style="font-size:0.7rem; margin-top:12px; text-align:center;">💡 绿色点表示有写作记录</div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header">✅ 写作待办</div>
+            <div class="card-body"><div id="todoListContainer" class="todo-list"></div><div class="add-todo"><input type="text" id="newTodoText" placeholder="新任务，如：完善第三章大纲"><button id="addTodoBtn">+ 添加</button></div></div>
+        </div>
+        <div class="card">
+            <div class="card-header">📈 近7天码字趋势</div>
+            <div class="card-body"><div id="weeklyChart" class="week-chart"></div><div class="typing-stats"><div>🏆 本月目标剩余: <span id="monthRemain">0</span> 字</div><div class="progress-bar mt-1"><div class="progress-fill" id="monthGoalFill" style="width:0%"></div></div><div class="badge-list"><div class="stat-badge">⚡ 最高日: <span id="maxDayWords">0</span></div><div class="stat-badge">📖 平均时速: <span id="avgSpeed">0</span> 字/日</div></div></div></div>
+        </div>
+        <div class="card">
+            <div class="card-header">🏅 写作成就 & 标签</div>
+            <div class="card-body"><div id="achievementList" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px;"></div><div style="border-top:1px solid #f0e5d8; margin:12px 0;"></div><div><strong>🏷️ 活跃标签</strong></div><div id="tagCloud" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;"></div><div class="stat-badge" style="margin-top:16px; background:#f9efdf;">✨ 累计创作天数: <strong id="totalWritingDays">0</strong> 天</div></div>
+        </div>
+        <div class="card">
+            <div class="card-header">⚡ 写作效率</div>
+            <div class="card-body"><div><span>章节平均字数: </span><strong id="avgChapterWords">0</strong> 字</div><div style="margin:12px 0;">当前小说进度</div><div class="progress-bar"><div class="progress-fill" id="novelProgress" style="width:23%"></div></div><div id="nextMilestone" style="font-size:0.75rem; margin-top:8px;">🏁 下一个里程碑: 10万字</div><button id="resetDemoDataBtn" style="margin-top:16px; background:#e8ddcf; border:none; border-radius:40px; padding:6px; width:100%;">重置演示数据</button></div>
+        </div>
+    </div>
+    <div class="footer-note">🖋️ 每一字都是世界的砖瓦 — 记录你的创作宇宙</div>
+</div>
+<script>
+    let writingData = { totalWords: 28400, dailyLog: {}, todoList: [{ text: "完善第一卷·龙渊觉醒的伏笔", completed: false },{ text: "设计新角色的武器设定", completed: true },{ text: "写出高潮场景片段", completed: false }], chapterCount: 12, noteCount: 18 };
+    function getTodayStr() { let d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+    function updateTodayWords() { let today = getTodayStr(); let words = writingData.dailyLog[today] || 0; document.getElementById('todayWords').innerText = words; return words; }
+    function recalcTotalWords() { let sum = 0; for (let key in writingData.dailyLog) sum += writingData.dailyLog[key]; writingData.totalWords = sum; document.getElementById('totalWords').innerText = sum; return sum; }
+    function updateWeekAvg() { let dates = []; for (let i=6; i>=0; i--) { let d = new Date(); d.setDate(d.getDate()-i); let ds = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; dates.push(ds); } let total=0,count=0; dates.forEach(d=>{ if(writingData.dailyLog[d]){ total+=writingData.dailyLog[d]; count++; } }); let avg=count===0?0:Math.floor(total/count); document.getElementById('weekAvg').innerText=avg; return {dates,total,avg}; }
+    function calcStreak() { let today=new Date(); let streak=0; let checkDate=new Date(today); while(true){ let ds=`${checkDate.getFullYear()}-${String(checkDate.getMonth()+1).padStart(2,'0')}-${String(checkDate.getDate()).padStart(2,'0')}`; if(writingData.dailyLog[ds] && writingData.dailyLog[ds]>0){ streak++; checkDate.setDate(checkDate.getDate()-1); } else break; } document.getElementById('streakDays').innerText=streak; return streak; }
+    function updateStatsMeta() { document.getElementById('totalNotes').innerText=writingData.noteCount||0; document.getElementById('totalChapters').innerText=writingData.chapterCount||12; let maxVal=0; for(let k in writingData.dailyLog) if(writingData.dailyLog[k]>maxVal) maxVal=writingData.dailyLog[k]; document.getElementById('maxDayWords').innerText=maxVal; let days=Object.keys(writingData.dailyLog).length; let avgSpeed=days===0?0:Math.floor(writingData.totalWords/days); document.getElementById('avgSpeed').innerText=avgSpeed; document.getElementById('totalWritingDays').innerText=days; let avgChap=writingData.chapterCount?Math.floor(writingData.totalWords/writingData.chapterCount):0; document.getElementById('avgChapterWords').innerText=avgChap; let goal=200000; let progPercent=Math.min(100,Math.floor((writingData.totalWords/goal)*100)); document.getElementById('novelProgress').style.width=`${progPercent}%`; let monthTarget=30000; let currentMonth=new Date().getMonth(); let currentYear=new Date().getFullYear(); let monthWords=0; for(let k in writingData.dailyLog){ let parts=k.split('-'); if(parseInt(parts[1])-1===currentMonth && parseInt(parts[0])===currentYear) monthWords+=writingData.dailyLog[k]; } let remain=Math.max(0,monthTarget-monthWords); document.getElementById('monthRemain').innerText=remain; let monthFill=Math.min(100,Math.floor((monthWords/monthTarget)*100)); document.getElementById('monthGoalFill').style.width=`${monthFill}%`; document.getElementById('monthProgress').style.width=`${monthFill}%`; }
+    function renderTodo() { let container=document.getElementById('todoListContainer'); if(!container) return; container.innerHTML=''; writingData.todoList.forEach((item,idx)=>{ let div=document.createElement('div'); div.className='todo-item'; div.innerHTML=`<input type="checkbox" class="todo-check" ${item.completed?'checked':''} data-idx="${idx}"><span class="todo-text ${item.completed?'completed':''}">${escapeHtml(item.text)}</span><span class="todo-delete" data-idx="${idx}">🗑</span>`; container.appendChild(div); }); document.querySelectorAll('.todo-check').forEach(cb=>{ cb.addEventListener('change',(e)=>{ let idx=parseInt(e.target.dataset.idx); writingData.todoList[idx].completed=e.target.checked; renderTodo(); saveToLocal(); }); }); document.querySelectorAll('.todo-delete').forEach(del=>{ del.addEventListener('click',(e)=>{ let idx=parseInt(e.target.dataset.idx); writingData.todoList.splice(idx,1); renderTodo(); saveToLocal(); }); }); }
+    function escapeHtml(str){ return str.replace(/[&<>]/g,function(m){ if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
+    document.getElementById('addTodoBtn')?.addEventListener('click',()=>{ let input=document.getElementById('newTodoText'); if(input.value.trim()){ writingData.todoList.push({ text: input.value.trim(), completed: false }); input.value=''; renderTodo(); saveToLocal(); } });
+    document.getElementById('addWordBtn')?.addEventListener('click',()=>{ let addVal=parseInt(document.getElementById('dailyWordInput').value); if(isNaN(addVal)||addVal<=0) return alert('请输入有效字数'); let today=getTodayStr(); let current=writingData.dailyLog[today]||0; writingData.dailyLog[today]=current+addVal; recalcTotalWords(); updateTodayWords(); updateWeekAvg(); calcStreak(); updateStatsMeta(); renderCalendar(currentCalendarYear,currentCalendarMonth); renderWeeklyChart(); renderAchievementsAndTags(); saveToLocal(); document.getElementById('dailyWordInput').value=''; });
+    let currentCalendarYear=new Date().getFullYear(); let currentCalendarMonth=new Date().getMonth();
+    function renderCalendar(year,month){ let firstDay=new Date(year,month,1); let startWeekday=firstDay.getDay()===0?7:firstDay.getDay(); let daysInMonth=new Date(year,month+1,0).getDate(); let calendarDiv=document.getElementById('calendarDays'); if(!calendarDiv) return; calendarDiv.innerHTML=''; document.getElementById('calendarMonthYear').innerHTML=`${year}年 ${month+1}月`; for(let i=1;i<startWeekday;i++){ let empty=document.createElement('div'); empty.className='cal-day'; empty.style.background='#faf7f0'; calendarDiv.appendChild(empty); } for(let d=1;d<=daysInMonth;d++){ let dayDiv=document.createElement('div'); dayDiv.className='cal-day'; let dateStr=`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`; let hasEvent=writingData.dailyLog[dateStr]&&writingData.dailyLog[dateStr]>0; if(hasEvent) dayDiv.classList.add('has-event'); let todayStr=getTodayStr(); if(todayStr===dateStr) dayDiv.classList.add('today'); dayDiv.innerHTML=`<span>${d}</span>${hasEvent?'<div class="event-dot"></div>':''}`; dayDiv.title=hasEvent?`写了${writingData.dailyLog[dateStr]}字`:'无记录'; calendarDiv.appendChild(dayDiv); } }
+    function renderWeeklyChart(){ let {dates}=updateWeekAvg(); let container=document.getElementById('weeklyChart'); if(!container) return; container.innerHTML=''; let maxInWeek=1; dates.forEach(d=>{ let val=writingData.dailyLog[d]||0; if(val>maxInWeek) maxInWeek=val; }); maxInWeek=Math.max(maxInWeek,100); dates.forEach(d=>{ let words=writingData.dailyLog[d]||0; let heightPercent=(words/maxInWeek)*80; let barDiv=document.createElement('div'); barDiv.className='bar-item'; barDiv.innerHTML=`<div class="bar" style="height:${Math.max(8,heightPercent)}px;"></div><div class="bar-label">${d.slice(5)}</div><div style="font-size:0.6rem;">${words}</div>`; container.appendChild(barDiv); }); }
+    function renderAchievementsAndTags(){ let total=writingData.totalWords; let achieveDiv=document.getElementById('achievementList'); let achievements=[]; if(total>=5000) achievements.push('🏅 初入文道'); if(total>=20000) achievements.push('📖 两万字徽章'); if(total>=50000) achievements.push('🌟 五万字里程碑'); if(Object.keys(writingData.dailyLog).length>=7) achievements.push('📆 七日笔耕不辍'); achieveDiv.innerHTML=achievements.map(a=>`<span class="stat-badge">${a}</span>`).join(''); if(achievements.length===0) achieveDiv.innerHTML='<span class="stat-badge">✨ 记录第一笔字数解锁成就</span>'; let tagDiv=document.getElementById('tagCloud'); let tags=['玄幻','修仙','羁绊','高燃战斗','权谋','秘境']; tagDiv.innerHTML=tags.map(t=>`<span class="stat-badge" style="background:#f1e8de;">#${t}</span>`).join(''); }
+    function resetDemo(){ writingData={ totalWords:28400, dailyLog:{ "2025-03-15":3200, "2025-03-16":2800, "2025-03-17":4100, "2025-03-18":0, "2025-03-19":1500, "2025-03-20":2700, "2025-03-21":1800, [getTodayStr()]:0 }, todoList:[{ text:"完善第一卷·龙渊觉醒的伏笔", completed:false },{ text:"设计新角色的武器设定", completed:true },{ text:"写出高潮场景片段", completed:false }], chapterCount:12, noteCount:18 }; recalcTotalWords(); updateTodayWords(); updateWeekAvg(); calcStreak(); updateStatsMeta(); renderTodo(); renderCalendar(currentCalendarYear,currentCalendarMonth); renderWeeklyChart(); renderAchievementsAndTags(); saveToLocal(); }
+    function saveToLocal(){ localStorage.setItem('writing_dashboard',JSON.stringify(writingData)); }
+    function loadLocal(){ let raw=localStorage.getItem('writing_dashboard'); if(raw){ try{ let saved=JSON.parse(raw); writingData=saved; recalcTotalWords(); updateTodayWords(); updateWeekAvg(); calcStreak(); updateStatsMeta(); renderTodo(); renderCalendar(currentCalendarYear,currentCalendarMonth); renderWeeklyChart(); renderAchievementsAndTags(); }catch(e){} } else { if(!writingData.dailyLog[getTodayStr()]) writingData.dailyLog[getTodayStr()]=0; recalcTotalWords(); updateTodayWords(); updateWeekAvg(); calcStreak(); updateStatsMeta(); renderTodo(); renderCalendar(currentCalendarYear,currentCalendarMonth); renderWeeklyChart(); renderAchievementsAndTags(); } }
+    document.getElementById('prevMonthBtn')?.addEventListener('click',()=>{ if(currentCalendarMonth===0){ currentCalendarYear--; currentCalendarMonth=11; } else currentCalendarMonth--; renderCalendar(currentCalendarYear,currentCalendarMonth); });
+    document.getElementById('nextMonthBtn')?.addEventListener('click',()=>{ if(currentCalendarMonth===11){ currentCalendarYear++; currentCalendarMonth=0; } else currentCalendarMonth++; renderCalendar(currentCalendarYear,currentCalendarMonth); });
+    document.getElementById('resetDemoDataBtn')?.addEventListener('click',resetDemo);
+    function updateCurrentDate(){ document.getElementById('currentDateDisplay').innerText=new Date().toLocaleDateString('zh-CN',{ year:'numeric', month:'long', day:'numeric', weekday:'long' }); }
+    updateCurrentDate(); loadLocal(); setInterval(updateCurrentDate,60000);
+</script>
+</body>
+</html>

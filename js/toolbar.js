@@ -17,6 +17,7 @@ function handleToolbarAction(action) {
         case 'export': openExportPanel(); break;
         case 'sidebar': if (typeof toggleRightSidebar === 'function') toggleRightSidebar(); break;
         default: console.log('未知:', action);
+        case 'clean': quickClean(); break;
     }
 }
 
@@ -60,13 +61,108 @@ function toggleFullscreen() {
 
 function autoFormat() {
     var editor = document.getElementById('editor');
-    if (!editor) return;
-    var html = editor.innerHTML;
-    html = html.replace(/<p><br><\/p>/g, '<p></p>');
-    html = html.replace(/([。！？；])([^"'])/g, '$1<br>$2');
-    editor.innerHTML = html;
-    if (typeof saveCurrentChapter === 'function') saveCurrentChapter();
-    alert('排版完成');
+    if (!editor) {
+        alert('请先打开一个章节');
+        return;
+    }
+    
+    // 获取当前内容
+    var content = editor.innerHTML;
+    
+    // 1. 提取纯文本（去除 HTML 标签）
+    var tempDiv = document.createElement('div');
+    tempDiv.innerHTML = content;
+    var text = tempDiv.innerText;
+    
+    // 2. 处理文本格式
+    var lines = text.split(/\r?\n/);
+    var formattedLines = [];
+    
+    for (var i = 0; i < lines.length; i++) {
+        var line = lines[i];
+        
+        // 去除每行开头和结尾的多余空格
+        line = line.trim();
+        
+        // 跳过空行
+        if (line === '') continue;
+        
+        // 检查是否是段落开头（中文标点符号开头的不缩进）
+        var firstChar = line.charAt(0);
+        var isPunctuation = ['，', '。', '！', '？', '；', '：', '”', '’', '》', '】', '、'].indexOf(firstChar) !== -1;
+        
+        if (!isPunctuation && line.length > 0) {
+            // 首行缩进两个字符（使用两个全角空格）
+            line = '　　' + line;
+        }
+        
+        formattedLines.push(line);
+    }
+    
+    // 3. 重新组合，段落之间空一行
+    var formattedText = formattedLines.join('\n\n');
+    
+    // 4. 处理标点符号换行问题（防止引号、括号等被单独换行）
+    formattedText = formattedText.replace(/([“”‘’《》【】])/g, function(match) {
+        return match;
+    });
+    
+    // 5. 将处理后的文本转换回 HTML
+    var formattedHtml = formattedText.replace(/\n/g, '<br>');
+    
+    // 6. 处理段落（将连续的 br 转换为 p 标签）
+    formattedHtml = formattedHtml.replace(/(<br>)+/g, '</p><p>');
+    formattedHtml = '<p>' + formattedHtml + '</p>';
+    formattedHtml = formattedHtml.replace(/<p><\/p>/g, '');
+    formattedHtml = formattedHtml.replace(/<p><br><\/p>/g, '<p></p>');
+    
+    // 7. 应用格式化后的内容
+    editor.innerHTML = formattedHtml;
+    
+    // 8. 保存章节
+    if (typeof saveCurrentChapter === 'function') {
+        saveCurrentChapter();
+    }
+    
+    alert('排版完成：已删除多余空格，段落首行缩进2字符，段落之间空一行');
+}
+
+// 快速清理功能（只删除多余空格，不改变格式）
+function quickClean() {
+    var editor = document.getElementById('editor');
+    if (!editor) {
+        alert('请先打开一个章节');
+        return;
+    }
+    
+    // 获取当前内容
+    var content = editor.innerHTML;
+    var tempDiv = document.createElement('div');
+    tempDiv.innerHTML = content;
+    var text = tempDiv.innerText;
+    
+    // 清理多余空行（多个连续换行变成两个）
+    text = text.replace(/\n{3,}/g, '\n\n');
+    
+    // 清理行首行尾空格
+    var lines = text.split('\n');
+    for (var i = 0; i < lines.length; i++) {
+        lines[i] = lines[i].trim();
+    }
+    text = lines.join('\n');
+    
+    // 转回 HTML
+    var formattedHtml = text.replace(/\n/g, '<br>');
+    formattedHtml = '<p>' + formattedHtml.replace(/<br><br>/g, '</p><p>') + '</p>';
+    formattedHtml = formattedHtml.replace(/<p><\/p>/g, '');
+    
+    editor.innerHTML = formattedHtml;
+    
+    if (typeof saveCurrentChapter === 'function') {
+        saveCurrentChapter();
+    }
+    
+    alert('清理完成：已删除多余空格和空行');
 }
 
 function proofread() {
@@ -315,7 +411,6 @@ function openFontPanel() {
     var rightSidebarRect = rightSidebar ? rightSidebar.getBoundingClientRect() : null;
     var leftPos = rightSidebarRect ? (rightSidebarRect.left - 340) : (window.innerWidth - 380);
     var topPos = 80;
-    var topPos = 80;
     
     var html = '<div id="fontSlidePanel" style="position: fixed; left: ' + leftPos + 'px; top: ' + topPos + 'px; width: 340px; height: calc(100vh - 80px); background: var(--panel-bg, rgba(255, 255, 255, 0.95)); backdrop-filter: blur(8px); border-radius: 0px; box-shadow: -2px 0 12px rgba(0,0,0,0.15); z-index: 1000; display: flex; flex-direction: column;">' +
         '<div class="right-slide-panel-header" style="padding: 16px; border-bottom: 1px solid var(--border-color, rgba(0,0,0,0.1)); display: flex; justify-content: space-between; align-items: center;">' +
@@ -324,8 +419,8 @@ function openFontPanel() {
         '</div>' +
         '<div class="right-slide-panel-content" style="flex:1; overflow-y:auto; padding: 20px;">' +
         
-        // 字体选择
-        '<label style="display:block; margin-bottom:8px;">🔤 字体：</label>' +
+        // 快速字体选择（下拉框）
+        '<label style="display:block; margin-bottom:8px;">🔤 快速选择：</label>' +
         '<select id="fontFamilySlide" style="width:100%; margin-bottom:16px; padding:8px; border-radius:6px; border:1px solid #ddd;">' +
         '<option value="system-ui">系统默认</option>' +
         '<option value="Georgia, serif">宋体风格</option>' +
@@ -334,9 +429,17 @@ function openFontPanel() {
         '<option value="Courier New, monospace">等宽字体</option>' +
         '</select>' +
         
-        // 上传自定义字体区域
+        // 系统字体列表
+        '<div style="margin-bottom:20px;">' +
+        '<label style="display:block; margin-bottom:8px;">💻 系统字体：</label>' +
+        '<div id="systemFontList" style="border:1px solid var(--border-color, #ddd); border-radius:6px; max-height:150px; overflow-y:auto;">' +
+        '<div style="padding:8px; text-align:center; color:#888;">加载中...</div>' +
+        '</div>' +
+        '</div>' +
+        
+        // 自定义字体上传
         '<div style="margin-bottom:20px; border:1px dashed var(--border-color, #ddd); border-radius:8px; padding:12px;">' +
-        '<label style="display:block; margin-bottom:8px; cursor:pointer;">📁 点击可上传字体</label>' +
+        '<label style="display:block; margin-bottom:8px; cursor:pointer;">📁 点击上传自定义字体</label>' +
         '<input type="file" id="customFontUpload" accept=".ttf,.otf,.woff,.woff2" style="width:100%; padding:6px; margin-bottom:8px;">' +
         '<div id="customFontList" style="margin-top:8px; font-size:12px; max-height:100px; overflow-y:auto;"></div>' +
         '</div>' +
@@ -409,6 +512,9 @@ function openFontPanel() {
         if (savedLine) editor.style.lineHeight = savedLine;
     }
     
+    // 加载系统字体列表
+    loadSystemFonts();
+    
     // 加载自定义字体列表
     loadCustomFonts();
     
@@ -424,6 +530,50 @@ function openFontPanel() {
             alert('请选择有效的字体文件（.ttf, .otf, .woff, .woff2）');
         }
     };
+}
+
+// 加载系统字体列表
+function loadSystemFonts() {
+    var container = document.getElementById('systemFontList');
+    if (!container) return;
+    
+    // 常见的系统字体列表
+    var systemFonts = [
+        { name: '苹方 (PingFang SC)', family: 'PingFang SC, system-ui' },
+        { name: '微软雅黑 (Microsoft YaHei)', family: 'Microsoft YaHei, system-ui' },
+        { name: '宋体 (SimSun)', family: 'SimSun, serif' },
+        { name: '黑体 (SimHei)', family: 'SimHei, sans-serif' },
+        { name: '楷体 (KaiTi)', family: 'KaiTi, serif' },
+        { name: '仿宋 (FangSong)', family: 'FangSong, serif' },
+        { name: '思源黑体 (Source Han Sans)', family: 'Source Han Sans, sans-serif' },
+        { name: '思源宋体 (Source Han Serif)', family: 'Source Han Serif, serif' },
+        { name: '阿里巴巴惠普体', family: 'Alibaba PuHuiTi, sans-serif' },
+        { name: '霞鹜文楷 (LXGW WenKai)', family: 'LXGW WenKai, cursive' },
+        { name: 'JetBrains Mono', family: 'JetBrains Mono, monospace' },
+        { name: 'Fira Code', family: 'Fira Code, monospace' }
+    ];
+    
+    var html = '';
+    for (var i = 0; i < systemFonts.length; i++) {
+        var font = systemFonts[i];
+        html += '<div style="display:flex; justify-content:space-between; align-items:center; padding:8px; border-bottom:1px solid #eee; cursor:pointer;" onclick="applySystemFont(\'' + font.family.replace(/'/g, "\\'") + '\', \'' + font.name.replace(/'/g, "\\'") + '\')">' +
+            '<span style="font-family:\'' + font.family + '\';">' + font.name + '</span>' +
+            '<span style="font-size:11px; color:#888;">预览</span>' +
+            '</div>';
+    }
+    container.innerHTML = html;
+}
+
+// 应用系统字体
+function applySystemFont(fontFamily, fontName) {
+    var editor = document.getElementById('editor');
+    if (editor) {
+        editor.style.fontFamily = fontFamily;
+        localStorage.setItem('editor_font_family', fontFamily);
+        var fontSelect = document.getElementById('fontFamilySlide');
+        if (fontSelect) fontSelect.value = fontFamily;
+        alert('已应用字体：' + fontName);
+    }
 }
 
 // 加载自定义字体列表
@@ -883,7 +1033,6 @@ function toggleDualMode() {
     if (existingDual) {
         existingDual.remove();
         editor.style.display = 'block';
-        alert('已退出双栏模式');
         return;
     }
     
@@ -993,7 +1142,6 @@ function toggleMemoMode() {
     if (existingMemo) {
         existingMemo.remove();
         editor.style.display = 'block';
-        alert('已退出备忘录模式');
         return;
     }
     

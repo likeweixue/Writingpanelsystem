@@ -1,0 +1,2862 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f0f2f5;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.app-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100%;
+}
+
+/* 顶部标签栏 */
+.tabs-container {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    overflow-x: auto;
+    padding: 5px 10px;
+    background: rgba(242, 243, 245, 0.95);
+    backdrop-filter: blur(4px);
+    gap: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    z-index: 15;
+}
+
+.window-controls {
+    display: flex;
+    gap: 8px;
+    margin-right: 12px;
+    flex-shrink: 0;
+}
+.window-btn {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+.window-btn.close { background: #ff5f56; }
+.window-btn.minimize { background: #ffbd2e; }
+.window-btn.maximize { background: #27c93f; }
+
+.tab {
+    display: flex;
+    align-items: center;
+    background: #fff;
+    height: 29px;
+    padding: 0 20px;
+    border-radius: 15px;
+    cursor: pointer;
+    gap: 6px;
+    font-size: 13px;
+}
+.tab.active {
+    background: #fff;
+    font-weight: 600;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+.tab-close {
+    font-size: 14px;
+    color: #999;
+    cursor: pointer;
+    width: 18px;
+    text-align: center;
+}
+.tab-close:hover { color: #333; }
+
+.new-tab-btn {
+    width: 28px;
+    height: 28px;
+    background: transparent;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    border-radius: 8px;
+}
+.new-tab-btn:hover { background: #e0e0e0; }
+
+/* 一级菜单栏 */
+.main-toolbar {
+    display: none;
+    align-items: center;
+    flex-shrink: 0;
+    padding: 6px 16px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(4px);
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.main-toolbar.visible {
+    display: flex;
+}
+.toolbar-btn {
+    padding: 6px 12px;
+    background: none;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.2s;
+}
+.toolbar-btn:hover {
+    background: rgba(0,0,0,0.08);
+}
+
+/* 主内容区 */
+.main-wrapper {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+/* 左侧菜单栏 */
+.sidebar-menu {
+    width: 200px;
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    border-right: 1px solid rgba(0,0,0,0.08);
+}
+
+.logo-area {
+    padding: 20px;
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+}
+.logo-area h3 { font-size: 18px; }
+.slogan { font-size: 10px; opacity: 0.6; margin-top: 4px; }
+
+.menu-nav {
+    flex: 1;
+    padding: 16px 0;
+}
+.menu-item {
+    width: 100%;
+    padding: 10px 20px;
+    background: none;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    font-size: 14px;
+}
+.menu-item:hover { background: rgba(0,0,0,0.05); }
+.menu-item.active {
+    background: rgba(0,122,255,0.1);
+    font-weight: 600;
+    border-right: 2px solid #007aff;
+}
+
+.menu-footer {
+    padding: 16px;
+    font-size: 10px;
+    text-align: center;
+    border-top: 1px solid rgba(0,0,0,0.08);
+    opacity: 0.6;
+}
+
+/* 右侧内容区 */
+.main-content {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+}
+
+.pages-container {
+    height: 100%;
+    position: relative;
+}
+
+.page {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow-y: auto;
+    padding: 20px;
+}
+.page.active { display: block; }
+
+/* 书籍管理样式 */
+.books-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+.books-header-buttons {
+    display: flex;
+    gap: 12px;
+}
+
+.btn-primary {
+    background: #9b784e;
+    color: white;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+.btn-danger {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.books-container { padding: 0 10px; }
+
+.group-section {
+    margin-bottom: 30px;
+}
+.group-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid rgba(0,0,0,0.1);
+}
+.group-header h3 { margin: 0; }
+
+.books-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 16px;
+}
+
+.book-card {
+    background: #fff;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    overflow: hidden;
+    aspect-ratio: 1 / 1.4;
+    position: relative;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+.book-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.book-card .book-menu {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(0,0,0,0.5);
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: white;
+    z-index: 10;
+}
+.book-cover {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 20px;
+}
+.book-cover h4 {
+    margin-top: 12px;
+    font-size: 14px;
+}
+.book-cover p {
+    font-size: 11px;
+    opacity: 0.7;
+    margin-top: 8px;
+}
+
+/* 书籍编辑页面样式 */
+.book-detail-page {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+.detail-main {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+.detail-chapters {
+    width: 260px;
+    border-right: 1px solid rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    background: transparent;
+}
+.chapters-header {
+    padding: 12px;
+    display: flex;
+    gap: 8px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0);
+}
+.chapters-header button {
+    padding: 4px 12px;
+    font-size: 12px;
+    cursor: pointer;
+}
+.volume-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px;
+}
+.volume-item {
+    margin-bottom: 16px;
+}
+.volume-title {
+    font-weight: 600;
+    padding: 6px 8px;
+    display: flex;
+    justify-content: space-between;
+    cursor: pointer;
+}
+.chapter-list {
+    margin-left: 20px;
+}
+.chapter-item {
+    padding: 5px 8px;
+    cursor: pointer;
+    font-size: 13px;
+    display: flex;
+    justify-content: space-between;
+}
+.chapter-item.active {
+    color: #007aff;
+    font-weight: 500;
+}
+.detail-editor {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    margin-right: 0;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(4px);
+}
+.title-input {
+    font-size: 18px;
+    font-weight: 600;
+    border: none;
+    padding: 12px 16px;
+    outline: none;
+    border-bottom: 1px solid rgba(0, 0, 0, 0);
+    background: transparent;
+}
+.editor-content {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    outline: none;
+    line-height: 1.7;
+    background: transparent;
+}
+.status-bar {
+    padding: 6px 16px;
+    border-top: 1px solid rgba(0,0,0,0.08);
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    background: transparent;
+}
+
+/* 右侧边栏 - 二级菜单 */
+.right-sidebar {
+    position: fixed;
+    right: 0;
+    top: 100px;
+    width: 48px;
+    height: calc(100vh - 100px);
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+    box-shadow: -2px 0 12px rgba(0,0,0,0.1);
+    transition: right 0.3s ease;
+    z-index: 999;
+    display: flex;
+    flex-direction: column;
+    border-left: 1px solid rgba(0,0,0,0.08);
+}
+.right-sidebar.hidden {
+    right: -60px;
+}
+.right-sidebar-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px 0;
+}
+.sidebar-tool-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 4px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-bottom: 4px;
+    text-align: center;
+}
+.sidebar-tool-item:hover {
+    background: rgba(0,0,0,0.08);
+}
+.sidebar-tool-icon {
+    font-size: 20px;
+    margin-bottom: 4px;
+}
+.sidebar-tool-label {
+    font-size: 10px;
+}
+
+/* 右侧滑出面板 */
+.right-slide-panel {
+    position: fixed;
+    right: 0;
+    top: 100px;
+    width: 360px;
+    height: calc(100vh - 100px);
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+    box-shadow: -2px 0 12px rgba(0,0,0,0.15);
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+}
+.right-slide-panel.open {
+    transform: translateX(0);
+}
+.right-slide-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+.right-slide-panel-header h3 {
+    margin: 0;
+    font-size: 16px;
+}
+.right-slide-panel-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+}
+.right-slide-panel-close {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+/* 分卷和章节按钮样式 */
+#addVolumeBtn, #addChapterBtn {
+    background: #b8cab5;
+    border: none;
+    color: #2c3e2f;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+}
+#addVolumeBtn:hover, #addChapterBtn:hover {
+    background: #a8baa5;
+}
+
+/* 分卷菜单按钮（三个点） */
+.volume-more {
+    background: transparent;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 0 8px;
+    color: #666;
+    width: auto;
+    height: auto;
+}
+.volume-more:hover {
+    color: #333;
+}
+
+/* 删除章节按钮 */
+.delete-chapter {
+    background: transparent;
+    border: none;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 0 6px;
+    color: #999;
+    width: auto;
+    height: auto;
+    opacity: 0.6;
+}
+.delete-chapter:hover {
+    color: #dc3545;
+    opacity: 1;
+}
+
+/* 回收站按钮 */
+.trash-btn {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 4px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+}
+.trash-btn:hover {
+    background: #c82333;
+}
+
+/* 章节回收站面板 */
+.chapter-trash-item {
+    padding: 12px;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.chapter-trash-title {
+    font-weight: 500;
+}
+.chapter-trash-time {
+    font-size: 11px;
+    color: #888;
+}
+.restore-chapter-btn, .delete-chapter-permanent-btn {
+    padding: 4px 10px;
+    margin-left: 8px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.restore-chapter-btn {
+    background: #28a745;
+    color: white;
+}
+.delete-chapter-permanent-btn {
+    background: #dc3545;
+    color: white;
+}
+
+/* 统计页面 */
+.stats-cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    max-width: 800px;
+}
+.stat-card {
+    background: #fff;
+    padding: 20px;
+    text-align: center;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+.stat-number {
+    font-size: 32px;
+    font-weight: bold;
+    margin-top: 8px;
+}
+
+/* 关于页面 */
+.about-content {
+    text-align: center;
+    max-width: 500px;
+    margin: 50px auto;
+    padding: 40px;
+    background: #fff;
+    border-radius: 16px;
+}
+
+/* 抽屉 */
+.drawer {
+    position: fixed;
+    right: -400px;
+    top: 0;
+    width: 380px;
+    height: 100vh;
+    background: #fff;
+    box-shadow: -2px 0 20px rgba(0,0,0,0.15);
+    transition: right 0.3s ease;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+}
+.drawer.open { right: 0; }
+.drawer-header {
+    padding: 20px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+}
+.drawer-content {
+    flex: 1;
+    padding: 24px;
+}
+.close-drawer {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+/* 江湖/学府卡片 */
+.jianghu-card, .xuefu-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.jianghu-card:hover, .xuefu-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+}
+
+/* 闭关面板 */
+.seclusion-panel {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 400px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    z-index: 2000;
+}
+.seclusion-panel .panel-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid #eee;
+}
+.seclusion-progress-bar {
+    height: 8px;
+    background: #e0e0e0;
+    border-radius: 4px;
+    overflow: hidden;
+}
+.seclusion-progress-fill {
+    height: 100%;
+    background: #007aff;
+    width: 0%;
+    transition: width 0.3s;
+}
+
+/* ========== 主题适配 ========== */
+body.theme-dark .tabs-container {
+    background: rgba(42, 42, 58, 0.95);
+}
+body.theme-dark .main-toolbar {
+    background: rgba(42, 42, 58, 0.95);
+}
+body.theme-dark .tab {
+    background: #1e1e2e;
+    color: #e0e0e0;
+}
+body.theme-dark .tab.active {
+    background: #2a2a3a;
+}
+body.theme-dark .detail-editor {
+    background: rgba(30, 30, 46, 0.9);
+}
+body.theme-dark .right-sidebar,
+body.theme-dark .right-slide-panel {
+    background: rgba(30, 30, 46, 0.95);
+}
+body.theme-dark .book-card,
+body.theme-dark .stat-card,
+body.theme-dark .about-content,
+body.theme-dark .jianghu-card,
+body.theme-dark .xuefu-card {
+    background: #2a2a3a;
+    color: #e0e0e0;
+}
+body.theme-dark #addVolumeBtn, body.theme-dark #addChapterBtn {
+    background: #3a3a4a;
+    color: #e0e0e0;
+}
+body.theme-dark .volume-more {
+    color: #a0a0b0;
+}
+
+body.theme-eye .tabs-container {
+    background: rgba(184, 201, 181, 0.95);
+}
+body.theme-eye .main-toolbar {
+    background: rgba(184, 201, 181, 0.95);
+}
+body.theme-eye .detail-editor {
+    background: rgba(200, 219, 197, 0.9);
+}
+body.theme-eye .right-sidebar,
+body.theme-eye .right-slide-panel {
+    background: rgba(200, 219, 197, 0.95);
+}
+body.theme-eye .book-card,
+body.theme-eye .stat-card,
+body.theme-eye .about-content,
+body.theme-eye .jianghu-card,
+body.theme-eye .xuefu-card {
+    background: #d4e6d1;
+    color: #2c3e2f;
+}
+body.theme-eye #addVolumeBtn, body.theme-eye #addChapterBtn {
+    background: #a8ba98;
+}
+
+body.theme-warm .tabs-container {
+    background: rgba(207, 197, 173, 0.95);
+}
+body.theme-warm .main-toolbar {
+    background: rgba(207, 197, 173, 0.95);
+}
+body.theme-warm .detail-editor {
+    background: rgba(223, 213, 189, 0.9);
+}
+body.theme-warm .right-sidebar,
+body.theme-warm .right-slide-panel {
+    background: rgba(223, 213, 189, 0.95);
+}
+body.theme-warm .book-card,
+body.theme-warm .stat-card,
+body.theme-warm .about-content,
+body.theme-warm .jianghu-card,
+body.theme-warm .xuefu-card {
+    background: #efe5cd;
+    color: #4a3b2c;
+}
+body.theme-warm #addVolumeBtn, body.theme-warm #addChapterBtn {
+    background: #c8bda0;
+}
+
+/* ========== 毛玻璃效果配置变量 ========== */
+:root {
+    --glass-bg-light: rgba(255, 255, 255, 0.15);
+    --glass-bg-dark: rgba(30, 30, 46, 0.2);
+    --glass-bg-eye: rgba(200, 219, 197, 0.2);
+    --glass-bg-warm: rgba(223, 213, 189, 0.2);
+    --glass-blur: 24px;
+    --glass-blur-strong: 20px;
+}
+
+/* 毛玻璃效果 - 所有需要透明的元素 */
+.tabs-container,
+.main-toolbar,
+.detail-editor,
+.title-input,
+.editor-content,
+.status-bar,
+.chapters-header,
+.volume-list,
+.volume-title,
+.chapter-list,
+.chapter-item,
+.right-sidebar,
+.right-slide-panel {
+    background: rgba(255, 255, 255, 0.15) !important;
+    backdrop-filter: blur(24px) !important;
+}
+
+/* 暗夜黑主题毛玻璃 */
+body.theme-dark .tabs-container,
+body.theme-dark .main-toolbar,
+body.theme-dark .detail-editor,
+body.theme-dark .title-input,
+body.theme-dark .editor-content,
+body.theme-dark .status-bar,
+body.theme-dark .chapters-header,
+body.theme-dark .volume-list,
+body.theme-dark .volume-title,
+body.theme-dark .chapter-list,
+body.theme-dark .chapter-item,
+body.theme-dark .right-sidebar,
+body.theme-dark .right-slide-panel {
+    background: rgba(30, 30, 46, 0.2) !important;
+    backdrop-filter: blur(24px) !important;
+}
+
+/* 护眼绿主题毛玻璃 */
+body.theme-eye .tabs-container,
+body.theme-eye .main-toolbar,
+body.theme-eye .detail-editor,
+body.theme-eye .title-input,
+body.theme-eye .editor-content,
+body.theme-eye .status-bar,
+body.theme-eye .chapters-header,
+body.theme-eye .volume-list,
+body.theme-eye .volume-title,
+body.theme-eye .chapter-list,
+body.theme-eye .chapter-item,
+body.theme-eye .right-sidebar,
+body.theme-eye .right-slide-panel {
+    background: rgba(200, 219, 197, 0.2) !important;
+    backdrop-filter: blur(24px) !important;
+}
+
+/* 经典黄主题毛玻璃 */
+body.theme-warm .tabs-container,
+body.theme-warm .main-toolbar,
+body.theme-warm .detail-editor,
+body.theme-warm .title-input,
+body.theme-warm .editor-content,
+body.theme-warm .status-bar,
+body.theme-warm .chapters-header,
+body.theme-warm .volume-list,
+body.theme-warm .volume-title,
+body.theme-warm .chapter-list,
+body.theme-warm .chapter-item,
+body.theme-warm .right-sidebar,
+body.theme-warm .right-slide-panel {
+    background: rgba(223, 213, 189, 0.2) !important;
+    backdrop-filter: blur(24px) !important;
+}
+
+/* 编辑器区域更透明 */
+.detail-editor {
+    background: rgba(255, 255, 255, 0.1) !important;
+    backdrop-filter: blur(24px) !important;
+}
+body.theme-dark .detail-editor {
+    background: rgba(30, 30, 46, 0.15) !important;
+}
+body.theme-eye .detail-editor {
+    background: rgba(200, 219, 197, 0.15) !important;
+}
+body.theme-warm .detail-editor {
+    background: rgba(223, 213, 189, 0.15) !important;
+}
+
+/* 按钮不应用毛玻璃，保持原色 */
+#addVolumeBtn,
+#addChapterBtn,
+#trashBtnHeader,
+.toolbar-btn,
+.btn-primary,
+.btn-secondary,
+.btn-danger {
+    backdrop-filter: none !important;
+}
+
+/* 三点菜单和删除按钮完全透明 */
+.volume-more,
+.delete-chapter {
+    background: transparent !important;
+    backdrop-filter: none !important;
+}
+
+/* ========== 背景图片模式下完全透明 ========== */
+/* 当有自定义背景时，所有主要区域背景透明 */
+body.has-custom-bg .tabs-container,
+body.has-custom-bg .main-toolbar,
+body.has-custom-bg .detail-editor,
+body.has-custom-bg .editor-content,
+body.has-custom-bg .title-input,
+body.has-custom-bg .status-bar,
+body.has-custom-bg .chapters-header,
+body.has-custom-bg .volume-list,
+body.has-custom-bg .volume-title,
+body.has-custom-bg .chapter-list,
+body.has-custom-bg .chapter-item,
+body.has-custom-bg .right-sidebar,
+body.has-custom-bg .right-slide-panel {
+    background: transparent !important;
+    backdrop-filter: none !important;
+}
+
+/* 按钮在透明模式下保持可读，加一点半透背景 */
+body.has-custom-bg #addVolumeBtn,
+body.has-custom-bg #addChapterBtn {
+    background: rgba(184, 202, 181, 0.7) !important;
+}
+body.has-custom-bg #trashBtnHeader {
+    background: rgba(220, 53, 69, 0.7) !important;
+}
+body.has-custom-bg .toolbar-btn:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* 修复标签栏和菜单栏主题适配 */
+body.theme-dark .tabs-container,
+body.theme-dark .main-toolbar {
+    background: rgba(42, 42, 58, 0.95) !important;
+}
+body.theme-eye .tabs-container,
+body.theme-eye .main-toolbar {
+    background: rgba(184, 201, 181, 0.95) !important;
+}
+body.theme-warm .tabs-container,
+body.theme-warm .main-toolbar {
+    background: rgba(207, 197, 173, 0.95) !important;
+}
+
+/* 修复标签页背景 */
+body.theme-dark .tab {
+    background: #1e1e2e !important;
+    color: #e0e0e0 !important;
+}
+body.theme-dark .tab.active {
+    background: #2a2a3a !important;
+}
+body.theme-eye .tab {
+    background: #c8dbc5 !important;
+    color: #2c3e2f !important;
+}
+body.theme-eye .tab.active {
+    background: #d4e6d1 !important;
+}
+body.theme-warm .tab {
+    background: #dfd5bd !important;
+    color: #4a3b2c !important;
+}
+body.theme-warm .tab.active {
+    background: #efe5cd !important;
+}
+
+/* 主题预设按钮无边框 */
+.theme-preset-btn {
+    border: none !important;
+    outline: none !important;
+    border-radius: 6px !important;
+    padding: 6px 12px !important;
+    cursor: pointer !important;
+}
+body.theme-default .theme-preset-btn[data-theme="default"],
+body.theme-eye .theme-preset-btn[data-theme="eye"],
+body.theme-warm .theme-preset-btn[data-theme="warm"],
+body.theme-dark .theme-preset-btn[data-theme="dark"] {
+    outline: 2px solid #007aff !important;
+    outline-offset: 1px !important;
+}
+
+/* 颜色选择器透明边框 */
+#globalTextColorSlide,
+input[type="color"] {
+    border: none !important;
+    background: transparent !important;
+    width: 100%;
+    height: 40px;
+    cursor: pointer;
+}
+
+/* 章节栏收起样式 */
+.detail-chapters {
+    transition: width 0.3s ease;
+    overflow: hidden;
+}
+.detail-chapters.collapsed {
+    width: 0 !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    border-right: none !important;
+}
+.detail-chapters.collapsed .chapters-header,
+.detail-chapters.collapsed .volume-list {
+    display: none;
+}
+
+/* 收起按钮样式 */
+.toggle-chapters-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    padding: 6px 12px;
+    margin-right: 8px;
+    border-radius: 6px;
+}
+.toggle-chapters-btn:hover {
+    background: rgba(0,0,0,0.08);
+}
+
+/* ========== 滚动条透明样式 ========== */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: transparent !important;
+}
+::-webkit-scrollbar-thumb {
+    background: rgba(136, 136, 136, 0.4);
+    border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(136, 136, 136, 0.6);
+}
+
+/* 各个区域的滚动条透明 */
+.detail-chapters::-webkit-scrollbar-track,
+.editor-content::-webkit-scrollbar-track,
+.right-sidebar-content::-webkit-scrollbar-track,
+.right-slide-panel-content::-webkit-scrollbar-track,
+.volume-list::-webkit-scrollbar-track {
+    background: transparent !important;
+}
+
+/* Firefox 滚动条透明 */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(136, 136, 136, 0.4) transparent;
+}
+
+/* 修复编辑器区域对齐 - 去除多余空白 */
+.detail-main {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    gap: 0;
+    margin: 0;
+    padding: 0;
+}
+
+.detail-chapters {
+    width: 260px;
+    min-width: 200px;
+    max-width: 400px;
+    border-right: 1px solid rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    overflow-y: auto;
+    background: transparent;
+    margin: 0;
+    padding: 0;
+}
+
+.detail-editor {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+}
+
+/* 收起章节栏时的样式 */
+.detail-chapters.collapsed {
+    width: 0 !important;
+    min-width: 0 !important;
+    max-width: 0 !important;
+    overflow: hidden !important;
+    border-right: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* 主内容区无间隙 */
+.main-content {
+    margin: 0;
+    padding: 0;
+}
+
+.pages-container {
+    margin: 0;
+    padding: 0;
+}
+
+.page {
+    margin: 0;
+    padding: 0;
+}
+
+/* 书籍详情页无间隙 */
+.book-detail-page {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
+/* 章节栏头部和内容无多余间隙 */
+.chapters-header {
+    margin: 0;
+    padding: 12px;
+}
+
+.volume-list {
+    margin: 0;
+    padding: 8px;
+}
+
+/* 编辑器区域顶部对齐 */
+.detail-editor {
+    margin-top: 0;
+    padding-top: 0;
+}
+
+.title-input {
+    margin-top: 0;
+}
+
+/* 左侧菜单栏底部间距 - 全局样式 */
+.sidebar-menu {
+    margin-bottom: 30px !important;
+    margin-top: 15px !important;
+    margin-left: 15px !important;
+    height: calc(100vh - 45px) !important;
+}
+
+/* 主容器增加内边距，让所有元素都有呼吸空间 */
+.main-wrapper {
+    padding: 16px !important;
+    gap: 16px !important;
+}
+
+/* 左侧菜单栏在 Open 主题下样式 */
+body.theme-open .sidebar-menu {
+    margin: 0 !important;
+    height: 100% !important;
+    border-radius: 24px !important;
+}
+
+/* 主内容区在 Open 主题下 */
+body.theme-open .main-content {
+    border-radius: 24px !important;
+    overflow: hidden !important;
+}
+
+/* 默认所有主题无额外边距 */
+.main-wrapper {
+    padding: 0 !important;
+    gap: 0 !important;
+}
+
+/* 只对 open 主题添加边距 */
+body.theme-open .main-wrapper {
+    padding: 16px !important;
+    gap: 16px !important;
+}
+
+body.theme-open .sidebar-menu {
+    margin: 0 !important;
+    border-radius: 24px !important;
+}
+
+body.theme-open .main-content {
+    border-radius: 24px !important;
+    overflow: hidden !important;
+}
+
+/* 其他主题的菜单栏重置 - 无白边 */
+body.theme-default .sidebar-menu,
+body.theme-eye .sidebar-menu,
+body.theme-warm .sidebar-menu,
+body.theme-dark .sidebar-menu {
+    margin: 0 !important;
+    border-radius: 0 !important;
+    top: 0 !important;
+    left: 0 !important;
+    position: relative !important;
+}
+
+body.theme-default .main-wrapper,
+body.theme-eye .main-wrapper,
+body.theme-warm .main-wrapper,
+body.theme-dark .main-wrapper {
+    padding: 0 !important;
+    gap: 0 !important;
+}
+
+/* 确保其他主题的菜单栏紧贴边缘 */
+body.theme-default .sidebar-menu,
+body.theme-eye .sidebar-menu,
+body.theme-warm .sidebar-menu,
+body.theme-dark .sidebar-menu {
+    margin-top: 0 !important;
+    margin-left: 0 !important;
+}
+
+/* 右侧滑出面板默认位置 */
+.right-slide-panel {
+    right: 0;
+    transform: translateX(100%);
+}
+
+.right-slide-panel.open {
+    transform: translateX(0);
+}
+
+/* Open 主题下的特殊处理 */
+body.theme-open .right-slide-panel {
+    right: 20px;
+    transform: translateX(calc(100% + 20px));
+}
+
+body.theme-open .right-slide-panel.open {
+    transform: translateX(0);
+}
+
+/* 右侧滑出面板动画 */
+.right-slide-panel {
+    position: fixed;
+    right: 0;
+    top: 80px;
+    width: 360px;
+    height: calc(100vh - 100px);
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+    box-shadow: -2px 0 12px rgba(0,0,0,0.15);
+    transform: translateX(100%);
+    transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    visibility: visible;
+}
+
+.right-slide-panel.open {
+    transform: translateX(0);
+}
+
+/* Open 主题下的动画 */
+body.theme-open .right-slide-panel {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    right: 20px;
+    top: 100px;
+    height: calc(100vh - 120px);
+    transform: translateX(calc(100% + 20px));
+}
+
+body.theme-open .right-slide-panel.open {
+    transform: translateX(0);
+}
+
+/* 右侧滑出面板 - 基础动画 */
+.right-slide-panel {
+    position: fixed;
+    right: 0;
+    top: 80px;
+    width: 360px;
+    height: calc(100vh - 100px);
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+    box-shadow: -2px 0 12px rgba(0,0,0,0.15);
+    transform: translateX(100%);
+    transition: transform 0.3s ease-out;
+    z-index: 1000;
+    display: block !important;
+    visibility: visible;
+}
+
+.right-slide-panel.open {
+    transform: translateX(0);
+}
+
+/* 确保面板默认隐藏 */
+.right-slide-panel:not(.open) {
+    transform: translateX(100%);
+}
+
+/* Open 主题下的动画 */
+body.theme-open .right-slide-panel {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    right: 20px;
+    top: 100px;
+    height: calc(100vh - 120px);
+    transform: translateX(calc(100% + 20px));
+}
+
+body.theme-open .right-slide-panel.open {
+    transform: translateX(0);
+}
+
+/* 其他主题 */
+body.theme-default .right-slide-panel,
+body.theme-eye .right-slide-panel,
+body.theme-warm .right-slide-panel,
+body.theme-dark .right-slide-panel {
+    transform: translateX(100%);
+}
+
+body.theme-default .right-slide-panel.open,
+body.theme-eye .right-slide-panel.open,
+body.theme-warm .right-slide-panel.open,
+body.theme-dark .right-slide-panel.open {
+    transform: translateX(0);
+}
+
+/* 章节栏可调整宽度 */
+.detail-chapters {
+    width: 260px;
+    min-width: 180px;
+    max-width: 500px;
+    position: relative;
+    transition: none !important;
+}
+
+/* 拖动条悬停效果 */
+#resizeHandle:hover {
+    background: #007aff !important;
+    opacity: 0.5;
+}
+
+/* ========== 标签栏独立样式 ========== */
+.tabs-container {
+    background: var(--tabs-bg, #f2f3f5);
+    backdrop-filter: blur(4px);
+}
+
+.tab {
+    background: var(--tab-bg, #ffffff);
+    color: var(--tab-text, #333);
+}
+
+.tab.active {
+    background: var(--tab-active-bg, #ffffff);
+}
+
+/* ========== 工具栏独立样式 ========== */
+.main-toolbar {
+    background: var(--toolbar-bg, rgba(255, 255, 255, 0.95));
+    backdrop-filter: blur(4px);
+}
+
+.toolbar-btn {
+    background: transparent;
+}
+
+.toolbar-btn:hover {
+    background: var(--toolbar-btn-hover, rgba(0, 0, 0, 0.08));
+}
+
+/* ========== 黄色主题(warm)下标签栏和工具栏独立 ========== */
+body.theme-warm .tabs-container {
+    background: rgba(207, 197, 173, 0.95) !important;
+}
+
+body.theme-warm .tab {
+    background: rgba(223, 213, 189, 0.9) !important;
+    color: #4a3b2c !important;
+}
+
+body.theme-warm .tab.active {
+    background: #efe5cd !important;
+}
+
+body.theme-warm .main-toolbar {
+    background: rgba(207, 197, 173, 0.9) !important;
+}
+
+body.theme-warm .toolbar-btn:hover {
+    background: rgba(74, 59, 44, 0.1) !important;
+}
+
+/* ========== 绿色主题(eye)下标签栏和工具栏独立 ========== */
+body.theme-eye .tabs-container {
+    background: rgba(184, 201, 181, 0.95) !important;
+}
+
+body.theme-eye .tab {
+    background: rgba(200, 219, 197, 0.9) !important;
+    color: #2c3e2f !important;
+}
+
+body.theme-eye .tab.active {
+    background: #d4e6d1 !important;
+}
+
+body.theme-eye .main-toolbar {
+    background: rgba(184, 201, 181, 0.9) !important;
+}
+
+body.theme-eye .toolbar-btn:hover {
+    background: rgba(44, 62, 47, 0.1) !important;
+}
+
+/* ========== 暗色主题(dark)下标签栏和工具栏独立 ========== */
+body.theme-dark .tabs-container {
+    background: rgba(42, 42, 58, 0.95) !important;
+}
+
+body.theme-dark .tab {
+    background: #1e1e2e !important;
+    color: #e0e0e0 !important;
+}
+
+body.theme-dark .tab.active {
+    background: #2a2a3a !important;
+}
+
+body.theme-dark .main-toolbar {
+    background: rgba(42, 42, 58, 0.9) !important;
+}
+
+body.theme-dark .toolbar-btn:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* ========== 毛玻璃主题(glass)下标签栏和工具栏独立 ========== */
+body.theme-glass .tabs-container {
+    background: rgba(255, 255, 255, 0.2) !important;
+    backdrop-filter: blur(20px) !important;
+}
+
+body.theme-glass .tab {
+    background: rgba(255, 255, 255, 0.25) !important;
+    backdrop-filter: blur(10px) !important;
+}
+
+body.theme-glass .tab.active {
+    background: rgba(255, 255, 255, 0.4) !important;
+}
+
+body.theme-glass .main-toolbar {
+    background: rgba(255, 255, 255, 0.2) !important;
+    backdrop-filter: blur(20px) !important;
+}
+
+body.theme-glass .toolbar-btn:hover {
+    background: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* ========== 默认白色主题下标签栏和工具栏 ========== */
+body.theme-default .tabs-container {
+    background: #f2f3f5 !important;
+}
+
+body.theme-default .tab {
+    background: #ffffff !important;
+}
+
+body.theme-default .tab.active {
+    background: #ffffff !important;
+}
+
+body.theme-default .main-toolbar {
+    background: rgba(255, 255, 255, 0.95) !important;
+}
+
+/* ========== 各区域独立背景控制 ========== */
+
+/* 章节栏独立背景 */
+.detail-chapters {
+    background: var(--chapters-bg, rgba(255, 255, 255, 0.95));
+    transition: background 0.2s;
+}
+
+/* 编辑器独立背景 */
+.detail-editor {
+    background: var(--editor-bg, rgba(255, 255, 255, 0.95));
+    transition: background 0.2s;
+}
+
+/* 编辑器内容区独立背景 */
+.editor-content {
+    background: var(--editor-content-bg, rgba(255, 255, 255, 0.8));
+}
+
+/* 状态栏独立背景 */
+.status-bar {
+    background: var(--status-bar-bg, rgba(0, 0, 0, 0.02));
+}
+
+/* 标题输入框独立背景 */
+.title-input {
+    background: var(--title-input-bg, transparent);
+}
+
+/* ========== 黄色主题(warm)下各区域独立设置 ========== */
+body.theme-warm .detail-chapters {
+    background: rgba(223, 213, 189, 0.85) !important;
+}
+
+body.theme-warm .detail-editor {
+    background: rgba(223, 213, 189, 0.7) !important;
+}
+
+body.theme-warm .editor-content {
+    background: rgba(223, 213, 189, 0.5) !important;
+}
+
+body.theme-warm .status-bar {
+    background: rgba(223, 213, 189, 0.6) !important;
+}
+
+body.theme-warm .title-input {
+    background: rgba(223, 213, 189, 0.8) !important;
+}
+
+/* ========== 绿色主题(eye)下各区域独立设置 ========== */
+body.theme-eye .detail-chapters {
+    background: rgba(200, 219, 197, 0.85) !important;
+}
+
+body.theme-eye .detail-editor {
+    background: rgba(200, 219, 197, 0.7) !important;
+}
+
+body.theme-eye .editor-content {
+    background: rgba(200, 219, 197, 0.5) !important;
+}
+
+body.theme-eye .status-bar {
+    background: rgba(200, 219, 197, 0.6) !important;
+}
+
+body.theme-eye .title-input {
+    background: rgba(200, 219, 197, 0.8) !important;
+}
+
+/* ========== 暗色主题(dark)下各区域独立设置 ========== */
+body.theme-dark .detail-chapters {
+    background: rgba(30, 30, 46, 0.9) !important;
+}
+
+body.theme-dark .detail-editor {
+    background: rgba(30, 30, 46, 0.85) !important;
+}
+
+body.theme-dark .editor-content {
+    background: rgba(30, 30, 46, 0.7) !important;
+}
+
+body.theme-dark .status-bar {
+    background: rgba(30, 30, 46, 0.8) !important;
+}
+
+body.theme-dark .title-input {
+    background: rgba(30, 30, 46, 0.9) !important;
+}
+
+/* ========== 毛玻璃主题(glass)下各区域独立设置 ========== */
+body.theme-glass .detail-chapters {
+    background: rgba(255, 255, 255, 0.35) !important;
+    backdrop-filter: blur(20px) !important;
+}
+
+body.theme-glass .detail-editor {
+    background: rgba(255, 255, 255, 0.25) !important;
+    backdrop-filter: blur(20px) !important;
+}
+
+body.theme-glass .editor-content {
+    background: rgba(255, 255, 255, 0.15) !important;
+    backdrop-filter: blur(10px) !important;
+}
+
+body.theme-glass .status-bar {
+    background: rgba(255, 255, 255, 0.2) !important;
+    backdrop-filter: blur(10px) !important;
+}
+
+body.theme-glass .title-input {
+    background: rgba(255, 255, 255, 0.3) !important;
+    backdrop-filter: blur(10px) !important;
+}
+
+/* ========== 移除编辑器周围的空隙 ========== */
+.detail-main {
+    gap: 0 !important;
+    padding: 0 !important;
+}
+
+.detail-chapters {
+    margin: 0 !important;
+    border-radius: 0 !important;
+}
+
+.detail-editor {
+    margin: 0 !important;
+    border-radius: 0 !important;
+}
+
+/* 章节栏和编辑器之间的间隔线 */
+.detail-chapters {
+    border-right: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+/* 移除所有不必要的内边距 */
+.chapters-header {
+    margin: 0 !important;
+}
+
+.volume-list {
+    padding: 8px 4px !important;
+}
+
+.editor-content {
+    margin: 0 !important;
+    padding: 20px !important;
+}
+
+.status-bar {
+    margin: 0 !important;
+}
+
+.title-input {
+    margin: 0 !important;
+}
+
+/* 默认隐藏菜单栏 */
+.main-toolbar {
+    display: none !important;
+}
+
+/* 只在编辑模式显示 */
+.main-toolbar.visible {
+    display: flex !important;
+}
+
+/* 菜单栏默认隐藏 */
+.main-toolbar {
+    display: none !important;
+}
+
+/* 只在编辑模式显示 */
+.main-toolbar.visible {
+    display: flex !important;
+}
+
+/* ========== 三栏并排布局强制修复 ========== */
+.detail-main {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: stretch !important;
+    gap: 0 !important;
+    height: 100% !important;
+}
+
+.detail-chapters {
+    flex: 0 0 auto !important;
+    width: 260px !important;
+    min-width: 180px !important;
+    max-width: 500px !important;
+    height: 100% !important;
+    overflow-y: auto !important;
+}
+
+.detail-editor {
+    flex: 1 1 auto !important;
+    min-width: 200px !important;
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+.right-sidebar {
+    flex: 0 0 auto !important;
+    width: 280px !important;
+    min-width: 200px !important;
+    max-width: 400px !important;
+    height: 100% !important;
+    position: relative !important;
+    top: auto !important;
+    right: auto !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(8px) !important;
+    border-left: 1px solid rgba(0,0,0,0.08) !important;
+}
+
+.right-sidebar.collapsed {
+    width: 0 !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+    border-left: none !important;
+}
+cat >> /Users/machangsheng/Downloads/openwrite/css/style.css << 'EOF'
+
+/* ========== 左面板样式 ========== */
+.left-sidebar {
+    width: 280px;
+    min-width: 200px;
+    max-width: 400px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+    border-right: 1px solid rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    overflow: hidden;
+    transition: width 0.3s ease, min-width 0.3s ease;
+    position: relative;
+}
+
+.left-sidebar.collapsed {
+    width: 0 !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    border-right: none !important;
+}
+
+.left-sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: rgba(0, 0, 0, 0.03);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.toggle-left-sidebar-btn,
+.toggle-right-sidebar-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 12px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    color: #666;
+}
+
+.toggle-left-sidebar-btn:hover,
+.toggle-right-sidebar-btn:hover {
+    background: rgba(0, 0, 0, 0.08);
+}
+
+.left-sidebar-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px;
+}
+
+/* 右面板头部样式 */
+.right-sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: rgba(0, 0, 0, 0.03);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    font-weight: 600;
+    font-size: 14px;
+}
+
+/* 调整右面板的原有样式 */
+.right-sidebar {
+    border-left: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.right-sidebar.collapsed {
+    width: 0 !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    border-left: none !important;
+}
+
+/* 三栏布局强制 */
+.detail-main {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: stretch !important;
+    gap: 0 !important;
+    height: 100% !important;
+}
+
+.detail-editor {
+    flex: 1 1 auto !important;
+    min-width: 200px !important;
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+/* ========== 左面板样式 ========== */
+.left-sidebar {
+    width: 280px;
+    min-width: 200px;
+    max-width: 400px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+    border-right: 1px solid rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    overflow: hidden;
+    transition: width 0.3s ease, min-width 0.3s ease;
+    position: relative;
+}
+
+.left-sidebar.collapsed {
+    width: 0 !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    border-right: none !important;
+}
+
+.left-sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: rgba(0, 0, 0, 0.03);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.toggle-left-sidebar-btn,
+.toggle-right-sidebar-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 12px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    color: #666;
+}
+
+.toggle-left-sidebar-btn:hover,
+.toggle-right-sidebar-btn:hover {
+    background: rgba(0, 0, 0, 0.08);
+}
+
+.left-sidebar-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px;
+}
+
+/* 右面板头部样式 */
+.right-sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: rgba(0, 0, 0, 0.03);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    font-weight: 600;
+    font-size: 14px;
+}
+
+/* 调整右面板的原有样式 */
+.right-sidebar {
+    border-left: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.right-sidebar.collapsed {
+    width: 0 !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    border-left: none !important;
+}
+
+/* 三栏布局强制 */
+.detail-main {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: stretch !important;
+    gap: 0 !important;
+    height: 100% !important;
+}
+
+.detail-editor {
+    flex: 1 1 auto !important;
+    min-width: 200px !important;
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+/* ========== 极简图标边栏样式 ========== */
+.icon-sidebar {
+    width: 48px;
+    min-width: 48px;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(8px);
+    border-right: 1px solid rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    overflow-y: auto;
+}
+
+.icon-sidebar-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px 0;
+    gap: 16px;
+}
+
+.icon-sidebar-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: #5c5c5e;
+}
+
+.icon-sidebar-item:hover {
+    background: rgba(0, 0, 0, 0.08);
+}
+
+.icon-sidebar-item.active {
+    background: rgba(0, 122, 255, 0.15);
+    color: #007aff;
+}
+
+.icon-sidebar-icon {
+    font-size: 20px;
+}
+
+/* 调整左面板，使其紧贴图标边栏 */
+.left-sidebar {
+    border-left: none;
+}
+
+/* 暗色主题适配 */
+body.theme-dark .icon-sidebar {
+    background: rgba(30, 30, 46, 0.9);
+    border-right-color: rgba(255, 255, 255, 0.08);
+}
+
+body.theme-dark .icon-sidebar-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* 护眼主题适配 */
+body.theme-eye .icon-sidebar {
+    background: rgba(200, 219, 197, 0.9);
+}
+
+/* 暖色主题适配 */
+body.theme-warm .icon-sidebar {
+    background: rgba(223, 213, 189, 0.9);
+}
+
+/* 调整右边栏宽度为窄版 */
+.right-sidebar {
+    width: 48px !important;
+    min-width: 48px !important;
+    max-width: 48px !important;
+}
+
+.right-sidebar:not(.collapsed) {
+    width: 48px !important;
+    min-width: 48px !important;
+}
+
+/* 调整右边栏内容样式，让图标垂直排列 */
+.right-sidebar .right-sidebar-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px 0;
+    gap: 50px;
+}
+
+.right-sidebar .sidebar-tool-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    padding: 0;
+    margin: 0;
+}
+
+.right-sidebar .sidebar-tool-icon {
+    font-size: 20px;
+    margin-bottom: 0;
+}
+
+.right-sidebar .sidebar-tool-label {
+    display: none;
+}
+
+/* 悬停时显示标签 */
+.right-sidebar .sidebar-tool-item:hover .sidebar-tool-label {
+    display: block;
+    position: absolute;
+    left: 48px;
+    background: rgba(0,0,0,0.8);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    white-space: nowrap;
+    z-index: 100;
+}
+
+/* ========== 主题颜色变量 ========== */
+:root {
+    --panel-bg: rgba(255, 255, 255, 0.95);
+    --border-color: rgba(0, 0, 0, 0.1);
+    --text-color: #333;
+}
+
+/* 护眼绿主题 */
+body.theme-eye {
+    --panel-bg: rgba(200, 219, 197, 0.95);
+    --border-color: rgba(44, 62, 47, 0.15);
+    --text-color: #2c3e2f;
+}
+
+/* 经典黄主题 */
+body.theme-warm {
+    --panel-bg: rgba(223, 213, 189, 0.95);
+    --border-color: rgba(74, 59, 44, 0.15);
+    --text-color: #4a3b2c;
+}
+
+/* 暗夜黑主题 */
+body.theme-dark {
+    --panel-bg: rgba(30, 30, 46, 0.95);
+    --border-color: rgba(255, 255, 255, 0.1);
+    --text-color: #e0e0e0;
+}
+
+/* 应用主题变量到面板 */
+.right-slide-panel,
+#themeSlidePanel,
+#fontSlidePanel,
+#exportSlidePanel,
+#seclusionSlidePanel {
+    background: var(--panel-bg) !important;
+    color: var(--text-color) !important;
+}
+
+.right-slide-panel-header,
+#themeSlidePanel .right-slide-panel-header,
+#fontSlidePanel .right-slide-panel-header,
+#exportSlidePanel .right-slide-panel-header,
+#seclusionSlidePanel .right-slide-panel-header {
+    border-bottom-color: var(--border-color) !important;
+}
+
+.right-slide-panel-close {
+    color: var(--text-color) !important;
+}
+
+/* ========== 查找替换面板主题适配 ========== */
+#findReplaceFloatWin {
+    background: var(--panel-bg, rgba(255, 255, 255, 0.95)) !important;
+    backdrop-filter: blur(8px);
+    border-radius: 0px !important;
+}
+
+#findReplaceFloatWin .find-header {
+    background: var(--header-bg, rgba(0, 0, 0, 0.03)) !important;
+    border-bottom-color: var(--border-color, rgba(0, 0, 0, 0.1)) !important;
+}
+
+#findReplaceFloatWin h3,
+#findReplaceFloatWin label {
+    color: var(--text-color, #333) !important;
+}
+
+#findReplaceFloatWin input {
+    background: var(--input-bg, #fff) !important;
+    border-color: var(--border-color, #ddd) !important;
+    color: var(--text-color, #333) !important;
+}
+
+#findReplaceFloatWin .find-btn,
+#findReplaceFloatWin #searchBookBtn {
+    background: var(--btn-bg, #f0f0f0) !important;
+    border-color: var(--border-color, #ddd) !important;
+    color: var(--text-color, #333) !important;
+}
+
+#findReplaceFloatWin .find-btn:hover,
+#findReplaceFloatWin #searchBookBtn:hover {
+    background: var(--btn-hover-bg, #e0e0e0) !important;
+}
+
+#findReplaceFloatWin #searchResultArea {
+    background: var(--result-bg, #f8f8f8) !important;
+    color: var(--text-color, #666) !important;
+}
+
+/* ========== 自定义背景时，所有面板都透明 ========== */
+body.has-custom-bg .tabs-container,
+body.has-custom-bg .main-toolbar,
+body.has-custom-bg .icon-sidebar,
+body.has-custom-bg .left-sidebar,
+body.has-custom-bg .right-sidebar,
+body.has-custom-bg .detail-chapters,
+body.has-custom-bg .detail-editor,
+body.has-custom-bg .status-bar,
+body.has-custom-bg .right-slide-panel,
+body.has-custom-bg #themeSlidePanel,
+body.has-custom-bg #fontSlidePanel,
+body.has-custom-bg #exportSlidePanel,
+body.has-custom-bg #seclusionSlidePanel {
+    background: rgba(255, 255, 255, 0.15) !important;
+    backdrop-filter: blur(20px) !important;
+}
+
+/* 暗夜黑主题下自定义背景时的透明效果 */
+body.theme-dark.has-custom-bg .tabs-container,
+body.theme-dark.has-custom-bg .main-toolbar,
+body.theme-dark.has-custom-bg .icon-sidebar,
+body.theme-dark.has-custom-bg .left-sidebar,
+body.theme-dark.has-custom-bg .right-sidebar,
+body.theme-dark.has-custom-bg .detail-chapters,
+body.theme-dark.has-custom-bg .detail-editor,
+body.theme-dark.has-custom-bg .status-bar,
+body.theme-dark.has-custom-bg .right-slide-panel {
+    background: rgba(30, 30, 46, 0.2) !important;
+    backdrop-filter: blur(20px) !important;
+}
+
+/* 护眼绿主题下自定义背景时的透明效果 */
+body.theme-eye.has-custom-bg .tabs-container,
+body.theme-eye.has-custom-bg .main-toolbar,
+body.theme-eye.has-custom-bg .icon-sidebar,
+body.theme-eye.has-custom-bg .left-sidebar,
+body.theme-eye.has-custom-bg .right-sidebar,
+body.theme-eye.has-custom-bg .detail-chapters,
+body.theme-eye.has-custom-bg .detail-editor,
+body.theme-eye.has-custom-bg .status-bar,
+body.theme-eye.has-custom-bg .right-slide-panel {
+    background: rgba(200, 219, 197, 0.2) !important;
+    backdrop-filter: blur(20px) !important;
+}
+
+/* 经典黄主题下自定义背景时的透明效果 */
+body.theme-warm.has-custom-bg .tabs-container,
+body.theme-warm.has-custom-bg .main-toolbar,
+body.theme-warm.has-custom-bg .icon-sidebar,
+body.theme-warm.has-custom-bg .left-sidebar,
+body.theme-warm.has-custom-bg .right-sidebar,
+body.theme-warm.has-custom-bg .detail-chapters,
+body.theme-warm.has-custom-bg .detail-editor,
+body.theme-warm.has-custom-bg .status-bar,
+body.theme-warm.has-custom-bg .right-slide-panel {
+    background: rgba(223, 213, 189, 0.2) !important;
+    backdrop-filter: blur(20px) !important;
+}
+
+/* 图标边栏特殊处理 */
+.icon-sidebar {
+    background: rgba(255, 255, 255, 0.9) !important;
+    backdrop-filter: blur(8px) !important;
+}
+
+body.has-custom-bg .icon-sidebar {
+    background: rgba(255, 255, 255, 0.15) !important;
+    backdrop-filter: blur(20px) !important;
+}
+
+/* 标签栏透明效果 */
+.tabs-container {
+    background: rgba(255, 255, 255, 0.9) !important;
+    backdrop-filter: blur(8px) !important;
+}
+
+body.has-custom-bg .tabs-container {
+    background: rgba(255, 255, 255, 0.15) !important;
+    backdrop-filter: blur(20px) !important;
+}
+
+/* 工具栏透明效果 */
+.main-toolbar {
+    background: rgba(255, 255, 255, 0.9) !important;
+    backdrop-filter: blur(8px) !important;
+}
+
+body.has-custom-bg .main-toolbar {
+    background: rgba(255, 255, 255, 0.15) !important;
+    backdrop-filter: blur(20px) !important;
+}
+
+/* ========== 删除毛玻璃效果，改为完全透明 ========== */
+body.has-custom-bg .tabs-container,
+body.has-custom-bg .main-toolbar,
+body.has-custom-bg .icon-sidebar,
+body.has-custom-bg .left-sidebar,
+body.has-custom-bg .right-sidebar,
+body.has-custom-bg .detail-chapters,
+body.has-custom-bg .detail-editor,
+body.has-custom-bg .status-bar,
+body.has-custom-bg .right-slide-panel,
+body.has-custom-bg #themeSlidePanel,
+body.has-custom-bg #fontSlidePanel,
+body.has-custom-bg #exportSlidePanel,
+body.has-custom-bg #seclusionSlidePanel {
+    background: transparent !important;
+    backdrop-filter: none !important;
+}
+
+/* 暗夜黑主题下自定义背景时完全透明 */
+body.theme-dark.has-custom-bg .tabs-container,
+body.theme-dark.has-custom-bg .main-toolbar,
+body.theme-dark.has-custom-bg .icon-sidebar,
+body.theme-dark.has-custom-bg .left-sidebar,
+body.theme-dark.has-custom-bg .right-sidebar,
+body.theme-dark.has-custom-bg .detail-chapters,
+body.theme-dark.has-custom-bg .detail-editor,
+body.theme-dark.has-custom-bg .status-bar,
+body.theme-dark.has-custom-bg .right-slide-panel {
+    background: transparent !important;
+    backdrop-filter: none !important;
+}
+
+/* 护眼绿主题下自定义背景时完全透明 */
+body.theme-eye.has-custom-bg .tabs-container,
+body.theme-eye.has-custom-bg .main-toolbar,
+body.theme-eye.has-custom-bg .icon-sidebar,
+body.theme-eye.has-custom-bg .left-sidebar,
+body.theme-eye.has-custom-bg .right-sidebar,
+body.theme-eye.has-custom-bg .detail-chapters,
+body.theme-eye.has-custom-bg .detail-editor,
+body.theme-eye.has-custom-bg .status-bar,
+body.theme-eye.has-custom-bg .right-slide-panel {
+    background: transparent !important;
+    backdrop-filter: none !important;
+}
+
+/* 经典黄主题下自定义背景时完全透明 */
+body.theme-warm.has-custom-bg .tabs-container,
+body.theme-warm.has-custom-bg .main-toolbar,
+body.theme-warm.has-custom-bg .icon-sidebar,
+body.theme-warm.has-custom-bg .left-sidebar,
+body.theme-warm.has-custom-bg .right-sidebar,
+body.theme-warm.has-custom-bg .detail-chapters,
+body.theme-warm.has-custom-bg .detail-editor,
+body.theme-warm.has-custom-bg .status-bar,
+body.theme-warm.has-custom-bg .right-slide-panel {
+    background: transparent !important;
+    backdrop-filter: none !important;
+}
+
+/* 图标边栏完全透明 */
+.icon-sidebar {
+    background: rgba(255, 255, 255, 0.9) !important;
+}
+
+body.has-custom-bg .icon-sidebar {
+    background: transparent !important;
+    backdrop-filter: none !important;
+}
+
+/* 标签栏完全透明 */
+.tabs-container {
+    background: rgba(255, 255, 255, 0.9) !important;
+}
+
+body.has-custom-bg .tabs-container {
+    background: transparent !important;
+    backdrop-filter: none !important;
+}
+
+/* 工具栏完全透明 */
+.main-toolbar {
+    background: rgba(255, 255, 255, 0.9) !important;
+}
+
+body.has-custom-bg .main-toolbar {
+    background: transparent !important;
+    backdrop-filter: none !important;
+}
+
+/* ========== 图标边栏跟随主题 ========== */
+.icon-sidebar {
+    background: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* 默认主题 */
+body.theme-default .icon-sidebar {
+    background: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* 护眼绿主题 */
+body.theme-eye .icon-sidebar {
+    background: rgba(200, 219, 197, 0.9) !important;
+}
+
+/* 经典黄主题 */
+body.theme-warm .icon-sidebar {
+    background: rgba(223, 213, 189, 0.9) !important;
+}
+
+/* 暗夜黑主题 */
+body.theme-dark .icon-sidebar {
+    background: rgba(30, 30, 46, 0.9) !important;
+}
+
+/* 自定义背景时，图标边栏透明 */
+body.has-custom-bg .icon-sidebar {
+    background: transparent !important;
+}
+
+/* ========== 修复 Open 主题下右边栏位置 ========== */
+body.theme-open .right-sidebar {
+    position: relative !important;
+    top: auto !important;
+    right: auto !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+/* 修复 Open 主题下主内容区布局 */
+body.theme-open .main-content {
+    overflow: visible !important;
+}
+
+/* 修复 Open 主题下 detail-main 布局 */
+body.theme-open .detail-main {
+    align-items: stretch !important;
+}
+
+/* 左边栏添加阴影效果（和菜单栏一致） */
+.icon-sidebar {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.2s ease;
+}
+
+/* Open 主题下左边栏阴影 */
+body.theme-open .icon-sidebar {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
+}
+
+/* 悬浮时阴影加深 */
+.icon-sidebar:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+body.theme-open .icon-sidebar:hover {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* 确保右边栏在 Open 主题下正常显示 */
+body.theme-open .right-sidebar {
+    box-shadow: -2px 0 8px rgba(0, 0, 0, 0.08);
+}
+
+body.theme-open .right-sidebar:hover {
+    box-shadow: -2px 0 12px rgba(0, 0, 0, 0.12);
+}
+
+/* ========== 修复 Open 主题下右边栏位置（强制） ========== */
+body.theme-open .right-sidebar {
+    position: relative !important;
+    right: 0 !important;
+    top: 0 !important;
+    transform: none !important;
+    margin: 0 !important;
+    width: 280px !important;
+    flex-shrink: 0 !important;
+}
+
+body.theme-open .detail-main {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    gap: 0 !important;
+}
+
+body.theme-open .detail-editor {
+    flex: 1 !important;
+    min-width: 0 !important;
+}
+
+body.theme-open .left-sidebar {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+}
+
+body.theme-open .icon-sidebar {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+}
+
+/* ========== 右边栏文字显示在图标下方 ========== */
+.right-sidebar .sidebar-tool-item {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    padding: 12px 8px !important;
+    margin: 4px 0 !important;
+}
+
+.right-sidebar .sidebar-tool-icon {
+    font-size: 24px !important;
+    margin-bottom: 6px !important;
+}
+
+.right-sidebar .sidebar-tool-label {
+    font-size: 11px !important;
+    display: block !important;
+    opacity: 0.8 !important;
+}
+
+/* 悬停效果 */
+.right-sidebar .sidebar-tool-item:hover {
+    background: rgba(0, 0, 0, 0.08) !important;
+    border-radius: 12px !important;
+}
+
+/* ========== 调整右边栏图标间距 ========== */
+.right-sidebar .sidebar-tool-item {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    padding: 16px 8px !important;  /* 增加上下内边距 */
+    margin: 8px 0 !important;      /* 增加上下外边距 */
+    border-radius: 16px !important;
+    transition: all 0.2s ease !important;
+}
+
+.right-sidebar .sidebar-tool-icon {
+    font-size: 28px !important;    /* 图标稍微调大 */
+    margin-bottom: 8px !important; /* 图标和文字间距增加 */
+}
+
+.right-sidebar .sidebar-tool-label {
+    font-size: 12px !important;    /* 文字稍微调大 */
+    display: block !important;
+    opacity: 0.8 !important;
+}
+
+/* 悬停效果 */
+.right-sidebar .sidebar-tool-item:hover {
+    background: rgba(0, 0, 0, 0.08) !important;
+    transform: translateY(-2px) !important;
+}
+
+/* ========== 进一步调大右边栏图标间距 ========== */
+.right-sidebar .sidebar-tool-item {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    padding: 20px 8px !important;  /* 上下内边距增大到 20px */
+    margin: 12px 0 !important;      /* 上下外边距增大到 12px */
+    border-radius: 16px !important;
+    transition: all 0.2s ease !important;
+}
+
+.right-sidebar .sidebar-tool-icon {
+    font-size: 32px !important;    /* 图标调大到 32px */
+    margin-bottom: 10px !important; /* 图标和文字间距增大 */
+}
+
+.right-sidebar .sidebar-tool-label {
+    font-size: 13px !important;    /* 文字调大到 13px */
+    display: block !important;
+    font-weight: 500 !important;   /* 稍微加粗 */
+    opacity: 0.85 !important;
+}
+
+/* 悬停效果增强 */
+.right-sidebar .sidebar-tool-item:hover {
+    background: rgba(0, 0, 0, 0.08) !important;
+    transform: translateY(-3px) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* ========== 右边栏图标大小恢复 ========== */
+.right-sidebar .sidebar-tool-icon {
+    font-size: 24px !important;    /* 恢复原来大小 */
+    margin-bottom: 10px !important;
+}
+
+.right-sidebar .sidebar-tool-label {
+    font-size: 12px !important;
+    display: block !important;
+    font-weight: normal !important;
+    opacity: 0.8 !important;
+}
+
+.right-sidebar .sidebar-tool-item {
+    padding: 16px 8px !important;
+    margin: 10px 0 !important;
+}
+
+/* ========== 设置面板主题适配 ========== */
+/* 默认主题 */
+body.theme-default .settings-tab.active,
+body.theme-default .settings-sub-tab.active,
+body.theme-default .settings-tab[data-tab="appearance"],
+body.theme-default .settings-sub-tab[data-sub="theme"] {
+    background: #e8e0d4 !important;
+    border-left-color: #ceb087 !important;
+    color: #4a3b2c !important;
+}
+
+/* 护眼绿主题 */
+body.theme-eye .settings-tab.active,
+body.theme-eye .settings-sub-tab.active,
+body.theme-eye .settings-tab[data-tab="appearance"],
+body.theme-eye .settings-sub-tab[data-sub="theme"] {
+    background: #b8d4a8 !important;
+    border-left-color: #6b8c42 !important;
+    color: #2c3e2f !important;
+}
+
+body.theme-eye .settings-container,
+body.theme-eye .settings-sub-menu {
+    background: rgba(200, 219, 197, 0.3) !important;
+}
+
+/* 经典黄主题 */
+body.theme-warm .settings-tab.active,
+body.theme-warm .settings-sub-tab.active,
+body.theme-warm .settings-tab[data-tab="appearance"],
+body.theme-warm .settings-sub-tab[data-sub="theme"] {
+    background: #e0d0a8 !important;
+    border-left-color: #b8953e !important;
+    color: #4a3b2c !important;
+}
+
+body.theme-warm .settings-container,
+body.theme-warm .settings-sub-menu {
+    background: rgba(223, 213, 189, 0.3) !important;
+}
+
+/* 暗夜黑主题 */
+body.theme-dark .settings-tab.active,
+body.theme-dark .settings-sub-tab.active,
+body.theme-dark .settings-tab[data-tab="appearance"],
+body.theme-dark .settings-sub-tab[data-sub="theme"] {
+    background: #3a3a4a !important;
+    border-left-color: #6b8c42 !important;
+    color: #e0e0e0 !important;
+}
+
+body.theme-dark .settings-container,
+body.theme-dark .settings-sub-menu {
+    background: rgba(30, 30, 46, 0.5) !important;
+}
+
+/* Open 主题 */
+body.theme-open .settings-tab.active,
+body.theme-open .settings-sub-tab.active,
+body.theme-open .settings-tab[data-tab="appearance"],
+body.theme-open .settings-sub-tab[data-sub="theme"] {
+    background: rgba(255, 255, 255, 0.3) !important;
+    border-left-color: #ceb087 !important;
+    color: #333 !important;
+}
+
+body.theme-open .settings-container,
+body.theme-open .settings-sub-menu {
+    background: rgba(255, 255, 255, 0.15) !important;
+    backdrop-filter: blur(10px) !important;
+}
+
+/* ========== 设置面板主题颜色 ========== */
+
+/* 默认白色主题 */
+body.theme-default .settings-container > div,
+body.theme-default .settings-sub-menu {
+    background: #f5f5f5 !important;
+}
+body.theme-default .settings-container > div > div:first-child {
+    background: #d8d9da !important;
+}
+
+/* 护眼绿主题 */
+body.theme-eye .settings-container > div,
+body.theme-eye .settings-sub-menu {
+    background: #a8b7a5 !important;
+}
+body.theme-eye .settings-container > div > div:first-child {
+    background: #93a590 !important;
+}
+body.theme-eye .settings-tab.active,
+body.theme-eye .settings-sub-tab.active {
+    background: #7a9a6e !important;
+    border-left-color: #4a6e3a !important;
+}
+
+/* 经典黄主题 */
+body.theme-warm .settings-container > div,
+body.theme-warm .settings-sub-menu {
+    background: #b2a88c !important;
+}
+body.theme-warm .settings-container > div > div:first-child {
+    background: #9a8f73 !important;
+}
+body.theme-warm .settings-tab.active,
+body.theme-warm .settings-sub-tab.active {
+    background: #c4b694 !important;
+    border-left-color: #8a7648 !important;
+}
+
+/* 暗夜黑主题 */
+body.theme-dark .settings-container > div,
+body.theme-dark .settings-sub-menu {
+    background: #252542 !important;
+}
+body.theme-dark .settings-container > div > div:first-child {
+    background: #343443 !important;
+}
+body.theme-dark .settings-tab.active,
+body.theme-dark .settings-sub-tab.active {
+    background: #3a3a5a !important;
+    border-left-color: #6b8c42 !important;
+}
+body.theme-dark .settings-tab,
+body.theme-dark .settings-sub-tab {
+    color: #c0c0c0 !important;
+}
+
+/* Open 主题 - 毛玻璃效果 */
+body.theme-open .settings-container > div,
+body.theme-open .settings-sub-menu {
+    background: rgba(255, 255, 255, 0.25) !important;
+    backdrop-filter: blur(20px) !important;
+}
+body.theme-open .settings-container > div > div:first-child {
+    background: rgba(255, 255, 255, 0.2) !important;
+}
+body.theme-open .settings-tab.active,
+body.theme-open .settings-sub-tab.active {
+    background: rgba(255, 255, 255, 0.35) !important;
+    border-left-color: #ceb087 !important;
+}
+
+/* ========== 设置面板在自定义背景时透明 ========== */
+body.has-custom-bg .settings-container > div,
+body.has-custom-bg .settings-sub-menu,
+body.has-custom-bg .settings-content-area {
+    background: rgba(0, 0, 0, 0.6) !important;
+    backdrop-filter: blur(10px) !important;
+}
+
+/* 设置面板圆角改为直角 */
+.settings-container > div,
+.settings-sub-menu,
+.settings-content-area {
+    border-radius: 0px !important;
+}
+
+/* 确保设置面板内部元素也是直角 */
+.settings-container > div > div:first-child {
+    border-radius: 0px !important;
+}
+
+/* 主题预设按钮也改为直角 */
+.theme-preset-btn {
+    border-radius: 0px !important;
+}
+
+/* 背景预览也改为直角 */
+#bgPreviewSetting,
+#customBgPreview {
+    border-radius: 0px !important;
+}
+
+/* ========== 设置面板完全透明（自定义背景时） ========== */
+body.has-custom-bg .settings-container > div,
+body.has-custom-bg .settings-sub-menu,
+body.has-custom-bg .settings-content-area,
+body.has-custom-bg .settings-container > div > div:first-child,
+body.has-custom-bg .settings-tab,
+body.has-custom-bg .settings-sub-tab {
+    background: transparent !important;
+    background-color: transparent !important;
+    backdrop-filter: blur(15px) !important;
+}
+
+/* 确保内联样式被覆盖 */
+body.has-custom-bg [style*="background: #f8f6f2"],
+body.has-custom-bg [style*="background: #e8e0d4"],
+body.has-custom-bg [style*="background: rgb(248, 246, 242)"],
+body.has-custom-bg [style*="background: rgb(232, 224, 212)"],
+body.has-custom-bg [style*="background-color: #f8f6f2"],
+body.has-custom-bg [style*="background-color: #e8e0d4"] {
+    background: transparent !important;
+    background-color: transparent !important;
+}
+
+/* 设置面板文字颜色在透明背景下 */
+body.has-custom-bg .settings-tab,
+body.has-custom-bg .settings-sub-tab,
+body.has-custom-bg .settings-content-area h3,
+body.has-custom-bg .settings-content-area label {
+    color: #fff !important;
+    text-shadow: 0 0 2px rgba(0,0,0,0.5) !important;
+}
+
+/* 设置面板按钮在透明背景下 */
+body.has-custom-bg .theme-preset-btn {
+    background: rgba(255, 255, 255, 0.2) !important;
+    color: #fff !important;
+    backdrop-filter: blur(5px) !important;
+}
+
+body.has-custom-bg .theme-preset-btn:hover {
+    background: rgba(255, 255, 255, 0.35) !important;
+}
+
+/* 设置面板边框在透明背景下 */
+body.has-custom-bg .settings-container > div,
+body.has-custom-bg .settings-sub-menu {
+    border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* 深色主题下透明背景的文字颜色 */
+body.theme-dark.has-custom-bg .settings-tab,
+body.theme-dark.has-custom-bg .settings-sub-tab,
+body.theme-dark.has-custom-bg .settings-content-area h3 {
+    color: #e0e0e0 !important;
+}
+
+/* ========== 章节栏可调节拖动条 ========== */
+.left-sidebar {
+    position: relative !important;
+    resize: horizontal !important;
+    overflow: auto !important;
+}
+
+#resizeHandle {
+    position: absolute;
+    right: -4px;
+    top: 0;
+    width: 6px;
+    height: 100%;
+    cursor: ew-resize;
+    background: transparent;
+    z-index: 10;
+    transition: background 0.2s;
+}
+
+#resizeHandle:hover {
+    background: rgba(0, 122, 255, 0.4) !important;
+}
+
+/* 章节栏宽度过渡效果 */
+.left-sidebar {
+    transition: width 0.1s ease !important;
+}
+
+/* ========== 章节列表样式优化 ========== */
+.chapter-item {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 8px 12px !important;
+    margin: 2px 0 !important;
+    border-radius: 8px !important;
+    cursor: default !important;
+    transition: all 0.2s ease !important;
+}
+
+.chapter-item:hover {
+    background: rgba(0, 0, 0, 0.05) !important;
+}
+
+.chapter-item.dragging {
+    opacity: 0.5;
+}
+
+.chapter-title {
+    flex: 1;
+    cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.chapter-actions {
+    display: flex;
+    gap: 4px;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+}
+
+.chapter-item:hover .chapter-actions {
+    opacity: 1;
+}
+
+.chapter-actions button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.chapter-actions button:hover {
+    background: rgba(0, 0, 0, 0.1);
+    transform: scale(1.1);
+}
+
+.delete-chapter:hover {
+    color: #dc3545 !important;
+}
+
+/* ========== 分卷和章节按钮样式 ========== */
+.volume-item {
+    margin-bottom: 16px;
+    background: rgba(0, 0, 0, 0.02);
+    border-radius: 8px;
+    padding: 4px;
+}
+
+.volume-header {
+    transition: all 0.2s ease;
+}
+
+.volume-header:hover .volume-actions {
+    opacity: 1 !important;
+}
+
+.volume-actions {
+    opacity: 0;
+}
+
+.volume-actions button:hover {
+    background: rgba(0, 0, 0, 0.1);
+    transform: scale(1.05);
+}
+
+.volume-delete:hover {
+    color: #dc3545 !important;
+}
+
+/* 章节列表默认显示 */
+.chapter-list {
+    margin-left: 16px;
+    margin-top: 4px;
+}
