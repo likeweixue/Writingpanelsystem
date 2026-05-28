@@ -137,13 +137,13 @@ function switchPage(pageId) {
         pageDiv.innerHTML = '<iframe src="stats.html" style="width:100%; height:100%; border:none; background:#e9e3d7;"></iframe>';
     } 
     else if (pageId === 'settings') {
-        pageDiv.innerHTML = '<div class="settings-container" id="settingsContainer" style="height:100%; overflow:auto;"></div>';
-        setTimeout(function() {
-            if (typeof renderSettingsPage === 'function') {
-                renderSettingsPage();
-            }
-        }, 100);
-    } 
+    pageDiv.innerHTML = '<div class="settings-container" id="settingsContainer" style="height:100%; overflow:auto;"></div>';
+    setTimeout(function() {
+        if (typeof renderSettingsPage === 'function') {
+            renderSettingsPage();
+        }
+    }, 100);
+}
     else if (pageId === 'about') {
         pageDiv.innerHTML = '<div class="about-content"></div>';
         setTimeout(function() {

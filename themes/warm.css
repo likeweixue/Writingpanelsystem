@@ -6,3 +6,9 @@
 .sidebar-menu { background: #cfc5ad; }
 .tab.active { background: #dfd5bd; }
 .tab { background: #cfc5ad; }
+body.theme-warm .settings-container > div > div:first-child {
+    background: transparent !important;
+}
+body.theme-warm .settings-container [style*="background: rgba"] {
+    background: rgba(223, 213, 189, 0.6) !important;
+}

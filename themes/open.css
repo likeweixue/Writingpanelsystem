@@ -5,250 +5,209 @@ body {
     background: transparent !important;
 }
 
-/* 主容器毛玻璃效果 */
+/* 主容器 - 整体毛玻璃 */
 .app-container {
-    background: rgba(255, 255, 255, 0.12) !important;
+    background: rgba(255, 255, 255, 0.08) !important;
     backdrop-filter: blur(20px) !important;
-    border-radius: 0 !important;
 }
 
-/* 标签栏圆角 + 毛玻璃 */
+/* 标签栏 - 胶囊 */
 .tabs-container {
     background: rgba(255, 255, 255, 0.15) !important;
     backdrop-filter: blur(20px) !important;
-    border-radius: 24px !important;
-    margin: 12px 12px 0 12px !important;
-    padding: 8px 12px !important;
-    width: auto !important;
+    border-radius: 40px !important;
+    margin: 12px 16px 0 16px !important;
+    padding: 6px 12px !important;
 }
 
-/* 标签页圆角 */
 .tab {
-    border-radius: 20px !important;
+    border-radius: 30px !important;
     background: rgba(255, 255, 255, 0.2) !important;
-    margin: 0 2px !important;
+    margin: 0 3px !important;
+    padding: 6px 20px !important;
 }
 .tab.active {
-    background: rgba(255, 255, 255, 0.35) !important;
+    background: rgba(255, 255, 255, 0.4) !important;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
 }
 
-/* 左侧菜单栏 - 浮动效果 */
+/* 左侧菜单栏 - 胶囊 */
 .sidebar-menu {
-    background: rgba(255, 255, 255, 0.2) !important;
+    background: rgba(255, 255, 255, 0.15) !important;
     backdrop-filter: blur(20px) !important;
-    border-radius: 20px !important;
-    margin: 12px 0 12px 12px !important;
+    border-radius: 28px !important;
+    margin: 12px 0 12px 16px !important;
     width: 180px !important;
     height: calc(100vh - 24px) !important;
     border: none !important;
 }
 
-/* 菜单项样式 */
 .menu-item {
-    border-radius: 12px !important;
+    border-radius: 24px !important;
     margin: 4px 8px !important;
-    width: auto !important;
 }
 .menu-item.active {
-    background: rgba(255, 255, 255, 0.25) !important;
-    border-right: none !important;
-}
-
-/* logo 区域 */
-.logo-area {
-    border-bottom: 1px solid rgba(255,255,255,0.2) !important;
+    background: rgba(255, 255, 255, 0.3) !important;
 }
 
 /* 主内容区 */
 .main-content {
-    margin: 12px 12px 12px 0 !important;
+    margin: 12px 16px 12px 0 !important;
     background: transparent !important;
 }
 
 /* 页面容器 */
 .page {
-    background: rgba(255, 255, 255, 0.1) !important;
-    backdrop-filter: blur(20px) !important;
-    border-radius: 24px !important;
-    margin: 0 !important;
-    padding: 20px !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    padding: 0 !important;
 }
 
-/* 一级菜单栏 - 毛玻璃浮动 */
+/* 工具栏 - 胶囊 */
 .main-toolbar {
     background: rgba(255, 255, 255, 0.15) !important;
     backdrop-filter: blur(20px) !important;
     border-radius: 40px !important;
-    margin: 12px 12px 0 12px !important;
-    padding: 8px 16px !important;
-    border: none !important;
+    margin: 12px 16px 0 16px !important;
+    padding: 6px 12px !important;
 }
 
-/* 工具栏按钮 */
 .toolbar-btn {
     border-radius: 30px !important;
-    background: rgba(255, 255, 255, 0.1) !important;
+    background: rgba(255, 255, 255, 0.15) !important;
     margin: 0 2px !important;
 }
 .toolbar-btn:hover {
-    background: rgba(255, 255, 255, 0.25) !important;
+    background: rgba(255, 255, 255, 0.3) !important;
 }
 
 /* 写作区域主容器 */
 .detail-main {
-    gap: 12px !important;
-    padding: 12px !important;
+    gap: 16px !important;
+    padding: 16px !important;
     display: flex !important;
     flex-direction: row !important;
-    align-items: stretch !important;
-    overflow: visible !important;
 }
 
-/* 章节栏 - 浮动毛玻璃 */
+/* 章节栏 - 胶囊 */
 .detail-chapters {
-    background: rgba(255, 255, 255, 0.2) !important;
-    backdrop-filter: blur(20px) !important;
-    border-radius: 20px !important;
-    border: none !important;
-    margin: 0 !important;
-    width: 260px !important;
-    flex-shrink: 0 !important;
-    position: relative !important;
-    top: auto !important;
-    left: auto !important;
-}
-
-/* 编辑器区域 - 毛玻璃 */
-.detail-editor {
     background: rgba(255, 255, 255, 0.15) !important;
     backdrop-filter: blur(20px) !important;
-    border-radius: 20px !important;
-    margin: 0 !important;
-    padding: 0 !important;
+    border-radius: 24px !important;
+    border: none !important;
+    width: 260px !important;
+    flex-shrink: 0 !important;
+    overflow: hidden !important;
+}
+
+/* 编辑器区域 - 胶囊 */
+.detail-editor {
+    background: rgba(255, 255, 255, 0.12) !important;
+    backdrop-filter: blur(20px) !important;
+    border-radius: 24px !important;
     flex: 1 !important;
-    min-width: 200px !important;
+    overflow: hidden !important;
 }
 
 /* 章节标题输入框 */
 .title-input {
-    background: rgba(255, 255, 255, 0.2) !important;
-    backdrop-filter: blur(10px) !important;
-    border-radius: 16px !important;
-    margin: 12px !important;
-    width: calc(100% - 24px) !important;
+    background: rgba(255, 255, 255, 0.15) !important;
+    border-radius: 30px !important;
+    margin: 16px !important;
+    width: calc(100% - 32px) !important;
     border: none !important;
 }
 
 /* 编辑器内容区 */
 .editor-content {
-    background: rgba(255, 255, 255, 0.1) !important;
-    backdrop-filter: blur(10px) !important;
-    border-radius: 16px !important;
-    margin: 0 12px 12px 12px !important;
-    min-height: 300px !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    border-radius: 20px !important;
+    margin: 0 16px 16px 16px !important;
 }
 
-/* 状态栏 */
+/* 状态栏 - 胶囊 */
 .status-bar {
+    background: rgba(255, 255, 255, 0.12) !important;
+    backdrop-filter: blur(20px) !important;
+    border-radius: 30px !important;
+    margin: 0 16px 16px 16px !important;
+    padding: 10px 16px !important;
+}
+
+/* 右边栏 - 胶囊 */
+.right-sidebar {
     background: rgba(255, 255, 255, 0.15) !important;
-    backdrop-filter: blur(10px) !important;
-    border-radius: 16px !important;
-    margin: 0 12px 12px 12px !important;
-    padding: 8px 16px !important;
+    backdrop-filter: blur(20px) !important;
+    border-radius: 24px !important;
+    width: 280px !important;
+    flex-shrink: 0 !important;
     border: none !important;
 }
 
-/* 章节栏头部 */
-.chapters-header {
-    background: transparent !important;
-    padding: 12px !important;
+.right-sidebar-content {
+    padding: 16px 12px !important;
+}
+
+.sidebar-tool-item {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-radius: 16px !important;
+    margin-bottom: 8px !important;
+    padding: 12px 8px !important;
+}
+.sidebar-tool-item:hover {
+    background: rgba(255, 255, 255, 0.25) !important;
+}
+
+/* 图标边栏 - 胶囊 */
+.icon-sidebar {
+    background: rgba(255, 255, 255, 0.15) !important;
+    backdrop-filter: blur(20px) !important;
+    border-radius: 24px !important;
+    margin: 12px 0 12px 16px !important;
+    border: none !important;
+}
+
+.icon-sidebar-item {
+    border-radius: 16px !important;
+}
+.icon-sidebar-item:hover {
+    background: rgba(255, 255, 255, 0.25) !important;
+}
+
+/* 书籍卡片 - 胶囊 */
+.book-card {
+    background: rgba(255, 255, 255, 0.15) !important;
+    backdrop-filter: blur(10px) !important;
+    border-radius: 20px !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
 }
 
 /* 分卷和章节按钮 */
 #addVolumeBtn, #addChapterBtn, #trashBtnHeader {
     border-radius: 30px !important;
-    background: rgba(100, 100, 100, 0.3) !important;
-    border: none !important;
-}
-
-/* 卷列表 */
-.volume-list {
-    background: transparent !important;
-}
-
-/* 卷标题 */
-.volume-title {
-    border-radius: 12px !important;
-    background: rgba(255, 255, 255, 0.1) !important;
-    margin: 4px !important;
-}
-
-/* 章节项 */
-.chapter-item {
-    border-radius: 10px !important;
-    margin: 2px 8px !important;
-}
-
-/* ========== 右边栏 - 修复定位问题 ========== */
-.right-sidebar {
     background: rgba(255, 255, 255, 0.2) !important;
-    backdrop-filter: blur(20px) !important;
-    border-radius: 20px !important;
     border: none !important;
-    width: 280px !important;
-    flex-shrink: 0 !important;
-    position: relative !important;
-    top: auto !important;
-    right: auto !important;
-    left: auto !important;
-    bottom: auto !important;
-    margin: 0 !important;
-    height: auto !important;
+}
+
+.volume-title {
+    border-radius: 16px !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.chapter-item {
+    border-radius: 14px !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    margin: 4px 8px !important;
+}
+.chapter-item.active {
+    background: rgba(255, 255, 255, 0.25) !important;
 }
 
 /* 右侧滑出面板 */
 .right-slide-panel {
     background: rgba(255, 255, 255, 0.2) !important;
     backdrop-filter: blur(20px) !important;
-    border-radius: 20px !important;
-    top: 80px !important;
-    height: calc(100vh - 100px) !important;
-    margin-right: 12px !important;
-}
-
-/* 卡片样式 */
-.book-card, .stat-card, .about-content, .jianghu-card, .xuefu-card {
-    background: rgba(255, 255, 255, 0.15) !important;
-    backdrop-filter: blur(10px) !important;
-    border-radius: 20px !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
-}
-
-/* 设置卡片 */
-.settings-card {
-    background: rgba(255, 255, 255, 0.15) !important;
-    backdrop-filter: blur(10px) !important;
-    border-radius: 20px !important;
-}
-
-/* 江湖分组区域 */
-.jh-group-section {
-    background: transparent !important;
-}
-
-/* 调整左侧菜单右边距，让面板有呼吸感 */
-.main-wrapper {
-    gap: 12px !important;
-    padding: 12px !important;
-}
-
-/* 章节栏收起时的效果 */
-.detail-chapters.collapsed {
-    width: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    overflow: hidden !important;
+    border-radius: 28px !important;
 }
 
 /* 暗色主题下的毛玻璃 */
@@ -258,276 +217,306 @@ body.theme-dark .sidebar-menu,
 body.theme-dark .detail-chapters,
 body.theme-dark .detail-editor,
 body.theme-dark .right-sidebar,
-body.theme-dark .right-slide-panel,
-body.theme-dark .page {
+body.theme-dark .icon-sidebar,
+body.theme-dark .right-slide-panel {
     background: rgba(0, 0, 0, 0.3) !important;
-    backdrop-filter: blur(20px) !important;
 }
 
-/* 左侧菜单栏底部圆角和间距 */
-.sidebar-menu {
-    border-radius: 24px !important;
-    margin: 12px 0 12px 12px !important;
-    height: calc(100vh - 24px) !important;
-    overflow: hidden !important;
+/* 移除多余的白边 */
+.sidebar-menu,
+.icon-sidebar,
+.detail-chapters,
+.detail-editor,
+.right-sidebar {
+    box-shadow: none !important;
 }
 
-/* 菜单项底部圆角 */
-.menu-nav {
-    border-radius: 0 0 20px 20px !important;
+/* 确保没有多余背景 */
+body.theme-open .page {
+    background: transparent !important;
 }
 
-.menu-footer {
-    border-radius: 0 0 20px 20px !important;
-    margin-top: auto !important;
+/* 按钮无边框 */
+#addVolumeBtn, #addChapterBtn, #trashBtnHeader {
+    box-shadow: none !important;
 }
+/* ========== 添加阴影效果 - 让面板浮起来 ========== */
 
-/* 章节栏悬浮效果 */
-.detail-chapters {
-    background: rgba(255, 255, 255, 0.25) !important;
-    backdrop-filter: blur(20px) !important;
-    border-radius: 20px !important;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
-    margin: 0 !important;
-}
-
-/* 写作区域菜单栏悬浮效果 */
+/* 主工具栏阴影 */
 .main-toolbar {
-    background: rgba(255, 255, 255, 0.2) !important;
-    backdrop-filter: blur(20px) !important;
-    border-radius: 40px !important;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08) !important;
-    margin: 12px 12px 0 12px !important;
-}
-
-/* 编辑器区域悬浮效果 */
-.detail-editor {
-    background: rgba(255, 255, 255, 0.18) !important;
-    backdrop-filter: blur(20px) !important;
-    border-radius: 20px !important;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08) !important;
-}
-
-/* 标题输入框 */
-.title-input {
-    background: rgba(255, 255, 255, 0.25) !important;
-    border-radius: 16px !important;
-    margin: 12px !important;
-}
-
-/* 编辑器内容区 */
-.editor-content {
-    background: rgba(255, 255, 255, 0.12) !important;
-    border-radius: 16px !important;
-}
-
-/* 状态栏 */
-.status-bar {
-    background: rgba(255, 255, 255, 0.2) !important;
-    border-radius: 16px !important;
-}
-
-/* 章节栏悬浮效果增强 */
-.detail-chapters {
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12) !important;
-    transition: all 0.3s ease !important;
-}
-
-.detail-chapters:hover {
-    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15) !important;
-}
-
-/* 工具栏悬浮效果 */
-.main-toolbar {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
-}
-
-/* 编辑器区域悬浮效果 */
-.detail-editor {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
-}
-
-/* 右侧面板边框修复 */
-.right-slide-panel {
-    border-radius: 20px !important;
-    overflow: hidden !important;
-}
-
-/* 暗色主题下的悬浮效果 */
-body.theme-dark .detail-chapters,
-body.theme-dark .main-toolbar,
-body.theme-dark .detail-editor {
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.05) !important;
 }
 
 /* 左侧菜单栏阴影 */
 .sidebar-menu {
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
-    background: rgba(255, 255, 255, 0.25) !important;
-    backdrop-filter: blur(20px) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.05) !important;
 }
 
-/* 暗色主题下的阴影 */
-body.theme-dark .sidebar-menu {
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3) !important;
-    background: rgba(0, 0, 0, 0.35) !important;
+/* 图标边栏阴影 */
+.icon-sidebar {
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.05) !important;
 }
 
-/* 左侧菜单栏底部间距 */
+/* 章节栏阴影 */
+.detail-chapters {
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* 编辑器区域阴影 */
+.detail-editor {
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* 右边栏阴影 */
+.right-sidebar {
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* 状态栏阴影 */
+.status-bar {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* 书籍卡片阴影增强 */
+.book-card {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+    transition: transform 0.2s, box-shadow 0.2s !important;
+}
+.book-card:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* 标签栏阴影 */
+.tabs-container {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* 右侧滑出面板阴影 */
+.right-slide-panel {
+    box-shadow: -4px 8px 20px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* 暗色主题下的阴影（更深） */
+body.theme-dark .main-toolbar,
+body.theme-dark .sidebar-menu,
+body.theme-dark .icon-sidebar,
+body.theme-dark .detail-chapters,
+body.theme-dark .detail-editor,
+body.theme-dark .right-sidebar {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* 悬浮效果增强 */
+.detail-chapters:hover,
+.detail-editor:hover,
+.right-sidebar:hover {
+    transform: translateY(-1px) !important;
+    transition: transform 0.2s, box-shadow 0.2s !important;
+}
+
+/* ========== 调整左边栏和右边栏位置 ========== */
+
+/* 左边栏 - 向左移动，减少左边距 */
+.icon-sidebar {
+    margin-left: 8px !important;
+    margin-right: 0 !important;
+}
+
+/* 左侧菜单栏 - 也向左移动 */
 .sidebar-menu {
-    margin: 12px 0 20px 12px !important;
-    height: calc(100vh - 32px) !important;
+    margin-left: 8px !important;
 }
 
-/* 菜单底部内边距 */
-.menu-footer {
-    margin-bottom: 12px !important;
-    padding: 12px 16px !important;
+/* 右边栏 - 向右移动，减少右边距 */
+.right-sidebar {
+    margin-right: 8px !important;
 }
 
-/* 左侧菜单栏底部间距 - 增加呼吸感 */
-.sidebar-menu {
-    margin: 12px 0 20px 12px !important;
-    height: calc(100vh - 32px) !important;
-    border-radius: 24px !important;
-    overflow: hidden !important;
+/* 主内容区 - 调整边距保持平衡 */
+.main-content {
+    margin-right: 0 !important;
 }
 
-/* 菜单底部区域间距 */
-.menu-footer {
-    margin: 0 12px 12px 12px !important;
-    padding: 12px 0 !important;
-    border-radius: 12px !important;
-    background: rgba(255, 255, 255, 0.1) !important;
+/* 主容器外边距调整 */
+.main-wrapper {
+    padding: 12px 8px 12px 8px !important;
+    gap: 12px !important;
 }
 
-/* 菜单导航区域滚动 */
-.menu-nav {
-    flex: 1;
-    overflow-y: auto;
-    margin: 8px 0 !important;
+/* 章节栏和编辑器区域也微调 */
+.detail-chapters {
+    margin-left: 0 !important;
 }
 
-/* 菜单项间距 */
-.menu-item {
-    margin: 4px 12px !important;
-    border-radius: 12px !important;
+.detail-editor {
+    margin-right: 0 !important;
 }
 
-/* 暗色主题适配 */
-body.theme-dark .menu-footer {
-    background: rgba(0, 0, 0, 0.2) !important;
-}
+/* ========== 精确调整边距，与标签页对齐 ========== */
 
-/* 强制左侧菜单栏底部间距 - 提高优先级 */
-.sidebar-menu {
-    margin-bottom: 24px !important;
-    margin-top: 12px !important;
-    margin-left: 12px !important;
-    height: calc(100vh - 36px) !important;
-    border-radius: 24px !important;
-}
-
-/* 菜单底部额外间距 */
-.sidebar-menu .menu-footer {
-    margin-bottom: 16px !important;
-    padding-bottom: 16px !important;
-}
-
-/* Open 主题布局优化 */
+/* 主容器外边距统一为 16px */
 .main-wrapper {
     padding: 16px !important;
     gap: 16px !important;
-    background: transparent !important;
 }
 
+/* 左边栏 - 紧贴左侧 */
+.icon-sidebar {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+/* 左侧菜单栏 - 紧贴左侧 */
 .sidebar-menu {
+    margin-left: 0 !important;
+}
+
+/* 右边栏 - 紧贴右侧 */
+.right-sidebar {
+    margin-right: 0 !important;
+}
+
+/* 主内容区 - 无额外边距 */
+.main-content {
     margin: 0 !important;
-    height: 100% !important;
-    background: rgba(255, 255, 255, 0.25) !important;
-    backdrop-filter: blur(20px) !important;
+}
+
+/* 标签栏距离顶部和左右边距统一 */
+.tabs-container {
+    margin: 12px 16px 0 16px !important;
+}
+
+/* 工具栏距离左右边距统一 */
+.main-toolbar {
+    margin: 12px 16px 0 16px !important;
+}
+
+/* 左侧菜单栏距离左边距与标签栏一致 */
+.sidebar-menu {
+    margin: 12px 0 12px 16px !important;
+}
+
+/* 图标边栏距离左边距与标签栏一致 */
+.icon-sidebar {
+    margin: 12px 0 12px 16px !important;
+}
+
+/* 右边栏距离右边距与标签栏一致 */
+.right-sidebar {
+    margin: 12px 16px 12px 0 !important;
+}
+
+/* 主内容区距离右边距为 0 */
+.main-content {
+    margin: 12px 0 12px 0 !important;
+}
+
+/* ========== 增加面板间距，让布局更透气 ========== */
+
+/* 主内容区内边距增加 */
+.detail-main {
+    gap: 40px !important;
+    padding: 40px !important;
+}
+
+/* 图标边栏与章节栏之间的距离 */
+.icon-sidebar {
+    margin-right: 4px !important;
+}
+
+/* 章节栏与编辑器之间的距离 */
+.detail-chapters {
+    margin-right: 0 !important;
+}
+
+/* 编辑器与右边栏之间的距离 */
+.detail-editor {
+    margin-right: 0 !important;
+}
+
+/* 右边栏左边距 */
+.right-sidebar {
+    margin-left: 0 !important;
+}
+
+/* 整体布局容器增加内边距 */
+.main-wrapper {
+    padding: 40px !important;
+    gap: 40px !important;
+}
+
+/* 左侧菜单栏和主内容区间距 */
+.sidebar-menu {
+    margin-right: 10px !important;
 }
 
 .main-content {
-    border-radius: 24px !important;
-    overflow: hidden !important;
+    margin-left: 10px !important;
 }
 
-/* 书籍网格等卡片样式 */
-.books-grid {
-    padding: 8px !important;
+/* ========== 强制布局修复 - 让面板有间距 ========== */
+
+/* 强制 detail-main 为 flex 行布局 */
+.detail-main {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    width: 100% !important;
 }
 
-/* Open 主题专属布局 */
-body.theme-open .main-wrapper {
-    padding: 16px !important;
-    gap: 16px !important;
-}
-
-body.theme-open .sidebar-menu {
-    margin: 0 !important;
-    border-radius: 24px !important;
-}
-
-body.theme-open .main-content {
-    border-radius: 24px !important;
-}
-
-/* 修复 Open 主题下右侧面板位置 - 滑出面板 */
-body.theme-open .right-slide-panel {
-    right: 20px !important;
-    top: 100px !important;
-}
-
-body.theme-open .right-slide-panel.open {
-    right: 20px !important;
-}
-
-/* 右边栏在 Open 主题下的样式 - 移除固定定位 */
-body.theme-open .right-sidebar {
-    position: relative !important;
-    right: auto !important;
-    top: auto !important;
-    margin: 0 !important;
-}
-
-/* ========== 图标边栏圆润 ========== */
-.icon-sidebar {
-    border-radius: 20px !important;
+/* 给每个子元素添加边距 */
+.icon-sidebar,
+.left-sidebar,
+.library-sidebar,
+.detail-editor,
+.right-sidebar {
     margin-left: 12px !important;
-    margin-top: 12px !important;
-    margin-bottom: 12px !important;
-    overflow: hidden !important;
+    margin-right: 12px !important;
 }
 
-.icon-sidebar-content {
-    border-radius: 20px !important;
+/* 第一个元素左边距为 0，最后一个元素右边距为 0 */
+.icon-sidebar:first-child {
+    margin-left: 0 !important;
+}
+.right-sidebar:last-child {
+    margin-right: 0 !important;
 }
 
-.icon-sidebar-item {
-    border-radius: 12px !important;
-    transition: all 0.2s ease !important;
+/* 确保章节栏有宽度 */
+.left-sidebar {
+    flex-shrink: 0 !important;
+    width: 260px !important;
 }
 
-/* ========== 修复右侧滑出面板在 Open 主题下不可见 ========== */
-body.theme-open .right-slide-panel {
-    display: none !important;
+/* 编辑器自适应 */
+.detail-editor {
+    flex: 1 !important;
+    min-width: 200px !important;
 }
 
-body.theme-open .right-slide-panel.open {
-    display: flex !important;
-    right: 20px !important;
-    top: 100px !important;
-    transform: translateX(0) !important;
+/* 右边栏固定宽度 */
+.right-sidebar {
+    flex-shrink: 0 !important;
+    width: 500px !important;
 }
 
-/* 确保新建分组和新建书籍面板在 Open 主题下默认隐藏 */
-body.theme-open #newBookSlidePanelV2,
-body.theme-open #newGroupSlidePanelV2 {
-    display: none !important;
+/* ========== 图标边栏向左移动 ========== */
+
+/* 图标边栏 - 向左移动 */
+.icon-sidebar {
+    margin-left: -1px !important;
+    position: relative !important;
+    left: -10px !important;
 }
 
-body.theme-open #newBookSlidePanelV2.open,
-body.theme-open #newGroupSlidePanelV2.open {
-    display: flex !important;
+/* 或者使用 transform 平移 */
+.icon-sidebar {
+    transform: translateX(-8px) !important;
+}
+
+/* 调整左侧菜单栏，保持对齐 */
+.sidebar-menu {
+    margin-left: -4px !important;
 }

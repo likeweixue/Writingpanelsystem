@@ -1,4 +1,4 @@
-// ========== 设置界面 - 左右布局 ==========
+// ========== 设置界面 - 合并备份和安全（胶囊风格） ==========
 
 var settingsData = {
     theme: 'default',
@@ -92,11 +92,8 @@ function performBackup() {
         return;
     }
     
-    // 检查是否在 Electron 环境中
     if (window.electron && window.electron.backupAllBooks) {
-        // 使用 Electron 备份到文档文件夹
         alert('正在备份到文档文件夹，请稍候...');
-        
         window.electron.backupAllBooks(books).then(results => {
             let successCount = 0;
             let message = '';
@@ -114,17 +111,15 @@ function performBackup() {
             alert('备份失败：' + err.message);
         });
     } else {
-        // 浏览器环境降级到 localStorage
         var today = new Date();
         var dateStr = today.getFullYear() + '年' + (today.getMonth() + 1) + '月' + today.getDate() + '日';
         var dateFolder = today.getFullYear() + '' + String(today.getMonth() + 1).padStart(2,'0') + String(today.getDate()).padStart(2,'0');
         var backupData = { backupTime: new Date().toISOString(), books: books, groups: groups };
         localStorage.setItem('openwrite_backup_' + dateFolder, JSON.stringify(backupData));
-        alert('备份完成！备份时间：' + dateStr + '\n（存储在浏览器中，打包后会自动备份到文档文件夹）');
+        alert('备份完成！备份时间：' + dateStr);
     }
 }
 
-// 添加打开备份文件夹的功能
 function openBackupFolder() {
     if (window.electron && window.electron.openBackupFolder) {
         window.electron.openBackupFolder().then(result => {
@@ -148,7 +143,7 @@ function refreshBackupList() {
         }
     }
     if (backups.length === 0) {
-        container.innerHTML = '<p style="color: #888;">暂无备份记录</p>';
+        container.innerHTML = '<p style="color: #888; text-align: center; padding: 20px;">暂无备份记录</p>';
         return;
     }
     backups.sort(function(a, b) { return new Date(b.time) - new Date(a.time); });
@@ -203,463 +198,164 @@ function checkPassword() {
 }
 setTimeout(function() { loadPasswordSettings(); if (passwordSettings.enabled) checkPassword(); }, 100);
 
-// ========== 渲染各个标签页内容 ==========
-function renderThemeUI() {
-    var container = document.getElementById('settingsTabContent');
-    if (!container) return;
-    container.innerHTML = `
-        <h3 style="margin-bottom: 20px;">预设主题</h3>
-        <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 24px;">
-            <button class="theme-preset-btn" data-theme="default" style="padding: 10px 20px; border-radius: 12px; background: #f0f0f0; border: none; cursor: pointer;">默认白</button>
-            <button class="theme-preset-btn" data-theme="eye" style="padding: 10px 20px; border-radius: 12px; background: #C8DBC5; border: none; cursor: pointer;">护眼绿</button>
-            <button class="theme-preset-btn" data-theme="warm" style="padding: 10px 20px; border-radius: 12px; background: #DFD5BD; border: none; cursor: pointer;">经典黄</button>
-            <button class="theme-preset-btn" data-theme="dark" style="padding: 10px 20px; border-radius: 12px; background: #1e1e2e; color: white; border: none; cursor: pointer;">暗夜黑</button>
-            <button class="theme-preset-btn" data-theme="open" style="padding: 10px 20px; border-radius: 24px; background: #f5f5f7; border: none; cursor: pointer;">Open圆润</button>
-        </div>
-        <h3 style="margin-bottom: 20px;">全局文字颜色</h3>
-        <input type="color" id="globalTextColor" value="${settingsData.globalTextColor}" style="width: 60px; height: 40px; cursor: pointer;">
-    `;
-    var themeBtns = document.querySelectorAll('.theme-preset-btn');
-    for (var i = 0; i < themeBtns.length; i++) {
-        themeBtns[i].onclick = function() { applyTheme(this.getAttribute('data-theme')); };
-    }
-    var colorPicker = document.getElementById('globalTextColor');
-    if (colorPicker) {
-        colorPicker.onchange = function() {
-            settingsData.globalTextColor = this.value;
-            applyGlobalTextColor();
-            saveSettings();
-        };
-    }
-}
-
-function renderBackgroundUI() {
-    var container = document.getElementById('settingsTabContent');
-    if (!container) return;
-    container.innerHTML = `
-        <h3 style="margin-bottom: 20px;">自定义背景图片</h3>
-        <input type="file" id="bgUploadSetting" accept="image/*" style="margin-bottom: 16px;">
-        <div id="bgPreviewSetting" style="width:100%; height:150px; background:#ddd; border-radius:12px; margin-bottom:16px; background-size:cover; background-position:center;"></div>
-        <div style="margin-bottom: 16px;"><span>透明度: <span id="opacityValSetting">${settingsData.bgOpacity}</span>%</span><input type="range" id="opacitySliderSetting" min="0" max="100" value="${settingsData.bgOpacity}" style="width:100%; margin-top:8px;"></div>
-        <button id="clearBgSettingBtn" class="btn-danger" style="padding: 8px 16px; background: #dc3545; color: white; border: none; border-radius: 8px; cursor: pointer;">清除背景</button>
-    `;
-    if (settingsData.bgImage) document.getElementById('bgPreviewSetting').style.backgroundImage = 'url(' + settingsData.bgImage + ')';
-    document.getElementById('bgUploadSetting').onchange = function(e) {
-        var file = e.target.files[0];
-        if (file) {
-            var reader = new FileReader();
-            reader.onload = function(ev) {
-                settingsData.bgImage = ev.target.result;
-                document.getElementById('bgPreviewSetting').style.backgroundImage = 'url(' + settingsData.bgImage + ')';
-                applyBackground();
-                saveSettings();
-            };
-            reader.readAsDataURL(file);
-        }
-    };
-    document.getElementById('opacitySliderSetting').oninput = function() {
-        var val = parseInt(this.value);
-        document.getElementById('opacityValSetting').innerText = val;
-        settingsData.bgOpacity = val;
-        applyBackground();
-        saveSettings();
-    };
-    document.getElementById('clearBgSettingBtn').onclick = function() {
-        settingsData.bgImage = null;
-        document.getElementById('bgPreviewSetting').style.backgroundImage = '';
-        applyBackground();
-        saveSettings();
-    };
-}
-
-function renderCssUI() {
-    var container = document.getElementById('settingsTabContent');
-    if (!container) return;
-    container.innerHTML = `
-        <h3 style="margin-bottom: 20px;">自定义CSS</h3>
-        <textarea id="customCssSetting" rows="12" style="width:100%; padding:16px; font-family: monospace; border-radius: 12px; border: 1px solid #ddd; resize: vertical;">${settingsData.customCss.replace(/</g, '&lt;')}</textarea>
-        <button id="saveCssSettingBtn" class="btn-primary" style="margin-top: 16px; padding: 10px 20px; background: #007aff; color: white; border: none; border-radius: 8px; cursor: pointer;">保存CSS</button>
-    `;
-    document.getElementById('saveCssSettingBtn').onclick = function() {
-        settingsData.customCss = document.getElementById('customCssSetting').value;
-        applyCustomCss();
-        saveSettings();
-        alert('CSS已保存');
-    };
-}
-
-function renderBackupSettingsUI() {
-    var container = document.getElementById('settingsTabContent');
-    if (!container) return;
-    loadBackupSettings();
-    container.innerHTML = `
-        <h3 style="margin-bottom: 20px;">备份设置</h3>
-        <div style="margin-bottom: 24px; padding: 16px; background: rgba(0,0,0,0.03); border-radius: 12px;">
-            <h4>自动备份</h4>
-            <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;"><input type="checkbox" id="autoBackupCheckbox" ${backupSettings.autoBackup ? 'checked' : ''}><span>启用自动备份</span></label>
-            <div style="margin-bottom: 12px;"><label>备份间隔（分钟）：</label><select id="backupIntervalSelect" style="width: 100%; padding: 8px; margin-top: 8px;"><option value="5" ${backupSettings.backupInterval === 5 ? 'selected' : ''}>5分钟</option><option value="10" ${backupSettings.backupInterval === 10 ? 'selected' : ''}>10分钟</option><option value="30" ${backupSettings.backupInterval === 30 ? 'selected' : ''}>30分钟</option><option value="60" ${backupSettings.backupInterval === 60 ? 'selected' : ''}>1小时</option></select></div>
-            <button id="manualBackupBtn" class="btn-primary" style="margin-top: 12px; width:100%;">📦 立即备份</button>
-            <button id="openBackupFolderBtn" class="btn-secondary" style="margin-top: 8px; width:100%; background:#6c757d;">📁 打开备份文件夹</button>
-        </div>
-        <div style="padding: 16px; background: rgba(0,0,0,0.03); border-radius: 12px;">
-            <h4>恢复备份</h4>
-            <div id="backupList" style="margin-bottom: 12px;"><p style="color: #888;">暂无备份记录</p></div>
-            <button id="refreshBackupListBtn" class="btn-secondary">刷新列表</button>
-        </div>
-    `;
-    
-    document.getElementById('autoBackupCheckbox').onchange = function(e) {
-        backupSettings.autoBackup = e.target.checked;
-        saveBackupSettings();
-        if (backupSettings.autoBackup) startAutoBackup();
-        else stopAutoBackup();
-    };
-    document.getElementById('backupIntervalSelect').onchange = function(e) {
-        backupSettings.backupInterval = parseInt(e.target.value);
-        saveBackupSettings();
-        stopAutoBackup();
-        if (backupSettings.autoBackup) startAutoBackup();
-    };
-    document.getElementById('manualBackupBtn').onclick = performBackup;
-    document.getElementById('refreshBackupListBtn').onclick = refreshBackupList;
-    document.getElementById('openBackupFolderBtn').onclick = openBackupFolder;
-    refreshBackupList();
-}
-
-function renderSecuritySettingsUI() {
-    var container = document.getElementById('settingsTabContent');
-    if (!container) return;
-    loadPasswordSettings();
-    container.innerHTML = `
-        <h3 style="margin-bottom: 20px;">安全设置</h3>
-        <div style="margin-bottom: 24px; padding: 16px; background: rgba(0,0,0,0.03); border-radius: 12px;">
-            <h4>密码保护</h4>
-            <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;"><input type="checkbox" id="enablePasswordCheckbox" ${passwordSettings.enabled ? 'checked' : ''}><span>启用启动密码</span></label>
-            <div id="passwordSettingsDiv" style="${passwordSettings.enabled ? 'display: block;' : 'display: none;'}"><div style="margin-bottom: 12px;"><label>设置密码：</label><input type="password" id="passwordInput" value="${passwordSettings.password}" placeholder="请输入密码" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ddd;"></div></div>
-            <button id="savePasswordBtn" class="btn-primary" style="margin-top: 12px;">保存密码设置</button>
-        </div>
-        <div style="padding: 16px; background: rgba(0,0,0,0.03); border-radius: 12px;">
-            <h4>密保问题</h4>
-            <div style="margin-bottom: 12px;"><label>密保问题：</label><input type="text" id="securityQuestionInput" value="${passwordSettings.question}" placeholder="例如：你的出生地是？" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ddd;"></div>
-            <div style="margin-bottom: 12px;"><label>密保答案：</label><input type="text" id="securityAnswerInput" value="${passwordSettings.answer}" placeholder="请输入答案" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ddd;"></div>
-            <button id="saveSecurityBtn" class="btn-primary" style="margin-top: 12px;">保存密保设置</button>
-            <button id="forgotPasswordBtn" class="btn-secondary" style="margin-top: 12px; margin-left: 12px;">忘记密码？</button>
-        </div>
-    `;
-    var enableCheckbox = document.getElementById('enablePasswordCheckbox');
-    var passwordDiv = document.getElementById('passwordSettingsDiv');
-    var passwordInput = document.getElementById('passwordInput');
-    if (enableCheckbox) {
-        enableCheckbox.onchange = function(e) {
-            passwordDiv.style.display = e.target.checked ? 'block' : 'none';
-            passwordSettings.enabled = e.target.checked;
-            savePasswordSettings();
-        };
-    }
-    document.getElementById('savePasswordBtn').onclick = function() {
-        if (enableCheckbox.checked && passwordInput.value) {
-            passwordSettings.enabled = true;
-            passwordSettings.password = passwordInput.value;
-        } else {
-            passwordSettings.enabled = false;
-            passwordSettings.password = '';
-        }
-        savePasswordSettings();
-        alert('密码设置已保存');
-    };
-    document.getElementById('saveSecurityBtn').onclick = function() {
-        passwordSettings.question = document.getElementById('securityQuestionInput').value;
-        passwordSettings.answer = document.getElementById('securityAnswerInput').value;
-        savePasswordSettings();
-        alert('密保问题已保存');
-    };
-    document.getElementById('forgotPasswordBtn').onclick = function() {
-        if (passwordSettings.question && passwordSettings.answer) {
-            var answer = prompt('密保问题：' + passwordSettings.question);
-            if (answer === passwordSettings.answer) {
-                var newPassword = prompt('请输入新密码：');
-                if (newPassword) {
-                    passwordSettings.password = newPassword;
-                    savePasswordSettings();
-                    alert('密码已重置');
-                }
-            } else alert('答案错误');
-        } else alert('请先设置密保问题');
-    };
-}
-
+// ========== 渲染设置页面（合并版） ==========
 function renderSettingsPage() {
     var container = document.getElementById('settingsContainer');
     if (!container) return;
     
-        // 菜单分类：只保留备份和安全
-    var categories = [
-        { id: 'backup', name: '备份', icon: '💾' },
-        { id: 'security', name: '安全', icon: '🔒' }
-    ];
-    var activeCategory = localStorage.getItem('settings_active_tab') || 'backup';
+    loadBackupSettings();
+    loadPasswordSettings();
     
     container.innerHTML = `
-        <div style="display: flex; height: 100%; min-height: 500px; background: #fff; border-radius: 16px; overflow: hidden;">
-            <div style="width: 160px; background: #f8f6f2; border-right: 1px solid #eee; padding: 20px 0;">
-                ${categories.map(cat => `
-                    <div class="settings-tab" data-tab="${cat.id}" style="padding: 12px 20px; cursor: pointer; ${activeCategory === cat.id ? 'background: #e8e0d4; font-weight: 600; border-left: 3px solid #ceb087;' : 'color: #666;'}">
-                        ${cat.icon} ${cat.name}
-                    </div>
-                `).join('')}
+        <div style="height: 100%; background: transparent; padding: 24px; overflow-y: auto;">
+            <!-- 标题卡片 - 胶囊风格 -->
+            <div style="background: rgba(255,255,255,0.6); backdrop-filter: blur(10px); border-radius: 28px; padding: 16px 20px; margin-bottom: 20px;">
+                <h2 style="font-size: 20px; margin-bottom: 4px;">⚙️ 设置</h2>
+                <p style="color: #888; font-size: 13px;">个性化设置和数据管理</p>
             </div>
-            <div id="settingsTabContent" style="flex: 1; padding: 24px; overflow-y: auto;">
-                加载中...
+            
+            <!-- 备份设置卡片 -->
+            <div style="background: rgba(255,255,255,0.6); backdrop-filter: blur(10px); border-radius: 28px; padding: 20px; margin-bottom: 20px;">
+                <h3 style="font-size: 18px; margin-bottom: 16px;">💾 备份设置</h3>
+                <div style="background: #fff; border-radius: 24px; padding: 20px;">
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: flex; align-items: center; gap: 12px; cursor: pointer;">
+                            <input type="checkbox" id="autoBackupCheckbox" ${backupSettings.autoBackup ? 'checked' : ''} style="width: 18px; height: 18px;">
+                            <span style="font-weight: 500;">启用自动备份</span>
+                        </label>
+                    </div>
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 500;">备份间隔</label>
+                        <select id="backupIntervalSelect" style="width: 100%; padding: 12px; border-radius: 40px; border: 1px solid #ddd; background: #f8f8f8;">
+                            <option value="5" ${backupSettings.backupInterval === 5 ? 'selected' : ''}>5分钟</option>
+                            <option value="10" ${backupSettings.backupInterval === 10 ? 'selected' : ''}>10分钟</option>
+                            <option value="30" ${backupSettings.backupInterval === 30 ? 'selected' : ''}>30分钟</option>
+                            <option value="60" ${backupSettings.backupInterval === 60 ? 'selected' : ''}>1小时</option>
+                        </select>
+                    </div>
+                    <button id="manualBackupBtn" style="width: 100%; padding: 12px; background: #9b784e; color: white; border: none; border-radius: 40px; cursor: pointer; margin-bottom: 12px;">📦 立即备份</button>
+                    <button id="openBackupFolderBtn" style="width: 100%; padding: 12px; background: #6c757d; color: white; border: none; border-radius: 40px; cursor: pointer;">📁 打开备份文件夹</button>
+                </div>
+            </div>
+            
+            <!-- 恢复备份卡片 -->
+            <div style="background: rgba(255,255,255,0.6); backdrop-filter: blur(10px); border-radius: 28px; padding: 20px; margin-bottom: 20px;">
+                <h3 style="font-size: 18px; margin-bottom: 16px;">🔄 恢复备份</h3>
+                <div style="background: #fff; border-radius: 24px; padding: 20px;">
+                    <div id="backupList" style="margin-bottom: 16px; max-height: 200px; overflow-y: auto;">
+                        <p style="color: #888; text-align: center; padding: 20px;">暂无备份记录</p>
+                    </div>
+                    <button id="refreshBackupListBtn" style="width: 100%; padding: 12px; background: #6c757d; color: white; border: none; border-radius: 40px; cursor: pointer;">🔄 刷新列表</button>
+                </div>
+            </div>
+            
+            <!-- 安全设置卡片 -->
+            <div style="background: rgba(255,255,255,0.6); backdrop-filter: blur(10px); border-radius: 28px; padding: 20px;">
+                <h3 style="font-size: 18px; margin-bottom: 16px;">🔒 安全设置</h3>
+                <div style="background: #fff; border-radius: 24px; padding: 20px;">
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; margin-bottom: 16px;">
+                            <input type="checkbox" id="enablePasswordCheckbox" ${passwordSettings.enabled ? 'checked' : ''} style="width: 18px; height: 18px;">
+                            <span style="font-weight: 500;">启用启动密码</span>
+                        </label>
+                        <div id="passwordSettingsDiv" style="${passwordSettings.enabled ? 'display: block;' : 'display: none;'}">
+                            <label style="display: block; margin-bottom: 8px; font-weight: 500;">设置密码</label>
+                            <input type="password" id="passwordInput" value="${passwordSettings.password}" placeholder="请输入密码" style="width: 100%; padding: 12px; border-radius: 40px; border: 1px solid #ddd; background: #f8f8f8;">
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 500;">密保问题</label>
+                        <input type="text" id="securityQuestionInput" value="${passwordSettings.question}" placeholder="例如：你的出生地是？" style="width: 100%; padding: 12px; border-radius: 40px; border: 1px solid #ddd; margin-bottom: 16px; background: #f8f8f8;">
+                        
+                        <label style="display: block; margin-bottom: 8px; font-weight: 500;">密保答案</label>
+                        <input type="text" id="securityAnswerInput" value="${passwordSettings.answer}" placeholder="请输入答案" style="width: 100%; padding: 12px; border-radius: 40px; border: 1px solid #ddd; margin-bottom: 24px; background: #f8f8f8;">
+                    </div>
+                    
+                    <button id="saveSecurityBtn" style="width: 100%; padding: 12px; background: #9b784e; color: white; border: none; border-radius: 40px; cursor: pointer; margin-bottom: 12px;">💾 保存设置</button>
+                    <button id="forgotPasswordBtn" style="width: 100%; padding: 12px; background: #6c757d; color: white; border: none; border-radius: 40px; cursor: pointer;">❓ 忘记密码</button>
+                </div>
             </div>
         </div>
     `;
     
-    // 定义子菜单
-        // 定义子菜单（备份和安全）
-    var subMenus = {
-        backup: [
-            { id: 'backup_main', name: '备份设置', render: renderBackupSettingsUI }
-        ],
-        security: [
-            { id: 'security_main', name: '安全设置', render: renderSecuritySettingsUI }
-        ]
-    };
+    // 绑定备份事件
+    var autoCheckbox = document.getElementById('autoBackupCheckbox');
+    var intervalSelect = document.getElementById('backupIntervalSelect');
+    var manualBtn = document.getElementById('manualBackupBtn');
+    var refreshBtn = document.getElementById('refreshBackupListBtn');
+    var openFolderBtn = document.getElementById('openBackupFolderBtn');
     
-    var currentSub = localStorage.getItem('settings_sub_tab') || 'theme';
-    
-    function renderSubMenu() {
-        var subs = subMenus[activeCategory] || [];
-        var subContainer = document.createElement('div');
-        subContainer.style.cssText = 'width: 140px; border-right: 1px solid #eee; padding: 16px 0;';
-        subContainer.innerHTML = subs.map(sub => `
-            <div class="settings-sub-tab" data-sub="${sub.id}" style="padding: 10px 16px; cursor: pointer; ${currentSub === sub.id ? 'background: #e8e0d4; font-weight: 500; border-left: 2px solid #ceb087;' : 'color: #666;'}">
-                ${sub.name}
-            </div>
-        `).join('');
-        
-        var contentArea = document.getElementById('settingsTabContent');
-        var oldSubMenu = contentArea.querySelector('.settings-sub-menu');
-        if (oldSubMenu) oldSubMenu.remove();
-        
-        contentArea.insertBefore(subContainer, contentArea.firstChild);
-        subContainer.className = 'settings-sub-menu';
-        
-        var subBtns = document.querySelectorAll('.settings-sub-tab');
-        for (var i = 0; i < subBtns.length; i++) {
-            subBtns[i].onclick = function() {
-                var subId = this.getAttribute('data-sub');
-                localStorage.setItem('settings_sub_tab', subId);
-                var sub = subs.find(function(s) { return s.id === subId; });
-                if (sub && sub.render) {
-                    renderContentArea(sub.render);
-                }
-                var allSubs = document.querySelectorAll('.settings-sub-tab');
-                for (var j = 0; j < allSubs.length; j++) {
-                    allSubs[j].style.background = '';
-                    allSubs[j].style.borderLeft = '';
-                    allSubs[j].style.fontWeight = 'normal';
-                    allSubs[j].style.color = '#666';
-                }
-                this.style.background = '#e8e0d4';
-                this.style.borderLeft = '2px solid #ceb087';
-                this.style.fontWeight = '500';
-                this.style.color = '#333';
-            };
-        }
-    }
-    
-    function renderContentArea(renderFunc) {
-        var container = document.getElementById('settingsTabContent');
-        var oldContent = container.querySelector('.settings-content-area');
-        if (oldContent) oldContent.remove();
-        
-        var contentDiv = document.createElement('div');
-        contentDiv.className = 'settings-content-area';
-        contentDiv.style.cssText = 'flex: 1; padding: 0 20px;';
-        container.appendChild(contentDiv);
-        
-        var tempContainer = { innerHTML: '' };
-        var originalContainer = document.getElementById('settingsTabContent');
-        var tempId = 'temp-settings-container';
-        var tempDiv = document.createElement('div');
-        tempDiv.id = tempId;
-        tempDiv.style.display = 'none';
-        document.body.appendChild(tempDiv);
-        
-        var oldGetElement = document.getElementById;
-        document.getElementById = function(id) {
-            if (id === 'settingsTabContent') return tempDiv;
-            return oldGetElement.call(document, id);
-        };
-        
-        renderFunc();
-        
-        document.getElementById = oldGetElement;
-        contentDiv.innerHTML = tempDiv.innerHTML;
-        tempDiv.remove();
-        
-        // 重新绑定事件
-        if (renderFunc === renderThemeUI) {
-            var themeBtns = contentDiv.querySelectorAll('.theme-preset-btn');
-            for (var i = 0; i < themeBtns.length; i++) {
-                themeBtns[i].onclick = function() { applyTheme(this.getAttribute('data-theme')); };
-            }
-            var colorPicker = contentDiv.querySelector('#globalTextColor');
-            if (colorPicker) {
-                colorPicker.onchange = function() {
-                    settingsData.globalTextColor = this.value;
-                    applyGlobalTextColor();
-                    saveSettings();
-                };
-            }
-        } else if (renderFunc === renderBackgroundUI) {
-            var bgUpload = contentDiv.querySelector('#bgUploadSetting');
-            var bgPreview = contentDiv.querySelector('#bgPreviewSetting');
-            if (bgUpload) {
-                bgUpload.onchange = function(e) {
-                    var file = e.target.files[0];
-                    if (file) {
-                        var reader = new FileReader();
-                        reader.onload = function(ev) {
-                            settingsData.bgImage = ev.target.result;
-                            if (bgPreview) bgPreview.style.backgroundImage = 'url(' + settingsData.bgImage + ')';
-                            applyBackground();
-                            saveSettings();
-                        };
-                        reader.readAsDataURL(file);
-                    }
-                };
-            }
-            var opacitySlider = contentDiv.querySelector('#opacitySliderSetting');
-            if (opacitySlider) {
-                opacitySlider.oninput = function() {
-                    var val = parseInt(this.value);
-                    var opacityVal = contentDiv.querySelector('#opacityValSetting');
-                    if (opacityVal) opacityVal.innerText = val;
-                    settingsData.bgOpacity = val;
-                    applyBackground();
-                    saveSettings();
-                };
-            }
-            var clearBtn = contentDiv.querySelector('#clearBgSettingBtn');
-            if (clearBtn) {
-                clearBtn.onclick = function() {
-                    settingsData.bgImage = null;
-                    if (bgPreview) bgPreview.style.backgroundImage = '';
-                    applyBackground();
-                    saveSettings();
-                };
-            }
-        } else if (renderFunc === renderCssUI) {
-            var saveCssBtn = contentDiv.querySelector('#saveCssSettingBtn');
-            var cssTextarea = contentDiv.querySelector('#customCssSetting');
-            if (saveCssBtn && cssTextarea) {
-                saveCssBtn.onclick = function() {
-                    settingsData.customCss = cssTextarea.value;
-                    applyCustomCss();
-                    saveSettings();
-                    alert('CSS已保存');
-                };
-            }
-        } else if (renderFunc === renderBackupSettingsUI) {
-            var manualBtn = contentDiv.querySelector('#manualBackupBtn');
-            if (manualBtn) manualBtn.onclick = performBackup;
-            var refreshBtn = contentDiv.querySelector('#refreshBackupListBtn');
-            if (refreshBtn) refreshBtn.onclick = refreshBackupList;
-        } else if (renderFunc === renderSecuritySettingsUI) {
-            var enableCheckbox = contentDiv.querySelector('#enablePasswordCheckbox');
-            var passwordDiv = contentDiv.querySelector('#passwordSettingsDiv');
-            var passwordInput = contentDiv.querySelector('#passwordInput');
-            if (enableCheckbox) {
-                enableCheckbox.onchange = function(e) {
-                    if (passwordDiv) passwordDiv.style.display = e.target.checked ? 'block' : 'none';
-                    passwordSettings.enabled = e.target.checked;
-                    savePasswordSettings();
-                };
-            }
-            var savePwdBtn = contentDiv.querySelector('#savePasswordBtn');
-            if (savePwdBtn) {
-                savePwdBtn.onclick = function() {
-                    if (enableCheckbox.checked && passwordInput.value) {
-                        passwordSettings.enabled = true;
-                        passwordSettings.password = passwordInput.value;
-                    } else {
-                        passwordSettings.enabled = false;
-                        passwordSettings.password = '';
-                    }
-                    savePasswordSettings();
-                    alert('密码设置已保存');
-                };
-            }
-            var saveSecBtn = contentDiv.querySelector('#saveSecurityBtn');
-            if (saveSecBtn) {
-                saveSecBtn.onclick = function() {
-                    passwordSettings.question = contentDiv.querySelector('#securityQuestionInput').value;
-                    passwordSettings.answer = contentDiv.querySelector('#securityAnswerInput').value;
-                    savePasswordSettings();
-                    alert('密保问题已保存');
-                };
-            }
-            var forgotBtn = contentDiv.querySelector('#forgotPasswordBtn');
-            if (forgotBtn) {
-                forgotBtn.onclick = function() {
-                    if (passwordSettings.question && passwordSettings.answer) {
-                        var answer = prompt('密保问题：' + passwordSettings.question);
-                        if (answer === passwordSettings.answer) {
-                            var newPassword = prompt('请输入新密码：');
-                            if (newPassword) {
-                                passwordSettings.password = newPassword;
-                                savePasswordSettings();
-                                alert('密码已重置');
-                            }
-                        } else alert('答案错误');
-                    } else alert('请先设置密保问题');
-                };
-            }
-        }
-    }
-    
-    renderSubMenu();
-    var defaultSub = subMenus[activeCategory] ? subMenus[activeCategory][0] : null;
-    if (defaultSub && defaultSub.render) {
-        renderContentArea(defaultSub.render);
-    }
-    
-    // 绑定分类切换事件
-    var tabs = document.querySelectorAll('.settings-tab');
-    for (var i = 0; i < tabs.length; i++) {
-        tabs[i].onclick = function() {
-            var tab = this.getAttribute('data-tab');
-            localStorage.setItem('settings_active_tab', tab);
-            
-            activeCategory = tab;
-            currentSub = localStorage.getItem('settings_sub_tab') || 'theme';
-            
-            renderSubMenu();
-            
-            var subs = subMenus[tab] || [];
-            if (subs.length > 0) {
-                var firstSub = subs[0];
-                localStorage.setItem('settings_sub_tab', firstSub.id);
-                if (firstSub && firstSub.render) {
-                    renderContentArea(firstSub.render);
-                }
-            }
-            
-            var allTabs = document.querySelectorAll('.settings-tab');
-            for (var j = 0; j < allTabs.length; j++) {
-                allTabs[j].style.background = '';
-                allTabs[j].style.borderLeft = '';
-                allTabs[j].style.fontWeight = 'normal';
-                allTabs[j].style.color = '#666';
-            }
-            this.style.background = '#e8e0d4';
-            this.style.borderLeft = '3px solid #ceb087';
-            this.style.fontWeight = '600';
-            this.style.color = '#333';
+    if (autoCheckbox) {
+        autoCheckbox.onchange = function(e) {
+            backupSettings.autoBackup = e.target.checked;
+            saveBackupSettings();
+            if (backupSettings.autoBackup) startAutoBackup();
+            else stopAutoBackup();
         };
     }
+    if (intervalSelect) {
+        intervalSelect.onchange = function(e) {
+            backupSettings.backupInterval = parseInt(e.target.value);
+            saveBackupSettings();
+            stopAutoBackup();
+            if (backupSettings.autoBackup) startAutoBackup();
+        };
+    }
+    if (manualBtn) manualBtn.onclick = performBackup;
+    if (refreshBtn) refreshBtn.onclick = refreshBackupList;
+    if (openFolderBtn && typeof openBackupFolder === 'function') openFolderBtn.onclick = openBackupFolder;
+    
+    // 绑定安全事件
+    var enableCheckbox = document.getElementById('enablePasswordCheckbox');
+    var passwordDiv = document.getElementById('passwordSettingsDiv');
+    var passwordInput = document.getElementById('passwordInput');
+    var questionInput = document.getElementById('securityQuestionInput');
+    var answerInput = document.getElementById('securityAnswerInput');
+    var saveSecurityBtn = document.getElementById('saveSecurityBtn');
+    var forgotBtn = document.getElementById('forgotPasswordBtn');
+    
+    if (enableCheckbox) {
+        enableCheckbox.onchange = function(e) {
+            if (passwordDiv) passwordDiv.style.display = e.target.checked ? 'block' : 'none';
+            passwordSettings.enabled = e.target.checked;
+            savePasswordSettings();
+        };
+    }
+    if (saveSecurityBtn) {
+        saveSecurityBtn.onclick = function() {
+            if (enableCheckbox.checked && passwordInput.value) {
+                passwordSettings.enabled = true;
+                passwordSettings.password = passwordInput.value;
+            } else {
+                passwordSettings.enabled = false;
+                passwordSettings.password = '';
+            }
+            passwordSettings.question = questionInput ? questionInput.value : '';
+            passwordSettings.answer = answerInput ? answerInput.value : '';
+            savePasswordSettings();
+            alert('安全设置已保存');
+        };
+    }
+    if (forgotBtn) {
+        forgotBtn.onclick = function() {
+            if (passwordSettings.question && passwordSettings.answer) {
+                var answer = prompt('密保问题：' + passwordSettings.question);
+                if (answer === passwordSettings.answer) {
+                    var newPassword = prompt('请输入新密码：');
+                    if (newPassword) {
+                        passwordSettings.password = newPassword;
+                        if (passwordInput) passwordInput.value = newPassword;
+                        savePasswordSettings();
+                        alert('密码已重置');
+                    }
+                } else alert('答案错误');
+            } else alert('请先设置密保问题');
+        };
+    }
+    
+    refreshBackupList();
 }
 
 loadSettings();
-setTimeout(renderSettingsPage, 500);
+setTimeout(renderSettingsPage, 100);

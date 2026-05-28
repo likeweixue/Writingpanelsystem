@@ -2949,3 +2949,19 @@ body.theme-dark.has-custom-bg .settings-content-area h3 {
 .left-sidebar[style*="width"] {
     width: 280px !important;
 }
+
+/* ========== 设置卡片透明样式（胶囊风格） ========== */
+.settings-container > div > div:first-child {
+    background: transparent !important;
+}
+
+.settings-container > div {
+    background: transparent !important;
+}
+
+/* 设置卡片的背景由内联样式控制 */
+.settings-container [style*="background: rgba"] {
+    background: rgba(255, 255, 255, 0.6) !important;
+    backdrop-filter: blur(10px) !important;
+    border-radius: 28px !important;
+}

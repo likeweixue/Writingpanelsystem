@@ -6,3 +6,12 @@
 .sidebar-menu { background: #b8c9b5; }
 .tab.active { background: #c8dbc5; }
 .tab { background: #b8c9b5; }
+
+/* 修复设置卡片样式 - 让胶囊效果生效 */
+body.theme-eye .settings-container > div > div:first-child {
+    background: transparent !important;
+}
+
+body.theme-eye .settings-container [style*="background: rgba"] {
+    background: rgba(200, 219, 197, 0.6) !important;
+}
