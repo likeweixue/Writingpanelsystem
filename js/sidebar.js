@@ -63,14 +63,14 @@ function toggleRightSidebar() {
 // 打开辅助窗口
 function openSecondaryWindow(tool) {
     var fileMap = {
-        whiteboard: 'whiteboard.html',
-        namegen: 'namegen.html',
-        notes: 'notes.html',
-        outline: 'outline.html',
-        timeline: 'timeline.html',
-        characters: 'characters.html',
-        setting: 'setting.html',
-        relation: 'relation.html'
+        whiteboard: 'html/whiteboard.html',
+        namegen: 'html/namegen.html',
+        notes: 'html/notes.html',
+        outline: 'html/outline.html',
+        timeline: 'html/timeline.html',
+        characters: 'html/characters.html',
+        setting: 'html/setting.html',
+        relation: 'html/relation.html'
     };
     var file = fileMap[tool];
     if (file) {

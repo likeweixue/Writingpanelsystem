@@ -134,7 +134,7 @@ function switchPage(pageId) {
     pageDiv.setAttribute('data-page', tabId);
     
     if (pageId === 'stats') {
-        pageDiv.innerHTML = '<iframe src="stats.html" style="width:100%; height:100%; border:none; background:#e9e3d7;"></iframe>';
+    pageDiv.innerHTML = '<iframe src="html/html/stats.html" style="width:100%; height:100%; border:none; background:#e9e3d7;"></iframe>';
     } 
     else if (pageId === 'settings') {
     pageDiv.innerHTML = '<div class="settings-container" id="settingsContainer" style="height:100%; overflow:auto;"></div>';

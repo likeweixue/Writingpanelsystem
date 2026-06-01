@@ -16,6 +16,8 @@ function Book(id, title, volumes) {
     this.title = title;
     this.volumes = volumes || [];
     this.createdAt = new Date().toISOString();
+    this.ratePerThousand = 10;      // 每千字稿费，默认10元
+    this.targetWords = 200000;       // 目标字数，默认20万字
 }
 
 // 全局变量

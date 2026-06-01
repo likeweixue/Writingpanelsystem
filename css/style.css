@@ -2965,3 +2965,181 @@ body.theme-dark.has-custom-bg .settings-content-area h3 {
     backdrop-filter: blur(10px) !important;
     border-radius: 28px !important;
 }
+/* ========== 章节栏可调节拖动条（修复版） ========== */
+
+/* 确保章节栏可以调整大小，但 overflow 不影响拖动条 */
+.left-sidebar {
+    position: relative !important;
+    overflow: visible !important;  /* 关键修改：改为 visible 而不是 auto */
+    resize: none !important;       /* 禁用原生 resize */
+    width: 280px !important;
+    min-width: 280px !important;
+    max-width: 500px !important;
+    display: flex !important;
+    flex-shrink: 0 !important;
+    flex-grow: 0 !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    border-right: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+
+/* 左侧栏内容区域单独滚动 */
+.left-sidebar-content {
+    overflow-y: auto !important;
+    flex: 1;
+    min-height: 0;  /* 确保 flex 子元素可以滚动 */
+}
+
+/* 拖动条样式 - 关键修复 */
+#resizeHandle {
+    position: absolute;
+    right: -3px;
+    top: 0;
+    width: 6px;
+    height: 100%;
+    cursor: ew-resize;
+    background: transparent;
+    z-index: 9999 !important;  /* 提高层级 */
+    transition: background 0.2s;
+    pointer-events: auto !important;
+}
+
+#resizeHandle:hover {
+    background: rgba(0, 122, 255, 0.5) !important;
+}
+
+/* 拖动时禁用文本选择 */
+body.resizing {
+    user-select: none !important;
+    cursor: ew-resize !important;
+}
+
+/* ========== 书库面板拖动条修复 ========== */
+.library-sidebar {
+    position: relative !important;
+    overflow: visible !important;  /* 关键修改 */
+    width: 280px !important;
+    min-width: 200px !important;
+    max-width: 500px !important;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+    border-right: 1px solid rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+}
+
+.library-sidebar-content {
+    overflow-y: auto !important;
+    flex: 1;
+    min-height: 0;
+}
+
+#libraryResizeHandle {
+    position: absolute;
+    right: -3px;
+    top: 0;
+    width: 6px;
+    height: 100%;
+    cursor: ew-resize;
+    background: transparent;
+    z-index: 9999 !important;
+    transition: background 0.2s;
+    pointer-events: auto !important;
+}
+
+#libraryResizeHandle:hover {
+    background: rgba(0, 122, 255, 0.5) !important;
+}
+
+/* ========== 修复章节列表滚动 ========== */
+.volume-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px;
+    min-height: 0;
+}
+
+/* ========== 确保没有覆盖样式 ========== */
+.left-sidebar[style*="width"],
+.library-sidebar[style*="width"] {
+    transition: none !important;
+}
+/* 书库面板样式修复 */
+.library-sidebar {
+    position: relative !important;
+    overflow: visible !important;  /* 关键：让拖动条可以正常工作 */
+    width: 280px !important;
+    min-width: 200px !important;
+    max-width: 500px !important;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+    border-right: 1px solid rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+}
+
+/* 书库内容区域单独滚动 */
+.library-sidebar-content {
+    overflow-y: auto !important;
+    flex: 1;
+    min-height: 0;
+}
+
+/* 拖动条样式 */
+#libraryResizeHandle {
+    position: absolute;
+    right: -3px;
+    top: 0;
+    width: 6px;
+    height: 100%;
+    cursor: ew-resize;
+    background: transparent;
+    z-index: 9999 !important;
+    transition: background 0.2s;
+    pointer-events: auto !important;
+}
+
+#libraryResizeHandle:hover {
+    background: rgba(0, 122, 255, 0.5) !important;
+}
+/* 历史面板样式 */
+.history-sidebar {
+    transition: width 0.2s ease !important;
+}
+
+.history-sidebar-header {
+    flex-shrink: 0;
+}
+
+.history-sidebar-content {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+}
+
+.history-item:hover {
+    background: rgba(0, 122, 255, 0.08) !important;
+    transform: translateX(2px);
+}
+
+.history-current {
+    background: rgba(0, 122, 255, 0.1) !important;
+    border-left-color: #007aff !important;
+}
+
+#historyResizeHandle {
+    position: absolute;
+    right: -4px;
+    top: 0;
+    width: 6px;
+    height: 100%;
+    cursor: ew-resize;
+    background: transparent;
+    z-index: 9999;
+    transition: background 0.2s;
+}
+
+#historyResizeHandle:hover {
+    background: rgba(0, 122, 255, 0.5) !important;
+}

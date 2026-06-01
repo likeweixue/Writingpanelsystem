@@ -248,3 +248,89 @@ app.on('window-all-closed', () => {
         app.quit();
     }
 });
+
+// 确保 assets/images 目录存在
+const assetsImagesPath = path.join(__dirname, 'assets', 'images');
+function ensureAssetsImagesDir() {
+    if (!fs.existsSync(assetsImagesPath)) {
+        fs.mkdirSync(assetsImagesPath, { recursive: true });
+        console.log('创建图片目录:', assetsImagesPath);
+    }
+}
+
+// 保存图片的 IPC 处理
+ipcMain.handle('save-image', async (event, { imageData, fileName }) => {
+    ensureAssetsImagesDir();
+    
+    // 生成唯一文件名（如果没提供）
+    let finalFileName = fileName;
+    if (!finalFileName) {
+        const timestamp = Date.now();
+        const random = Math.random().toString(36).substring(2, 8);
+        finalFileName = `img_${timestamp}_${random}.jpg`;
+    }
+    
+    // 清理文件名中的非法字符
+    finalFileName = finalFileName.replace(/[\\/:*?"<>|]/g, '_');
+    
+    const filePath = path.join(assetsImagesPath, finalFileName);
+    
+    // 将 base64 数据转换为 Buffer 并保存
+    const base64Data = imageData.replace(/^data:image\/\w+;base64,/, '');
+    const buffer = Buffer.from(base64Data, 'base64');
+    
+    fs.writeFileSync(filePath, buffer);
+    
+    // 返回相对路径（用于在 HTML 中显示）
+    const relativePath = `assets/images/${finalFileName}`;
+    return { success: true, filePath: relativePath, fullPath: filePath };
+});
+// 在 main.js 顶部添加（如果还没有的话）
+const { app, BrowserWindow, Menu, ipcMain, dialog, shell } = require('electron');
+const path = require('path');
+const fs = require('fs');
+const os = require('os');
+
+// 添加下载处理
+ipcMain.handle('save-file-dialog', async (event, { fileName, content, type }) => {
+    // 打开保存对话框
+    const result = await dialog.showSaveDialog({
+        title: '保存文件',
+        defaultPath: path.join(app.getPath('downloads'), fileName),
+        filters: [
+            { name: type === 'docx' ? 'Word 文档' : '文本文件', extensions: [type === 'docx' ? 'docx' : 'txt'] },
+            { name: '所有文件', extensions: ['*'] }
+        ]
+    });
+    
+    if (!result.canceled && result.filePath) {
+        // 写入文件
+        if (type === 'docx') {
+            // DOCX 是二进制数据
+            const buffer = Buffer.from(content, 'base64');
+            fs.writeFileSync(result.filePath, buffer);
+        } else {
+            // TXT 是文本
+            fs.writeFileSync(result.filePath, content, 'utf8');
+        }
+        return { success: true, filePath: result.filePath };
+    }
+    return { success: false, canceled: true };
+});
+
+// 保存 ZIP 文件
+ipcMain.handle('save-zip-file', async (event, { fileName, data }) => {
+    const result = await dialog.showSaveDialog({
+        title: '保存压缩包',
+        defaultPath: path.join(app.getPath('downloads'), fileName),
+        filters: [
+            { name: 'ZIP 压缩包', extensions: ['zip'] }
+        ]
+    });
+    
+    if (!result.canceled && result.filePath) {
+        fs.writeFileSync(result.filePath, Buffer.from(data));
+        return { success: true, filePath: result.filePath };
+    }
+    return { success: false, canceled: true };
+});

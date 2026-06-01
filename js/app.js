@@ -127,8 +127,14 @@ function createNewGroup() {
 
 function openTrashTab() {
     var tabId = 'trash';
+    // 检查是否已经打开了回收站标签页
     for (var i = 0; i < openTabs.length; i++) {
-        if (openTabs[i].id === tabId) { switchToTab(tabId); return; }
+        if (openTabs[i].id === tabId) { 
+            switchToTab(tabId); 
+            // 如果已经打开，重新刷新回收站内容
+            renderTrashList();
+            return; 
+        }
     }
     openTabs.push({ id: tabId, title: '回收站', type: 'trash' });
     renderTabs();
@@ -145,29 +151,53 @@ function openTrashTab() {
 function renderTrashList() {
     var container = document.getElementById('trashList');
     if (!container) return;
+    
+    // 确保 trashBooks 是最新的（从 localStorage 重新加载）
+    loadTrash();
+    
     if (!trashBooks || trashBooks.length === 0) {
         container.innerHTML = '<div style="text-align:center;padding:40px;">回收站为空</div>';
         return;
     }
+    
     var html = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px;">';
     for (var i = 0; i < trashBooks.length; i++) {
         var book = trashBooks[i];
-        html += '<div style="background:#fff;border-radius:8px;padding:16px;text-align:center;"><div style="font-size:48px;"></div><div style="font-weight:bold;">' + escapeHtml(book.title) + '</div><div style="font-size:12px;color:#888;">' + new Date(book.deletedTime).toLocaleDateString() + '</div><div style="margin-top:12px;"><button class="restore-book" data-id="' + book.id + '" style="padding:4px 12px;background:#28a745;color:white;border:none;border-radius:4px;">恢复</button><button class="permanent-delete" data-id="' + book.id + '" style="padding:4px 12px;background:#dc3545;color:white;border:none;border-radius:4px;">永久删除</button></div></div>';
+        var deleteDate = book.deletedTime ? new Date(book.deletedTime).toLocaleDateString() : '未知时间';
+        html += '<div style="background:#fff;border-radius:8px;padding:16px;text-align:center;">' +
+            '<div style="font-size:48px;">📖</div>' +
+            '<div style="font-weight:bold;">' + escapeHtml(book.title) + '</div>' +
+            '<div style="font-size:12px;color:#888;">删除于: ' + deleteDate + '</div>' +
+            '<div style="margin-top:12px;">' +
+            '<button class="restore-book" data-id="' + book.id + '" style="padding:4px 12px;background:#28a745;color:white;border:none;border-radius:4px;margin-right:8px;cursor:pointer;">恢复</button>' +
+            '<button class="permanent-delete" data-id="' + book.id + '" style="padding:4px 12px;background:#dc3545;color:white;border:none;border-radius:4px;cursor:pointer;">永久删除</button>' +
+            '</div>' +
+            '</div>';
     }
     html += '</div>';
     container.innerHTML = html;
-    var restoreBtns = document.querySelectorAll('.restore-book');
+    
+    // 绑定恢复按钮事件
+    var restoreBtns = container.querySelectorAll('.restore-book');
     for (var i = 0; i < restoreBtns.length; i++) {
         restoreBtns[i].onclick = function() {
             var id = parseInt(this.getAttribute('data-id'));
             var restored = restoreFromTrash(id);
-            if (restored) { renderBooks(); renderTrashList(); alert('书籍已恢复'); }
+            if (restored) { 
+                renderBooks(); 
+                renderTrashList(); 
+                alert('书籍已恢复'); 
+            } else {
+                alert('恢复失败');
+            }
         };
     }
-    var deleteBtns = document.querySelectorAll('.permanent-delete');
+    
+    // 绑定永久删除按钮事件
+    var deleteBtns = container.querySelectorAll('.permanent-delete');
     for (var i = 0; i < deleteBtns.length; i++) {
         deleteBtns[i].onclick = function() {
-            if (confirm('确定永久删除吗？')) {
+            if (confirm('确定永久删除吗？此操作不可恢复！')) {
                 var id = parseInt(this.getAttribute('data-id'));
                 permanentDeleteBook(id);
                 renderTrashList();
