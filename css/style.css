@@ -1,3 +1,10 @@
+/* ========== CSS 变量 ========== */
+:root {
+    --panel-bg: rgba(255, 255, 255, 0.95);
+    --border-color: rgba(0, 0, 0, 0.08);
+    --header-bg: rgba(0, 0, 0, 0.03);
+    --text-color: #333;
+}
 * {
     margin: 0;
     padding: 0;
@@ -3142,4 +3149,374 @@ body.resizing {
 
 #historyResizeHandle:hover {
     background: rgba(0, 122, 255, 0.5) !important;
+}
+/* 章节栏头部优化 */
+.chapters-header {
+    padding: 8px 10px !important;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+/* 顶部按钮行 */
+.chapters-header > button {
+    font-size: 12px !important;
+    padding: 4px 10px !important;
+    border-radius: 4px !important;
+    white-space: nowrap;
+}
+
+/* 顶部按钮组 - 使用 flex 布局 */
+.chapters-header .top-actions {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+/* 批量操作区域 */
+.batch-actions {
+    display: flex !important;
+    gap: 4px !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    padding-top: 6px !important;
+    margin-top: 6px !important;
+    border-top: 1px solid rgba(0,0,0,0.06) !important;
+}
+
+.batch-actions button {
+    font-size: 11px !important;
+    padding: 3px 8px !important;
+    border-radius: 4px !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+    min-height: 26px !important;
+}
+
+/* 当章节栏宽度较窄时，缩小按钮 */
+.left-sidebar[style*="width: 180px"] .batch-actions button,
+.left-sidebar[style*="width: 190px"] .batch-actions button,
+.left-sidebar[style*="width: 200px"] .batch-actions button {
+    font-size: 10px !important;
+    padding: 2px 6px !important;
+}
+
+/* 分卷和章节按钮在窄宽度下 */
+@media (max-width: 240px) {
+    .chapters-header > button {
+        font-size: 11px !important;
+        padding: 3px 7px !important;
+    }
+    .batch-actions button {
+        font-size: 10px !important;
+        padding: 2px 5px !important;
+    }
+}
+/* 章节栏头部优化 */
+.chapters-header {
+    padding: 8px 10px !important;
+}
+
+/* 顶部按钮行 */
+.top-actions {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.top-actions button {
+    font-size: 12px !important;
+    padding: 4px 10px !important;
+    border-radius: 4px !important;
+    white-space: nowrap;
+    border: none;
+    cursor: pointer;
+}
+
+.top-actions #addVolumeBtn {
+    background: #6c757d;
+    color: white;
+}
+
+.top-actions #addChapterBtn {
+    background: #28a745;
+    color: white;
+}
+
+.top-actions #trashBtnHeader {
+    background: #dc3545;
+    color: white;
+}
+
+/* 批量操作区域 */
+.batch-actions {
+    display: flex !important;
+    gap: 4px !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    padding-top: 4px !important;
+    border-top: 1px solid rgba(0,0,0,0.06) !important;
+}
+/* ========== 面板背景跟随主题 ========== */
+
+/* 左侧章节栏 - 跟随主题 */
+.left-sidebar {
+    background: var(--panel-bg, rgba(255, 255, 255, 0.95)) !important;
+    backdrop-filter: blur(8px) !important;
+    border-right: 1px solid var(--border-color, rgba(0, 0, 0, 0.08)) !important;
+}
+
+/* 章节栏头部 */
+.left-sidebar-header {
+    background: var(--header-bg, rgba(0, 0, 0, 0.03)) !important;
+    border-bottom: 1px solid var(--border-color, rgba(0, 0, 0, 0.08)) !important;
+    color: var(--text-color, #333) !important;
+}
+
+/* 章节栏内容区 */
+.left-sidebar-content {
+    background: transparent !important;
+}
+
+/* 历史面板 */
+.history-sidebar {
+    background: var(--panel-bg, rgba(255, 255, 255, 0.95)) !important;
+    backdrop-filter: blur(8px) !important;
+    border-right: 1px solid var(--border-color, rgba(0, 0, 0, 0.08)) !important;
+}
+
+.history-sidebar-header {
+    background: var(--header-bg, rgba(0, 0, 0, 0.03)) !important;
+    border-bottom: 1px solid var(--border-color, rgba(0, 0, 0, 0.08)) !important;
+    color: var(--text-color, #333) !important;
+}
+
+.history-sidebar-header span {
+    color: var(--text-color, #333) !important;
+}
+
+/* 书库面板 */
+.library-sidebar {
+    background: var(--panel-bg, rgba(255, 255, 255, 0.95)) !important;
+    backdrop-filter: blur(8px) !important;
+    border-right: 1px solid var(--border-color, rgba(0, 0, 0, 0.08)) !important;
+}
+
+.library-sidebar-header {
+    background: var(--header-bg, rgba(0, 0, 0, 0.03)) !important;
+    border-bottom: 1px solid var(--border-color, rgba(0, 0, 0, 0.08)) !important;
+    color: var(--text-color, #333) !important;
+}
+
+.library-sidebar-header span {
+    color: var(--text-color, #333) !important;
+}
+
+/* ========== 各主题颜色变量 ========== */
+
+/* 护眼绿主题 (theme-eye) */
+body.theme-eye {
+    --panel-bg: rgba(200, 219, 197, 0.95) !important;
+    --border-color: rgba(44, 62, 47, 0.15) !important;
+    --header-bg: rgba(44, 62, 47, 0.08) !important;
+    --text-color: #2c3e2f !important;
+}
+
+body.theme-eye .left-sidebar,
+body.theme-eye .history-sidebar,
+body.theme-eye .library-sidebar {
+    background: rgba(200, 219, 197, 0.95) !important;
+}
+
+body.theme-eye .left-sidebar-header,
+body.theme-eye .history-sidebar-header,
+body.theme-eye .library-sidebar-header {
+    background: rgba(44, 62, 47, 0.08) !important;
+    border-bottom-color: rgba(44, 62, 47, 0.15) !important;
+}
+
+body.theme-eye .left-sidebar-header span,
+body.theme-eye .history-sidebar-header span,
+body.theme-eye .library-sidebar-header span {
+    color: #2c3e2f !important;
+}
+
+/* 经典黄主题 (theme-warm) */
+body.theme-warm {
+    --panel-bg: rgba(223, 213, 189, 0.95) !important;
+    --border-color: rgba(74, 59, 44, 0.15) !important;
+    --header-bg: rgba(74, 59, 44, 0.08) !important;
+    --text-color: #4a3b2c !important;
+}
+
+body.theme-warm .left-sidebar,
+body.theme-warm .history-sidebar,
+body.theme-warm .library-sidebar {
+    background: rgba(223, 213, 189, 0.95) !important;
+}
+
+body.theme-warm .left-sidebar-header,
+body.theme-warm .history-sidebar-header,
+body.theme-warm .library-sidebar-header {
+    background: rgba(74, 59, 44, 0.08) !important;
+    border-bottom-color: rgba(74, 59, 44, 0.15) !important;
+}
+
+body.theme-warm .left-sidebar-header span,
+body.theme-warm .history-sidebar-header span,
+body.theme-warm .library-sidebar-header span {
+    color: #4a3b2c !important;
+}
+
+/* 暗夜黑主题 (theme-dark) */
+body.theme-dark {
+    --panel-bg: rgba(30, 30, 46, 0.95) !important;
+    --border-color: rgba(255, 255, 255, 0.1) !important;
+    --header-bg: rgba(255, 255, 255, 0.05) !important;
+    --text-color: #e0e0e0 !important;
+}
+
+body.theme-dark .left-sidebar,
+body.theme-dark .history-sidebar,
+body.theme-dark .library-sidebar {
+    background: rgba(30, 30, 46, 0.95) !important;
+}
+
+body.theme-dark .left-sidebar-header,
+body.theme-dark .history-sidebar-header,
+body.theme-dark .library-sidebar-header {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border-bottom-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+body.theme-dark .left-sidebar-header span,
+body.theme-dark .history-sidebar-header span,
+body.theme-dark .library-sidebar-header span {
+    color: #e0e0e0 !important;
+}
+
+/* 默认白色主题 (theme-default) */
+body.theme-default {
+    --panel-bg: rgba(255, 255, 255, 0.95) !important;
+    --border-color: rgba(0, 0, 0, 0.08) !important;
+    --header-bg: rgba(0, 0, 0, 0.03) !important;
+    --text-color: #333 !important;
+}
+
+body.theme-default .left-sidebar,
+body.theme-default .history-sidebar,
+body.theme-default .library-sidebar {
+    background: rgba(255, 255, 255, 0.95) !important;
+}
+
+body.theme-default .left-sidebar-header,
+body.theme-default .history-sidebar-header,
+body.theme-default .library-sidebar-header {
+    background: rgba(0, 0, 0, 0.03) !important;
+    border-bottom-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Open 主题下的面板 */
+body.theme-open {
+    --panel-bg: rgba(255, 255, 255, 0.2) !important;
+    --border-color: rgba(255, 255, 255, 0.1) !important;
+    --header-bg: rgba(255, 255, 255, 0.08) !important;
+    --text-color: #333 !important;
+}
+
+body.theme-open .left-sidebar,
+body.theme-open .history-sidebar,
+body.theme-open .library-sidebar {
+    background: rgba(255, 255, 255, 0.2) !important;
+    backdrop-filter: blur(20px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-radius: 24px !important;
+}
+
+body.theme-open .left-sidebar-header,
+body.theme-open .history-sidebar-header,
+body.theme-open .library-sidebar-header {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border-bottom-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* 暗色主题下 Open 风格 */
+body.theme-dark.theme-open .left-sidebar,
+body.theme-dark.theme-open .history-sidebar,
+body.theme-dark.theme-open .library-sidebar {
+    background: rgba(0, 0, 0, 0.35) !important;
+}
+
+/* ========== 历史记录项颜色跟随主题 ========== */
+
+body.theme-eye .history-item {
+    background: rgba(44, 62, 47, 0.06) !important;
+    border-left-color: rgba(44, 62, 47, 0.2) !important;
+}
+
+body.theme-eye .history-item.history-current {
+    background: rgba(44, 62, 47, 0.15) !important;
+    border-left-color: #4a6e3a !important;
+}
+
+body.theme-warm .history-item {
+    background: rgba(74, 59, 44, 0.06) !important;
+    border-left-color: rgba(74, 59, 44, 0.2) !important;
+}
+
+body.theme-warm .history-item.history-current {
+    background: rgba(74, 59, 44, 0.15) !important;
+    border-left-color: #8a7648 !important;
+}
+
+body.theme-dark .history-item {
+    background: rgba(255, 255, 255, 0.04) !important;
+    border-left-color: rgba(255, 255, 255, 0.1) !important;
+    color: #c0c0c0 !important;
+}
+
+body.theme-dark .history-item.history-current {
+    background: rgba(74, 59, 44, 0.2) !important;
+    border-left-color: #6b8c42 !important;
+    color: #e0e0e0 !important;
+}
+
+body.theme-dark .history-item .history-item-title {
+    color: #c0c0c0 !important;
+}
+
+body.theme-dark .history-item .history-item-time {
+    color: #888 !important;
+}
+
+/* ========== 书库书籍项颜色跟随主题 ========== */
+
+body.theme-eye .library-book-item {
+    background: rgba(44, 62, 47, 0.05) !important;
+}
+
+body.theme-eye .library-book-item .book-title {
+    color: #2c3e2f !important;
+}
+
+body.theme-warm .library-book-item {
+    background: rgba(74, 59, 44, 0.05) !important;
+}
+
+body.theme-warm .library-book-item .book-title {
+    color: #4a3b2c !important;
+}
+
+body.theme-dark .library-book-item {
+    background: rgba(255, 255, 255, 0.04) !important;
+}
+
+body.theme-dark .library-book-item .book-title {
+    color: #c0c0c0 !important;
+}
+
+body.theme-dark .library-book-item .book-meta {
+    color: #888 !important;
 }

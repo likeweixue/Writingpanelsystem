@@ -520,3 +520,141 @@ body.theme-dark .right-sidebar {
 .sidebar-menu {
     margin-left: -4px !important;
 }
+/* ========== Open 主题章节栏修复 ========== */
+
+/* 章节栏大圆角 */
+.left-sidebar {
+    border-radius: 24px !important;
+    overflow: hidden !important;
+    background: rgba(255, 255, 255, 0.15) !important;
+    backdrop-filter: blur(20px) !important;
+    margin: 12px 0 12px 4px !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* 左侧栏内容也继承圆角 */
+.left-sidebar-content {
+    border-radius: 0 0 24px 24px !important;
+    overflow: hidden !important;
+}
+
+/* 章节栏头部圆角 */
+.left-sidebar-header {
+    border-radius: 24px 24px 0 0 !important;
+    padding: 10px 16px !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+/* 章节栏完全隐藏时无残留 */
+.left-sidebar.collapsed {
+    width: 0 !important;
+    min-width: 0 !important;
+    max-width: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    overflow: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+/* 确保收起时没有任何可见元素 */
+.left-sidebar.collapsed * {
+    display: none !important;
+}
+
+/* 调整章节栏内部组件，匹配圆角风格 */
+.chapters-header {
+    padding: 12px 14px !important;
+}
+
+.top-actions {
+    gap: 6px !important;
+}
+
+.top-actions button {
+    border-radius: 20px !important;
+    font-size: 12px !important;
+    padding: 5px 14px !important;
+    background: rgba(255, 255, 255, 0.2) !important;
+    color: #333 !important;
+    border: none !important;
+    cursor: pointer !important;
+    transition: all 0.2s !important;
+}
+
+.top-actions button:hover {
+    background: rgba(255, 255, 255, 0.35) !important;
+}
+
+.top-actions #addVolumeBtn {
+    background: rgba(108, 117, 125, 0.5) !important;
+    color: #fff !important;
+}
+
+.top-actions #addChapterBtn {
+    background: rgba(40, 167, 69, 0.5) !important;
+    color: #fff !important;
+}
+
+.top-actions #trashBtnHeader {
+    background: rgba(220, 53, 69, 0.5) !important;
+    color: #fff !important;
+}
+
+/* 批量操作按钮也圆角 */
+.batch-actions button {
+    border-radius: 14px !important;
+    font-size: 10px !important;
+    padding: 2px 10px !important;
+}
+
+/* 分卷和章节列表圆角 */
+.volume-item {
+    border-radius: 12px !important;
+    overflow: hidden !important;
+    margin: 4px 6px !important;
+}
+
+.volume-header {
+    border-radius: 12px !important;
+    padding: 8px 12px !important;
+}
+
+.chapter-item {
+    border-radius: 10px !important;
+    margin: 2px 6px !important;
+    padding: 4px 8px !important;
+}
+
+/* 暗色主题适配 */
+body.theme-dark .left-sidebar {
+    background: rgba(0, 0, 0, 0.35) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+}
+
+body.theme-dark .top-actions button {
+    color: #e0e0e0 !important;
+}
+
+body.theme-dark .left-sidebar-header {
+    background: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* 关闭按钮的三角形也圆润 */
+.toggle-left-sidebar-btn {
+    border-radius: 50% !important;
+    width: 28px !important;
+    height: 28px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    transition: all 0.2s !important;
+}
+
+.toggle-left-sidebar-btn:hover {
+    background: rgba(255, 255, 255, 0.25) !important;
+}

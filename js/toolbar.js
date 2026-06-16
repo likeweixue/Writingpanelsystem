@@ -27,31 +27,263 @@ function closePanel(panelId) {
     if (panel) panel.remove();
 }
 
+// 导入 TXT 文件 - 修复版
 function importFile() {
     var input = document.createElement('input');
     input.type = 'file';
-    input.accept = '.txt';
+    input.accept = '.txt,.md';
     input.onchange = function(e) {
         var file = e.target.files[0];
-        if (file) {
-            var reader = new FileReader();
-            reader.onload = function(ev) {
-                var ch = typeof getCurrentChapter === 'function' ? getCurrentChapter() : null;
-                if (ch) {
-                    ch.content = '<p>' + escapeHtml(ev.target.result).replace(/\n/g, '<br>') + '</p>';
-                    if (typeof saveCurrentChapter === 'function') saveCurrentChapter();
-                    if (typeof renderCurrentChapter === 'function') renderCurrentChapter();
-                    alert('导入成功');
-                } else {
-                    alert('请先打开一本书籍');
+        if (!file) return;
+        
+        // 先用 readAsText 读取，如果乱码再尝试其他编码
+        var reader = new FileReader();
+        reader.onload = function(ev) {
+            var content = ev.target.result;
+            
+            // 检查是否乱码（包含常见乱码字符）
+            var isGarbled = /[\ufffd\u00a0\u3000]/.test(content) || 
+                           content.indexOf('锟') !== -1 ||
+                           content.indexOf('斤') !== -1;
+            
+            // 如果看起来是乱码，尝试用 GBK 解码
+            if (isGarbled) {
+                try {
+                    // 重新以 ArrayBuffer 读取
+                    var bufferReader = new FileReader();
+                    bufferReader.onload = function(e) {
+                        try {
+                            var decoder = new TextDecoder('gbk');
+                            var decoded = decoder.decode(e.target.result);
+                            // 递归调用，但用解码后的内容
+                            processImportedContent(decoded);
+                        } catch(err) {
+                            console.warn('GBK 解码失败，使用原始内容:', err);
+                            processImportedContent(content);
+                        }
+                    };
+                    bufferReader.readAsArrayBuffer(file);
+                    return;
+                } catch(err) {
+                    console.warn('编码检测失败:', err);
                 }
-            };
-            reader.readAsText(file, 'UTF-8');
-        }
+            }
+            
+            processImportedContent(content);
+        };
+        reader.onerror = function() {
+            alert('读取文件失败');
+        };
+        reader.readAsText(file, 'UTF-8');
     };
     input.click();
 }
 
+// 处理导入的内容
+function processImportedContent(content) {
+    if (!content || typeof content !== 'string') {
+        alert('文件内容无效');
+        return;
+    }
+    
+    // 检测章节
+    var chapters = detectChapters(content);
+    
+    if (chapters.length > 1) {
+        if (confirm('检测到 ' + chapters.length + ' 个章节，是否分章导入？\n\n点击"确定"分章导入，点击"取消"全部导入到当前章节')) {
+            importMultipleChapters(chapters);
+            return;
+        }
+    }
+    
+    // 导入到当前章节
+    importToCurrentChapter(content);
+}
+
+// 检测章节
+function detectChapters(content) {
+    var chapters = [];
+    var lines = content.split('\n');
+    var currentChapter = null;
+    var currentContent = [];
+    
+    // 章节匹配模式
+    var chapterPatterns = [
+        /^第[零一二三四五六七八九十百千万0-9]+章[：\s]/,
+        /^第[零一二三四五六七八九十百千万0-9]+节[：\s]/,
+        /^第[零一二三四五六七八九十百千万0-9]+卷[：\s]/,
+        /^第[零一二三四五六七八九十百千万0-9]+部[：\s]/,
+        /^第[零一二三四五六七八九十百千万0-9]+回[：\s]/,
+        /^[0-9]+[.、）\s]+/,  // 数字开头如 "1. " 或 "1、"
+        /^[\(（][0-9]+[\)）][：\s]*/,  // (1) 或（1）
+        /^【[^】]+】/,  // 【第一章】
+        /^\[[^\]]+\]/,  // [第一章]
+        /^第[0-9]+章/,
+        /^[A-Z][.、）\s]+/,  // A. B. C.
+        /^第[一二三四五六七八九十]章/,
+        /^Chapter\s+[0-9]+/i,
+        /^Part\s+[0-9]+/i
+    ];
+    
+    for (var i = 0; i < lines.length; i++) {
+        var line = lines[i].trim();
+        var isChapter = false;
+        var chapterTitle = null;
+        
+        for (var p = 0; p < chapterPatterns.length; p++) {
+            var match = line.match(chapterPatterns[p]);
+            if (match) {
+                isChapter = true;
+                chapterTitle = line;
+                break;
+            }
+        }
+        
+        // 也检测空行后的标题（如 "第一章" 单独一行）
+        if (!isChapter && line.length < 20 && line.length > 1) {
+            for (var p = 0; p < chapterPatterns.length; p++) {
+                if (chapterPatterns[p].test(line)) {
+                    isChapter = true;
+                    chapterTitle = line;
+                    break;
+                }
+            }
+        }
+        
+        if (isChapter && chapterTitle) {
+            if (currentChapter !== null) {
+                chapters.push({
+                    title: currentChapter,
+                    content: currentContent.join('\n').trim()
+                });
+            }
+            currentChapter = chapterTitle;
+            currentContent = [];
+        } else {
+            if (currentChapter !== null) {
+                currentContent.push(line);
+            } else {
+                // 如果还没有检测到章节，全部归入第一章
+                if (currentContent.length === 0 && line.trim()) {
+                    currentChapter = '第一章';
+                }
+                currentContent.push(line);
+            }
+        }
+    }
+    
+    // 添加最后一章
+    if (currentChapter !== null && currentContent.length > 0) {
+        chapters.push({
+            title: currentChapter,
+            content: currentContent.join('\n').trim()
+        });
+    }
+    
+    // 如果没有检测到任何章节，返回空数组
+    if (chapters.length === 0 && content.trim()) {
+        chapters.push({
+            title: '第一章',
+            content: content.trim()
+        });
+    }
+    
+    return chapters;
+}
+
+// 导入到当前章节
+function importToCurrentChapter(content) {
+    var bookId = window.currentBookId;
+    var volumeId = window.currentVolumeId;
+    var chapterId = window.currentChapterId;
+    
+    if (!bookId || !volumeId || !chapterId) {
+        alert('请先打开一本书籍，并选择一个章节');
+        return;
+    }
+    
+    var book = window.books.find(function(b) { return b.id === bookId; });
+    if (!book) { alert('找不到当前书籍'); return; }
+    
+    var vol = book.volumes.find(function(v) { return v.id === volumeId; });
+    if (!vol) { alert('找不到当前分卷'); return; }
+    
+    var ch = vol.chapters.find(function(c) { return c.id === chapterId; });
+    if (!ch) { alert('找不到当前章节'); return; }
+    
+    // 设置内容
+    var htmlContent = content.replace(/\n/g, '<br>');
+    ch.content = '<p>' + htmlContent + '</p>';
+    ch.updatedTime = new Date().toISOString();
+    
+    // 更新标题（取第一行）
+    var lines = content.split('\n');
+    if (lines.length > 0 && lines[0].trim() && lines[0].trim().length < 50) {
+        ch.title = lines[0].trim();
+    }
+    
+    window.saveAllData();
+    window.renderVolumeList();
+    window.renderCurrentChapter();
+    window.updateWordCount();
+    
+    alert('导入成功！共 ' + content.length + ' 个字符');
+}
+
+// 导入多个章节
+function importMultipleChapters(chapters) {
+    var bookId = window.currentBookId;
+    if (!bookId) {
+        alert('请先打开一本书籍');
+        return;
+    }
+    
+    var book = window.books.find(function(b) { return b.id === bookId; });
+    if (!book) { alert('找不到当前书籍'); return; }
+    
+    // 获取当前分卷
+    var volumeId = window.currentVolumeId;
+    var vol = book.volumes.find(function(v) { return v.id === volumeId; });
+    if (!vol) { alert('找不到当前分卷'); return; }
+    
+    // 询问用户是否要创建新分卷
+    var createNewVolume = confirm('是否创建新分卷来存放这些章节？\n\n点击"确定"创建新分卷，点击"取消"导入到当前分卷');
+    
+    var targetVol = vol;
+    if (createNewVolume) {
+        var volName = prompt('请输入新分卷名称：', '导入章节');
+        if (!volName) return;
+        var newVol = new window.Volume(Date.now(), volName, []);
+        book.volumes.push(newVol);
+        targetVol = newVol;
+        window.saveAllData();
+    }
+    
+    var importedCount = 0;
+    for (var i = 0; i < chapters.length; i++) {
+        var chData = chapters[i];
+        var newChapter = new window.Chapter(Date.now(), chData.title || ('第' + (i + 1) + '章'), '');
+        var htmlContent = chData.content.replace(/\n/g, '<br>');
+        newChapter.content = '<p>' + htmlContent + '</p>';
+        targetVol.chapters.push(newChapter);
+        importedCount++;
+    }
+    
+    // 更新当前选中的分卷和章节
+    window.currentVolumeId = targetVol.id;
+    if (targetVol.chapters.length > 0) {
+        window.currentChapterId = targetVol.chapters[0].id;
+    }
+    
+    window.saveAllData();
+    window.renderVolumeList();
+    window.renderCurrentChapter();
+    window.updateWordCount();
+    
+    alert('导入成功！共 ' + importedCount + ' 个章节');
+}
+
+// 导入图片到编辑器（保存到本地 assets/images 文件夹）
 function importImage() {
     var editor = document.getElementById('editor');
     if (!editor) {
@@ -68,30 +300,57 @@ function importImage() {
         var files = e.target.files;
         if (!files || files.length === 0) return;
         
-        var selection = window.getSelection();
-        var range = selection.getRangeCount() > 0 ? selection.getRangeAt(0) : null;
+        // 修复：安全获取光标位置
+        var range = null;
+        var insertAtCursor = false;
         
-        var insertAtCursor = true;
-        if (!range || !editor.contains(range.commonAncestorContainer)) {
+        try {
+            var selection = window.getSelection();
+            // 检查 selection 是否有效且有 rangeCount 方法
+            if (selection && typeof selection.getRangeCount === 'function') {
+                if (selection.getRangeCount() > 0) {
+                    range = selection.getRangeAt(0);
+                    // 确保 range 在编辑器内
+                    if (range && editor.contains(range.commonAncestorContainer)) {
+                        insertAtCursor = true;
+                    } else {
+                        range = null;
+                    }
+                }
+            }
+        } catch(err) {
+            console.warn('获取光标位置失败:', err);
+            range = null;
             insertAtCursor = false;
-            range = document.createRange();
-            range.selectNodeContents(editor);
-            range.collapse(false);
         }
         
+        // 如果无法获取光标位置，在末尾插入
+        if (!range) {
+            range = document.createRange();
+            range.selectNodeContents(editor);
+            range.collapse(false); // 折叠到末尾
+            insertAtCursor = false;
+        }
+        
+        // 处理每张图片
         for (var i = 0; i < files.length; i++) {
             var file = files[i];
+            
             if (file.size > 10 * 1024 * 1024) {
                 alert('图片 "' + file.name + '" 超过10MB，请压缩后重试');
                 continue;
             }
+            
             if (!file.type.startsWith('image/')) {
                 alert('文件 "' + file.name + '" 不是图片格式');
                 continue;
             }
+            
+            // 压缩并保存图片
             compressAndSaveImage(file, editor, range, insertAtCursor);
         }
     };
+    
     input.click();
 }
 
@@ -116,40 +375,81 @@ function compressAndSaveImage(file, editor, originalRange, insertAtCursor) {
             canvas.width = newWidth;
             canvas.height = newHeight;
             var ctx = canvas.getContext('2d');
+            
+            // 清除背景为透明
+            ctx.clearRect(0, 0, newWidth, newHeight);
             ctx.drawImage(img, 0, 0, newWidth, newHeight);
             
-            var compressedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+            // 检测图片是否有透明通道
+            var hasAlpha = false;
+            var imageData = ctx.getImageData(0, 0, newWidth, newHeight);
+            var data = imageData.data;
+            for (var i = 3; i < data.length; i += 4) {
+                if (data[i] < 255) {
+                    hasAlpha = true;
+                    break;
+                }
+            }
+            
+            // 如果有透明通道，使用 PNG，否则使用 JPEG
+            var mimeType = hasAlpha ? 'image/png' : 'image/jpeg';
+            var quality = hasAlpha ? 1.0 : 0.8;
+            var compressedDataUrl = canvas.toDataURL(mimeType, quality);
             
             var originalName = file.name.replace(/\.[^/.]+$/, '');
             var timestamp = Date.now();
             var random = Math.random().toString(36).substring(2, 6);
-            var fileName = originalName + '_' + timestamp + '_' + random + '.jpg';
+            var extension = hasAlpha ? 'png' : 'jpg';
+            var fileName = originalName + '_' + timestamp + '_' + random + '.' + extension;
+            
+            console.log('开始保存图片:', fileName, '格式:', extension);
             
             if (window.electron && window.electron.saveImage) {
                 window.electron.saveImage(compressedDataUrl, fileName).then(function(result) {
+                    console.log('保存图片结果:', result);
                     if (result.success) {
-                        insertImageIntoEditor(result.filePath, file.name, editor, originalRange, insertAtCursor);
+                        insertImageIntoEditor(result.filePath || result.fullPath, file.name, editor, originalRange, insertAtCursor);
                     } else {
                         alert('保存图片失败：' + result.error);
                     }
                 }).catch(function(err) {
+                    console.error('保存图片异常:', err);
                     alert('保存图片失败：' + err.message);
                 });
             } else {
-                insertImageAsBase64(compressedDataUrl, file.name, editor, originalRange, insertAtCursor);
-                alert('当前为网页模式，图片将保存在浏览器中。如需保存到本地，请使用桌面应用。');
+                insertImageIntoEditor(compressedDataUrl, file.name, editor, originalRange, insertAtCursor);
+                alert('当前为网页模式，图片已插入');
             }
         };
         img.src = ev.target.result;
+    };
+    reader.onerror = function() {
+        alert('读取图片失败');
     };
     reader.readAsDataURL(file);
 }
 
 function insertImageIntoEditor(imagePath, originalName, editor, originalRange, insertAtCursor) {
-    var caption = prompt('为图片添加说明（可选）：', originalName);
+    // 使用默认名称，不再使用 prompt（Electron 中已禁用）
+    var caption = originalName || '图片';
+    
+    // 如果需要用户输入，可以使用自定义对话框，这里简化处理
+    // 可选：使用一个简单的输入框替代 prompt
     
     var imgElement = document.createElement('img');
-    imgElement.src = imagePath;
+    
+    // 处理图片路径
+    if (imagePath.startsWith('data:image')) {
+        imgElement.src = imagePath;
+    } else if (imagePath.startsWith('file://')) {
+        imgElement.src = imagePath;
+    } else if (window.electron && window.electron.platform) {
+        // 在 Electron 中，直接使用 file:// 协议
+        imgElement.src = 'file://' + imagePath;
+    } else {
+        imgElement.src = imagePath;
+    }
+    
     imgElement.style.maxWidth = '100%';
     imgElement.style.height = 'auto';
     imgElement.style.borderRadius = '8px';
@@ -171,23 +471,49 @@ function insertImageIntoEditor(imagePath, originalName, editor, originalRange, i
         container.appendChild(captionSpan);
     }
     
-    if (insertAtCursor && originalRange) {
-        originalRange.insertNode(container);
-        var br = document.createElement('br');
-        originalRange.setStartAfter(container);
-        originalRange.insertNode(br);
-        originalRange.setStartAfter(br);
-        var selection = window.getSelection();
-        selection.removeAllRanges();
-        selection.addRange(originalRange);
-    } else {
+    // 如果没有 editor，从 DOM 获取
+    if (!editor) {
+        editor = document.getElementById('editor');
+        if (!editor) {
+            alert('未找到编辑器，请先打开一个章节');
+            return;
+        }
+    }
+    
+    try {
+        if (insertAtCursor && originalRange && originalRange.commonAncestorContainer) {
+            var insertRange = originalRange.cloneRange();
+            insertRange.insertNode(container);
+            var br = document.createElement('br');
+            insertRange.setStartAfter(container);
+            insertRange.insertNode(br);
+            insertRange.setStartAfter(br);
+            insertRange.collapse(true);
+            var selection = window.getSelection();
+            if (selection && typeof selection.removeAllRanges === 'function') {
+                selection.removeAllRanges();
+                selection.addRange(insertRange);
+            }
+        } else {
+            editor.appendChild(container);
+            editor.appendChild(document.createElement('br'));
+            editor.scrollTop = editor.scrollHeight;
+        }
+    } catch(err) {
+        console.warn('插入图片失败，尝试在末尾插入:', err);
         editor.appendChild(container);
         editor.appendChild(document.createElement('br'));
     }
     
-    if (typeof saveCurrentChapter === 'function') saveCurrentChapter();
-    if (typeof updateWordCount === 'function') updateWordCount();
-    alert('图片已保存并插入成功！');
+    if (typeof window.saveCurrentChapter === 'function') {
+        window.saveCurrentChapter();
+    }
+    
+    if (typeof window.updateWordCount === 'function') {
+        window.updateWordCount();
+    }
+    
+    alert('图片已插入成功！');
 }
 
 function insertImageAsBase64(base64Data, originalName, editor, originalRange, insertAtCursor) {

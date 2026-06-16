@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Menu, ipcMain, dialog } = require('electron');
+const { app, BrowserWindow, Menu, ipcMain, dialog, shell } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
@@ -16,7 +16,7 @@ function ensureBackupDir() {
     }
 }
 
-// 清理文件名中的非法字符（不能作为文件夹/文件名的字符）
+// 清理文件名中的非法字符
 function sanitizeFileName(name) {
     if (!name) return '未命名';
     return name.replace(/[\\/:*?"<>|]/g, '_').replace(/\s+$/g, '');
@@ -35,7 +35,6 @@ async function backupBook(book) {
     const dateFolder = path.join(bookFolder, dateStr);
     const timeFolder = path.join(dateFolder, timeStr);
     
-    // 创建目录
     if (!fs.existsSync(timeFolder)) {
         fs.mkdirSync(timeFolder, { recursive: true });
     }
@@ -43,7 +42,6 @@ async function backupBook(book) {
     let chapterCount = 0;
     let totalWords = 0;
     
-    // 保存每个分卷和章节
     if (book.volumes && book.volumes.length > 0) {
         for (let v = 0; v < book.volumes.length; v++) {
             const vol = book.volumes[v];
@@ -59,7 +57,6 @@ async function backupBook(book) {
                     const chName = sanitizeFileName(ch.title);
                     const fileName = `${chName}.txt`;
                     const filePath = path.join(volFolder, fileName);
-                    // 提取纯文本内容
                     const content = ch.content ? ch.content.replace(/<[^>]*>/g, '') : '';
                     const words = content.length;
                     totalWords += words;
@@ -75,7 +72,6 @@ async function backupBook(book) {
         }
     }
     
-    // 保存书籍信息
     const infoPath = path.join(timeFolder, '_book_info.json');
     fs.writeFileSync(infoPath, JSON.stringify({
         title: book.title,
@@ -120,16 +116,17 @@ function createWindow() {
         webPreferences: {
             nodeIntegration: false,
             contextIsolation: true,
-            preload: path.join(__dirname, 'preload.js')
+            preload: path.join(__dirname, 'preload.js'),
+            webSecurity: false,  // 允许 file:// 协议加载图片
+            allowRunningInsecureContent: true
         },
-        icon: path.join(__dirname, 'icon.ico'),
-        title: 'OpenWrite',
+        icon: path.join(__dirname, 'icon.icns'),
+        title: '写作帮手 OpenWrite',
         frame: true
     });
 
     mainWindow.loadFile('index.html');
     
-    // 处理新窗口打开
     mainWindow.webContents.setWindowOpenHandler(({ url }) => {
         const newWindow = new BrowserWindow({
             width: 1200,
@@ -179,17 +176,15 @@ function createWindow() {
                     click: () => {
                         dialog.showMessageBox(mainWindow, {
                             type: 'info',
-                            title: '关于 OpenWrite',
-                            message: 'OpenWrite 版本 0.4.0',
-                            detail: '免费、开源、自由的写作软件\n\nGitHub: https://github.com/likeweixue/OpenWrite\n\n备份位置：~/Documents/写作帮手备份/'
+                            title: '关于 写作帮手 Writingpanelsystem',
+                            message: '写作帮手 Writingpanelsystem 版本 1.4.0\n\n免费，开源，自由的写作软件n\n开发者@麻昌生',
+                            detail: 'GitHub: https://github.com/likeweixue/Writingpanelsystem\n\n备份位置：~/Documents/写作帮手备份/'
                         });
                     }
                 },
                 {
                     label: '打开备份文件夹',
                     click: () => {
-                        const { shell } = require('electron');
-                        const documentsPath = path.join(os.homedir(), 'Documents', '写作帮手备份');
                         if (fs.existsSync(documentsPath)) {
                             shell.openPath(documentsPath);
                         } else {
@@ -223,7 +218,6 @@ ipcMain.handle('backup-all-books', async (event, { books }) => {
 });
 
 ipcMain.handle('open-backup-folder', async () => {
-    const { shell } = require('electron');
     if (fs.existsSync(documentsPath)) {
         shell.openPath(documentsPath);
         return { success: true };
@@ -232,68 +226,53 @@ ipcMain.handle('open-backup-folder', async () => {
     }
 });
 
-app.whenReady().then(() => {
-    createWindow();
-    ensureBackupDir();
-    
-    app.on('activate', () => {
-        if (BrowserWindow.getAllWindows().length === 0) {
-            createWindow();
-        }
-    });
-});
-
-app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin') {
-        app.quit();
-    }
-});
-
-// 确保 assets/images 目录存在
-const assetsImagesPath = path.join(__dirname, 'assets', 'images');
-function ensureAssetsImagesDir() {
-    if (!fs.existsSync(assetsImagesPath)) {
-        fs.mkdirSync(assetsImagesPath, { recursive: true });
-        console.log('创建图片目录:', assetsImagesPath);
-    }
-}
-
-// 保存图片的 IPC 处理
+// 保存图片 - 添加调试日志
 ipcMain.handle('save-image', async (event, { imageData, fileName }) => {
-    ensureAssetsImagesDir();
+    console.log('保存图片请求:', fileName);
     
-    // 生成唯一文件名（如果没提供）
+    const userDataPath = app.getPath('userData');
+    const imagesPath = path.join(userDataPath, 'assets', 'images');
+    
+    console.log('图片保存路径:', imagesPath);
+    
+    if (!fs.existsSync(imagesPath)) {
+        fs.mkdirSync(imagesPath, { recursive: true });
+        console.log('创建图片目录:', imagesPath);
+    }
+    
     let finalFileName = fileName;
     if (!finalFileName) {
         const timestamp = Date.now();
         const random = Math.random().toString(36).substring(2, 8);
         finalFileName = `img_${timestamp}_${random}.jpg`;
     }
-    
-    // 清理文件名中的非法字符
     finalFileName = finalFileName.replace(/[\\/:*?"<>|]/g, '_');
     
-    const filePath = path.join(assetsImagesPath, finalFileName);
+    const filePath = path.join(imagesPath, finalFileName);
+    console.log('完整文件路径:', filePath);
     
-    // 将 base64 数据转换为 Buffer 并保存
-    const base64Data = imageData.replace(/^data:image\/\w+;base64,/, '');
-    const buffer = Buffer.from(base64Data, 'base64');
-    
-    fs.writeFileSync(filePath, buffer);
-    
-    // 返回相对路径（用于在 HTML 中显示）
-    const relativePath = `assets/images/${finalFileName}`;
-    return { success: true, filePath: relativePath, fullPath: filePath };
+    try {
+        const base64Data = imageData.replace(/^data:image\/\w+;base64,/, '');
+        const buffer = Buffer.from(base64Data, 'base64');
+        fs.writeFileSync(filePath, buffer);
+        
+        // 返回 file:// URL
+        const fileUrl = `file://${filePath}`;
+        console.log('图片保存成功，URL:', fileUrl);
+        
+        return { 
+            success: true, 
+            filePath: fileUrl,
+            fullPath: filePath
+        };
+    } catch (err) {
+        console.error('保存图片失败:', err);
+        return { success: false, error: err.message };
+    }
 });
-// 在 main.js 顶部添加（如果还没有的话）
-const { app, BrowserWindow, Menu, ipcMain, dialog, shell } = require('electron');
-const path = require('path');
-const fs = require('fs');
-const os = require('os');
 
-// 添加下载处理
+// 保存文件对话框
 ipcMain.handle('save-file-dialog', async (event, { fileName, content, type }) => {
-    // 打开保存对话框
     const result = await dialog.showSaveDialog({
         title: '保存文件',
         defaultPath: path.join(app.getPath('downloads'), fileName),
@@ -304,13 +283,10 @@ ipcMain.handle('save-file-dialog', async (event, { fileName, content, type }) =>
     });
     
     if (!result.canceled && result.filePath) {
-        // 写入文件
         if (type === 'docx') {
-            // DOCX 是二进制数据
             const buffer = Buffer.from(content, 'base64');
             fs.writeFileSync(result.filePath, buffer);
         } else {
-            // TXT 是文本
             fs.writeFileSync(result.filePath, content, 'utf8');
         }
         return { success: true, filePath: result.filePath };
@@ -333,4 +309,21 @@ ipcMain.handle('save-zip-file', async (event, { fileName, data }) => {
         return { success: true, filePath: result.filePath };
     }
     return { success: false, canceled: true };
+});
+
+app.whenReady().then(() => {
+    createWindow();
+    ensureBackupDir();
+    
+    app.on('activate', () => {
+        if (BrowserWindow.getAllWindows().length === 0) {
+            createWindow();
+        }
+    });
+});
+
+app.on('window-all-closed', () => {
+    if (process.platform !== 'darwin') {
+        app.quit();
+    }
 });

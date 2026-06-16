@@ -313,12 +313,12 @@ function renderBookEditor(bookId) {
         '</div>' +
         '<div class="icon-sidebar-item" data-target="library" title="书库">' +
         '<div class="icon-sidebar-icon">📚</div>' +
-        '</div>' +//这三个东西一定要保存，要不然出大事我靠了
-        '<div class="icon-sidebar-item" data-target="history" title="历史">' +   // 新增历史图标
+        '</div>' +
+        '<div class="icon-sidebar-item" data-target="history" title="历史">' +
         '<div class="icon-sidebar-icon">⏱️</div>' +
         '</div>' +
-        '</div>' +//这三个东西一定要保存，要不然出大事我靠了
-        '</div>' +//这三个东西一定要保存，要不然出大事我靠了
+        '</div>' +
+        '</div>' +
         '<div class="left-sidebar" id="leftSidebar" style="width:280px;">' +
         '<div class="left-sidebar-header">' +
         '<span> 章节</span>' +
@@ -326,13 +326,18 @@ function renderBookEditor(bookId) {
         '</div>' +
         '<div class="left-sidebar-content" id="leftSidebarContent">' +
         '<div class="chapters-header">' +
+        // 第一行：三个按钮
+        '<div class="top-actions">' +
         '<button id="addVolumeBtn">+ 分卷</button>' +
         '<button id="addChapterBtn">+ 章节</button>' +
         '<button id="trashBtnHeader" class="trash-btn">回收站</button>' +
         '</div>' +
+        // 第二行：批量操作（用容器占位，由 addBatchActionButtons 填充）
+        '<div id="batchActionsContainer" style="margin-top:6px;"></div>' +
+        '</div>' +  // 结束 chapters-header
         '<div id="volumeList" class="volume-list"></div>' +
-        '</div>' +
-        '</div>' +
+        '</div>' +  // 结束 left-sidebar-content
+        '</div>' +  // 结束 left-sidebar
         // 书库面板（初始隐藏）
         '<div class="library-sidebar" id="librarySidebar" style="display:none; width:280px;">' +
         '<div class="library-sidebar-header">' +
@@ -347,16 +352,15 @@ function renderBookEditor(bookId) {
         '<div class="detail-editor">' +
         '<input type="text" id="chapterTitle" placeholder="章节标题" class="title-input">' +
         '<div id="editor" contenteditable="true" class="editor-content"><p>开始写作...</p></div>' +
-        // 在 renderBookEditor 函数中，找到 status-bar 部分，替换为：
-'<div class="status-bar">' +
-'<div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">' +
-'<span>📝 <span id="wordCount">0</span> 字</span>' +
-'<span>💾 <span id="saveStatus">已保存</span></span>' +
-'<span>⏰ <span id="currentTime">--:--:--</span></span>' +
-'<span>📦 <span id="backupStatus">备份待命</span></span>' +
-'</div>' +
-'</div>'
+        '<div class="status-bar">' +
+        '<div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">' +
+        '<span>📝 <span id="wordCount">0</span> 字</span>' +
+        '<span>💾 <span id="saveStatus">已保存</span></span>' +
+        '<span>⏰ <span id="currentTime">--:--:--</span></span>' +
+        '<span>📦 <span id="backupStatus">备份待命</span></span>' +
         '</div>' +
+        '</div>' +
+        '</div>' +  // 结束 detail-editor
         '<div class="right-sidebar" id="rightSidebar">' +
         '<div class="right-sidebar-header">' +
         '<span>🛠️ 工具</span>' +
@@ -372,9 +376,9 @@ function renderBookEditor(bookId) {
         '<div class="sidebar-tool-item" data-tool="namegen"><div class="sidebar-tool-icon">✏️</div><div class="sidebar-tool-label">起名</div></div>' +
         '<div class="sidebar-tool-item" data-tool="notes"><div class="sidebar-tool-icon">📓</div><div class="sidebar-tool-label">笔记</div></div>' +
         '</div>' +
-        '</div>' +
-        '</div>' +
-        '</div>';
+        '</div>' +  // 结束 right-sidebar
+        '</div>' +  // 结束 detail-main
+        '</div>';  // 结束 book-detail-page
 }
 
 function initBookEditor(tabId, bookId) {
@@ -2220,37 +2224,31 @@ function addHistoryResizeHandle() {
 // ========== 批量操作功能 ==========
 
 // 添加批量操作按钮到章节栏头部
+// 添加批量操作按钮到章节栏头部
 function addBatchActionButtons() {
-    var chaptersHeader = document.querySelector('.chapters-header');
-    if (!chaptersHeader) return;
+    var container = document.getElementById('batchActionsContainer');
+    if (!container) return;
     
-    // 检查是否已经添加了批量操作按钮 - 使用更精确的选择器
-    var existingBatch = chaptersHeader.querySelector('.batch-actions');
-    if (existingBatch) {
-        console.log('批量操作按钮已存在，跳过添加');
-        return;
-    }
+    // 检查是否已经添加
+    if (container.querySelector('.batch-actions')) return;
     
     var batchDiv = document.createElement('div');
     batchDiv.className = 'batch-actions';
-    batchDiv.style.cssText = 'margin-top: 12px; padding-top: 8px; border-top: 1px solid rgba(0,0,0,0.1); display: flex; gap: 8px; flex-wrap: wrap;';
+    batchDiv.style.cssText = 'display: flex; gap: 4px; flex-wrap: wrap; align-items: center;';
     
     batchDiv.innerHTML = `
-        <button id="selectAllChaptersBtn" style="padding: 4px 10px; font-size: 12px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">☑ 全选</button>
-        <button id="deselectAllChaptersBtn" style="padding: 4px 10px; font-size: 12px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">☐ 取消全选</button>
-        <button id="batchDeleteChaptersBtn" style="padding: 4px 10px; font-size: 12px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">🗑 批量删除</button>
-        <button id="batchMoveChaptersBtn" style="padding: 4px 10px; font-size: 12px; background: #007aff; color: white; border: none; border-radius: 4px; cursor: pointer;">📂 批量移动</button>
+        <button id="selectAllChaptersBtn" style="padding: 2px 8px; font-size: 11px; background: #6c757d; color: white; border: none; border-radius: 3px; cursor: pointer; white-space: nowrap;">☑ 全选</button>
+        <button id="deselectAllChaptersBtn" style="padding: 2px 8px; font-size: 11px; background: #6c757d; color: white; border: none; border-radius: 3px; cursor: pointer; white-space: nowrap;">☐ 取消</button>
+        <button id="batchDeleteChaptersBtn" style="padding: 2px 8px; font-size: 11px; background: #dc3545; color: white; border: none; border-radius: 3px; cursor: pointer; white-space: nowrap;">🗑 删除</button>
+        <button id="batchMoveChaptersBtn" style="padding: 2px 8px; font-size: 11px; background: #007aff; color: white; border: none; border-radius: 3px; cursor: pointer; white-space: nowrap;">📂 移动</button>
     `;
     
-    chaptersHeader.appendChild(batchDiv);
+    container.appendChild(batchDiv);
     
-    // 绑定事件
     document.getElementById('selectAllChaptersBtn').onclick = selectAllChapters;
     document.getElementById('deselectAllChaptersBtn').onclick = deselectAllChapters;
     document.getElementById('batchDeleteChaptersBtn').onclick = batchDeleteChapters;
     document.getElementById('batchMoveChaptersBtn').onclick = batchMoveChapters;
-    
-    console.log('批量操作按钮已添加');
 }
 
 // 获取所有选中的章节
