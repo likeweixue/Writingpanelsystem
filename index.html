@@ -150,6 +150,23 @@
 
 <!-- ========== 所有内联函数（放在一起，确保定义顺序正确） ========== -->
 <script>
+    // ========== 静默所有备份提示 ==========
+(function silenceBackup() {
+    var originalAlert = window.alert;
+    window.alert = function(message) {
+        if (message && typeof message === 'string') {
+            var keywords = ['备份', 'backup', '保存成功', '恢复', '已保存'];
+            for (var i = 0; i < keywords.length; i++) {
+                if (message.indexOf(keywords[i]) !== -1) {
+                    console.log('[静默]', message);
+                    return;
+                }
+            }
+        }
+        originalAlert(message);
+    };
+    console.log('✅ 备份提示已静默');
+})();
 // 图片压缩函数
 function compressImage(file, maxWidth, maxHeight, quality, callback) {
     var reader = new FileReader();
