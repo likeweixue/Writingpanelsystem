@@ -96,3 +96,44 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }, 500);
 });
+// 在 sidebar.js 中添加
+
+// 切换工具显示模式
+function toggleToolMode(tool, mode) {
+    if (mode === 'fullscreen') {
+        // 全屏模式：在标签页中打开
+        var fileMap = {
+            outline: 'html/outline.html',
+            timeline: 'html/timeline.html',
+            characters: 'html/characters.html',
+            setting: 'html/setting.html',
+            relation: 'html/relation.html',
+            whiteboard: 'html/whiteboard.html',
+            namegen: 'html/namegen.html',
+            notes: 'html/notes.html'
+        };
+        var file = fileMap[tool];
+        if (file) {
+            window.open(file, '_blank', 'width=1200,height=800,resizable=yes');
+        }
+    } else {
+        // 侧边栏模式：在工具面板中打开
+        var toolPanelMap = {
+            outline: window.openOutlinePanel,
+            timeline: window.openTimelinePanel,
+            characters: window.openCharacterPanel,
+            setting: window.openSettingPanel,
+            relation: window.openRelationPanel,
+            whiteboard: window.openWhiteboardPanel,
+            namegen: window.openNameGenPanel,
+            notes: window.openNotePanel
+        };
+        var openFn = toolPanelMap[tool];
+        if (typeof openFn === 'function') {
+            openFn();
+        }
+    }
+}
+
+// 导出到全局
+window.toggleToolMode = toggleToolMode;

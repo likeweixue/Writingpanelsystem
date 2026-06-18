@@ -16,6 +16,19 @@ contextBridge.exposeInMainWorld('electron', {
     saveZipFile: (fileName, data) => ipcRenderer.invoke('save-zip-file', { fileName, data }),
     
     platform: process.platform
+
+    // ========== 新增：打开外部窗口 ==========
+    openWindow: (url, options) => {
+        // 使用 shell 打开外部链接（浏览器）
+        if (url.startsWith('http')) {
+            shell.openExternal(url);
+        } else {
+            // 内部页面使用 window.open
+            window.open(url, '_blank', options || 'width=1200,height=800,resizable=yes');
+        }
+    },
+    
+    platform: process.platform
 });
 
 console.log('preload.js 已加载，electron API 已暴露');

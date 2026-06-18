@@ -361,21 +361,59 @@ function renderBookEditor(bookId) {
         '</div>' +
         '</div>' +
         '</div>' +  // 结束 detail-editor
-        '<div class="right-sidebar" id="rightSidebar">' +
-        '<div class="right-sidebar-header">' +
-        '<span>🛠️ 工具</span>' +
-        '<button class="toggle-right-sidebar-btn" id="toggleRightSidebarBtn" title="收起">▶</button>' +
-        '</div>' +
-        '<div class="right-sidebar-content">' +
-        '<div class="sidebar-tool-item" data-tool="outline"><div class="sidebar-tool-icon">📋</div><div class="sidebar-tool-label">大纲</div></div>' +
-        '<div class="sidebar-tool-item" data-tool="timeline"><div class="sidebar-tool-icon">⏱️</div><div class="sidebar-tool-label">时间线</div></div>' +
-        '<div class="sidebar-tool-item" data-tool="characters"><div class="sidebar-tool-icon">👥</div><div class="sidebar-tool-label">角色</div></div>' +
-        '<div class="sidebar-tool-item" data-tool="setting"><div class="sidebar-tool-icon">⚙️</div><div class="sidebar-tool-label">设定</div></div>' +
-        '<div class="sidebar-tool-item" data-tool="relation"><div class="sidebar-tool-icon">🔗</div><div class="sidebar-tool-label">关系图</div></div>' +
-        '<div class="sidebar-tool-item" data-tool="whiteboard"><div class="sidebar-tool-icon">📝</div><div class="sidebar-tool-label">无边记</div></div>' +
-        '<div class="sidebar-tool-item" data-tool="namegen"><div class="sidebar-tool-icon">✏️</div><div class="sidebar-tool-label">起名</div></div>' +
-        '<div class="sidebar-tool-item" data-tool="notes"><div class="sidebar-tool-icon">📓</div><div class="sidebar-tool-label">笔记</div></div>' +
-        '</div>' +
+        // 在 renderBookEditor 函数中，找到右侧边栏部分
+// 在 renderBookEditor 函数中，修改右侧边栏
+'<div class="right-sidebar" id="rightSidebar">' +
+'<div class="right-sidebar-header">' +
+'</div>' +
+'<div class="right-sidebar-content">' +
+// 大纲 - 带展开按钮
+'<div class="sidebar-tool-item" data-tool="outline">' +
+'<div class="sidebar-tool-icon">📋</div>' +
+'<div class="sidebar-tool-label">大纲</div>' +
+'<button class="tool-expand-btn" data-tool="outline" title="在新标签页打开" style="background:none; border:none; cursor:pointer; font-size:12px; opacity:0.4; margin-left:auto;">⤢</button>' +
+'</div>' +
+// 时间线
+'<div class="sidebar-tool-item" data-tool="timeline">' +
+'<div class="sidebar-tool-icon">⏱️</div>' +
+'<div class="sidebar-tool-label">时间线</div>' +
+'<button class="tool-expand-btn" data-tool="timeline" title="在新标签页打开" style="background:none; border:none; cursor:pointer; font-size:12px; opacity:0.4; margin-left:auto;">⤢</button>' +
+'</div>' +
+// 角色
+'<div class="sidebar-tool-item" data-tool="characters">' +
+'<div class="sidebar-tool-icon">👥</div>' +
+'<div class="sidebar-tool-label">角色</div>' +
+'<button class="tool-expand-btn" data-tool="characters" title="在新标签页打开" style="background:none; border:none; cursor:pointer; font-size:12px; opacity:0.4; margin-left:auto;">⤢</button>' +
+'</div>' +
+// 设定
+'<div class="sidebar-tool-item" data-tool="setting">' +
+'<div class="sidebar-tool-icon">⚙️</div>' +
+'<div class="sidebar-tool-label">设定</div>' +
+'<button class="tool-expand-btn" data-tool="setting" title="在新标签页打开" style="background:none; border:none; cursor:pointer; font-size:12px; opacity:0.4; margin-left:auto;">⤢</button>' +
+'</div>' +
+// 关系图
+'<div class="sidebar-tool-item" data-tool="relation">' +
+'<div class="sidebar-tool-icon">🔗</div>' +
+'<div class="sidebar-tool-label">关系图</div>' +
+'<button class="tool-expand-btn" data-tool="relation" title="在新标签页打开" style="background:none; border:none; cursor:pointer; font-size:12px; opacity:0.4; margin-left:auto;">⤢</button>' +
+'</div>' +
+// 无边记
+'<div class="sidebar-tool-item" data-tool="whiteboard">' +
+'<div class="sidebar-tool-icon">📝</div>' +
+'<div class="sidebar-tool-label">无边记</div>' +
+'<button class="tool-expand-btn" data-tool="whiteboard" title="在新标签页打开" style="background:none; border:none; cursor:pointer; font-size:12px; opacity:0.4; margin-left:auto;">⤢</button>' +
+'</div>' +
+// 起名
+'<div class="sidebar-tool-item" data-tool="namegen">' +
+'<div class="sidebar-tool-icon">✏️</div>' +
+'<div class="sidebar-tool-label">起名</div>' +
+'<button class="tool-expand-btn" data-tool="namegen" title="在新标签页打开" style="background:none; border:none; cursor:pointer; font-size:12px; opacity:0.4; margin-left:auto;">⤢</button>' +
+'</div>' +
+// 笔记
+'<div class="sidebar-tool-item" data-tool="notes">' +
+'<div class="sidebar-tool-icon">📓</div>' +
+'<div class="sidebar-tool-label">笔记</div>' +
+'<button class="tool-expand-btn" data-tool="notes" title="在新标签页打开" style="background:none; border:none; cursor:pointer; font-size:12px; opacity:0.4; margin-left:auto;">⤢</button>' +
         '</div>' +  // 结束 right-sidebar
         '</div>' +  // 结束 detail-main
         '</div>';  // 结束 book-detail-page
@@ -399,6 +437,18 @@ function initBookEditor(tabId, bookId) {
     
     var trashBtn = document.getElementById('trashBtnHeader');
     if (trashBtn) trashBtn.onclick = function() { openTrashPanel(); };
+
+    // 双击右侧边栏头部切换展开/收起
+var sidebarHeader = document.querySelector('.right-sidebar-header');
+if (sidebarHeader) {
+    sidebarHeader.ondblclick = function() {
+        var sidebar = document.getElementById('rightSidebar');
+        if (sidebar) {
+            sidebar.classList.toggle('expanded');
+            localStorage.setItem('rightSidebar_expanded', sidebar.classList.contains('expanded'));
+        }
+    };
+}
 
     // 在 initBookEditor 函数末尾添加
 setTimeout(function() {
@@ -816,13 +866,90 @@ function addResizeHandle() {
     }
 
     // 绑定工具点击事件
-    var tools = document.querySelectorAll('.sidebar-tool-item');
-    for (var i = 0; i < tools.length; i++) {
-        tools[i].onclick = function() {
-            var tool = this.getAttribute('data-tool');
+    // 在 initBookEditor 函数中
+// 绑定工具点击事件
+// 在 initBookEditor 函数中，找到绑定工具点击事件的代码
+// 绑定工具点击事件
+// 在 initBookEditor 函数中，替换工具绑定部分
+
+// 工具面板映射
+var toolPanelMap = {
+    outline: window.openOutlinePanel,
+    timeline: window.openTimelinePanel,
+    characters: window.openCharacterPanel,
+    setting: window.openSettingPanel,
+    relation: window.openRelationPanel,
+    whiteboard: window.openWhiteboardPanel,
+    namegen: window.openNameGenPanel,
+    notes: window.openNotePanel
+};
+
+// 绑定工具点击事件（点击图标区域打开侧边栏模式）
+var tools = document.querySelectorAll('.sidebar-tool-item');
+for (var i = 0; i < tools.length; i++) {
+    // 点击整个项（图标+文字区域）打开侧边栏模式
+    var item = tools[i];
+    item.onclick = function(e) {
+        // 如果点击的是展开按钮，不触发
+        if (e.target.classList && e.target.classList.contains('tool-expand-btn')) return;
+        var tool = this.getAttribute('data-tool');
+        var openFn = toolPanelMap[tool];
+        if (typeof openFn === 'function') {
+            openFn();
+        } else {
             openSecondaryWindow(tool);
+        }
+    };
+    
+    // 绑定展开按钮（点击后在新标签页打开全屏模式）
+    var expandBtn = item.querySelector('.tool-expand-btn');
+    if (expandBtn) {
+        expandBtn.onclick = function(e) {
+            e.stopPropagation();
+            var tool = this.getAttribute('data-tool');
+            // 在新窗口打开全屏版本
+            openToolFullscreen(tool);
         };
     }
+}
+
+// 全屏打开工具
+function openToolFullscreen(tool) {
+    // 关闭当前标签页中的工具面板（如果有）
+    var tabMap = {
+        outline: 'outline_panel',
+        timeline: 'timeline_panel',
+        characters: 'character_panel',
+        setting: 'setting_panel',
+        relation: 'relation_panel',
+        whiteboard: 'whiteboard_panel',
+        namegen: 'namegen_panel',
+        notes: 'note_panel'
+    };
+    var tabId = tabMap[tool];
+    if (tabId) {
+        var existingPage = document.querySelector('.page[data-page="' + tabId + '"]');
+        if (existingPage) {
+            closeTab(tabId);
+        }
+    }
+    
+    // 在新窗口中打开
+    var fileMap = {
+        outline: 'html/outline.html',
+        timeline: 'html/timeline.html',
+        characters: 'html/characters.html',
+        setting: 'html/setting.html',
+        relation: 'html/relation.html',
+        whiteboard: 'html/whiteboard.html',
+        namegen: 'html/namegen.html',
+        notes: 'html/notes.html'
+    };
+    var file = fileMap[tool];
+    if (file) {
+        window.open(file, '_blank', 'width=1200,height=800,resizable=yes');
+    }
+}
     
     // 启动状态栏定时器
     startStatusBarTimers();

@@ -3520,3 +3520,406 @@ body.theme-dark .library-book-item .book-title {
 body.theme-dark .library-book-item .book-meta {
     color: #888 !important;
 }
+/* 在 style.css 中添加 */
+.right-sidebar.expanded {
+    width: 400px !important;
+    min-width: 400px !important;
+}
+
+.right-sidebar.expanded .sidebar-tool-item {
+    padding: 12px 16px !important;
+    background: rgba(0,0,0,0.02);
+    border-radius: 8px;
+    margin-bottom: 4px;
+}
+
+.right-sidebar.expanded .sidebar-tool-item .sidebar-tool-label {
+    font-size: 13px !important;
+    display: block !important;
+}
+
+.right-sidebar.expanded .sidebar-tool-item .sidebar-tool-icon {
+    font-size: 20px !important;
+}
+/* 回收站图标激活状态 */
+.icon-sidebar-item.active {
+    background: rgba(0, 122, 255, 0.15);
+    color: #007aff;
+}
+
+.icon-sidebar-item[data-target="trash"].active .icon-sidebar-icon {
+    color: #dc3545;
+}
+
+/* ============================================================
+   章节栏简洁样式 - 覆盖原有样式（放在最后确保生效）
+   ============================================================ */
+
+/* 分卷容器 - 去掉背景色 */
+.volume-item {
+    background: transparent !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    margin-bottom: 4px !important;
+}
+
+/* 分卷头部 - 去掉背景色 */
+.volume-header {
+    background: transparent !important;
+    border-radius: 0 !important;
+    padding: 6px 8px !important;
+    margin-bottom: 0 !important;
+}
+
+.volume-header:hover {
+    background: rgba(0, 0, 0, 0.03) !important;
+}
+
+/* 分卷操作按钮 - 默认透明，悬停显示 */
+.volume-actions {
+    opacity: 0 !important;
+    transition: opacity 0.2s !important;
+}
+
+.volume-header:hover .volume-actions {
+    opacity: 0.6 !important;
+}
+
+.volume-actions button {
+    background: transparent !important;
+    border: none !important;
+    padding: 2px 4px !important;
+    border-radius: 4px !important;
+    cursor: pointer !important;
+    font-size: 12px !important;
+    color: #999 !important;
+}
+
+.volume-actions button:hover {
+    background: rgba(0, 0, 0, 0.08) !important;
+    color: #333 !important;
+}
+
+/* 章节列表 */
+.chapter-list {
+    margin-left: 20px !important;
+    margin-top: 0 !important;
+    padding-left: 4px !important;
+}
+
+/* 章节项 - 去掉背景色 */
+.chapter-item {
+    background: transparent !important;
+    border-radius: 4px !important;
+    padding: 4px 8px !important;
+    margin: 1px 0 !important;
+    transition: background 0.15s !important;
+}
+
+.chapter-item:hover {
+    background: rgba(0, 0, 0, 0.04) !important;
+}
+
+.chapter-item.active {
+    background: rgba(0, 122, 255, 0.08) !important;
+    color: #007aff !important;
+    font-weight: 500 !important;
+}
+
+/* 章节操作按钮 - 默认透明，悬停显示 */
+.chapter-actions {
+    opacity: 0 !important;
+    transition: opacity 0.2s !important;
+}
+
+.chapter-item:hover .chapter-actions {
+    opacity: 0.6 !important;
+}
+
+.chapter-actions button {
+    background: transparent !important;
+    border: none !important;
+    cursor: pointer !important;
+    font-size: 12px !important;
+    padding: 2px 4px !important;
+    border-radius: 4px !important;
+    color: #999 !important;
+}
+
+.chapter-actions button:hover {
+    background: rgba(0, 0, 0, 0.08) !important;
+    color: #333 !important;
+}
+
+.chapter-actions .delete-chapter:hover {
+    color: #dc3545 !important;
+}
+
+/* 章节标题 */
+.chapter-title {
+    cursor: pointer !important;
+    padding: 2px 0 !important;
+}
+
+/* 顶部按钮 - 简化样式 */
+.top-actions button {
+    padding: 4px 12px !important;
+    font-size: 12px !important;
+    border-radius: 4px !important;
+    border: none !important;
+    cursor: pointer !important;
+    background: rgba(0, 0, 0, 0.05) !important;
+    color: var(--text-color, #333) !important;
+}
+
+.top-actions button:hover {
+    background: rgba(0, 0, 0, 0.1) !important;
+}
+
+.top-actions #addVolumeBtn {
+    background: rgba(108, 117, 125, 0.15) !important;
+    color: #495057 !important;
+}
+
+.top-actions #addVolumeBtn:hover {
+    background: rgba(108, 117, 125, 0.25) !important;
+}
+
+.top-actions #addChapterBtn {
+    background: rgba(40, 167, 69, 0.15) !important;
+    color: #28a745 !important;
+}
+
+.top-actions #addChapterBtn:hover {
+    background: rgba(40, 167, 69, 0.25) !important;
+}
+
+/* 批量操作按钮 */
+.batch-actions {
+    padding-top: 4px !important;
+    margin-top: 4px !important;
+    border-top: 1px solid rgba(0, 0, 0, 0.05) !important;
+}
+
+.batch-actions button {
+    font-size: 11px !important;
+    padding: 2px 10px !important;
+    border-radius: 3px !important;
+    border: none !important;
+    cursor: pointer !important;
+    background: rgba(0, 0, 0, 0.04) !important;
+    color: var(--text-color, #333) !important;
+}
+
+.batch-actions button:hover {
+    background: rgba(0, 0, 0, 0.1) !important;
+}
+
+.batch-actions #batchDeleteChaptersBtn {
+    color: #dc3545 !important;
+}
+
+.batch-actions #batchDeleteChaptersBtn:hover {
+    background: rgba(220, 53, 69, 0.15) !important;
+}
+
+.batch-actions #batchMoveChaptersBtn {
+    color: #007aff !important;
+}
+
+.batch-actions #batchMoveChaptersBtn:hover {
+    background: rgba(0, 122, 255, 0.15) !important;
+}
+
+/* 分卷标题 */
+.volume-title {
+    font-weight: 500 !important;
+    font-size: 13px !important;
+    padding: 4px 0 !important;
+}
+/* ============================================================
+   章节栏简洁样式 - 覆盖原有样式（放在最后确保生效）
+   ============================================================ */
+
+/* 分卷容器 - 去掉背景色 */
+.volume-item {
+    background: transparent !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    margin-bottom: 4px !important;
+}
+
+/* 分卷头部 - 去掉背景色 */
+.volume-header {
+    background: transparent !important;
+    border-radius: 0 !important;
+    padding: 6px 8px !important;
+    margin-bottom: 0 !important;
+}
+
+.volume-header:hover {
+    background: rgba(0, 0, 0, 0.03) !important;
+}
+
+/* 分卷操作按钮 - 默认透明，悬停显示 */
+.volume-actions {
+    opacity: 0 !important;
+    transition: opacity 0.2s !important;
+}
+
+.volume-header:hover .volume-actions {
+    opacity: 0.6 !important;
+}
+
+.volume-actions button {
+    background: transparent !important;
+    border: none !important;
+    padding: 2px 4px !important;
+    border-radius: 4px !important;
+    cursor: pointer !important;
+    font-size: 12px !important;
+    color: #999 !important;
+}
+
+.volume-actions button:hover {
+    background: rgba(0, 0, 0, 0.08) !important;
+    color: #333 !important;
+}
+
+/* 章节列表 */
+.chapter-list {
+    margin-left: 20px !important;
+    margin-top: 0 !important;
+    padding-left: 4px !important;
+}
+
+/* 章节项 - 去掉背景色 */
+.chapter-item {
+    background: transparent !important;
+    border-radius: 4px !important;
+    padding: 4px 8px !important;
+    margin: 1px 0 !important;
+    transition: background 0.15s !important;
+}
+
+.chapter-item:hover {
+    background: rgba(0, 0, 0, 0.04) !important;
+}
+
+.chapter-item.active {
+    background: rgba(0, 122, 255, 0.08) !important;
+    color: #007aff !important;
+    font-weight: 500 !important;
+}
+
+/* 章节操作按钮 - 默认透明，悬停显示 */
+.chapter-actions {
+    opacity: 0 !important;
+    transition: opacity 0.2s !important;
+}
+
+.chapter-item:hover .chapter-actions {
+    opacity: 0.6 !important;
+}
+
+.chapter-actions button {
+    background: transparent !important;
+    border: none !important;
+    cursor: pointer !important;
+    font-size: 12px !important;
+    padding: 2px 4px !important;
+    border-radius: 4px !important;
+    color: #999 !important;
+}
+
+.chapter-actions button:hover {
+    background: rgba(0, 0, 0, 0.08) !important;
+    color: #333 !important;
+}
+
+.chapter-actions .delete-chapter:hover {
+    color: #dc3545 !important;
+}
+
+/* 章节标题 */
+.chapter-title {
+    cursor: pointer !important;
+    padding: 2px 0 !important;
+}
+
+/* 顶部按钮 - 简化样式 */
+.top-actions button {
+    padding: 4px 12px !important;
+    font-size: 12px !important;
+    border-radius: 4px !important;
+    border: none !important;
+    cursor: pointer !important;
+    background: rgba(0, 0, 0, 0.05) !important;
+    color: var(--text-color, #333) !important;
+}
+
+.top-actions button:hover {
+    background: rgba(0, 0, 0, 0.1) !important;
+}
+
+.top-actions #addVolumeBtn {
+    background: rgba(108, 117, 125, 0.15) !important;
+    color: #495057 !important;
+}
+
+.top-actions #addVolumeBtn:hover {
+    background: rgba(108, 117, 125, 0.25) !important;
+}
+
+.top-actions #addChapterBtn {
+    background: rgba(40, 167, 69, 0.15) !important;
+    color: #28a745 !important;
+}
+
+.top-actions #addChapterBtn:hover {
+    background: rgba(40, 167, 69, 0.25) !important;
+}
+
+/* 批量操作按钮 */
+.batch-actions {
+    padding-top: 4px !important;
+    margin-top: 4px !important;
+    border-top: 1px solid rgba(0, 0, 0, 0.05) !important;
+}
+
+.batch-actions button {
+    font-size: 11px !important;
+    padding: 2px 10px !important;
+    border-radius: 3px !important;
+    border: none !important;
+    cursor: pointer !important;
+    background: rgba(0, 0, 0, 0.04) !important;
+    color: var(--text-color, #333) !important;
+}
+
+.batch-actions button:hover {
+    background: rgba(0, 0, 0, 0.1) !important;
+}
+
+.batch-actions #batchDeleteChaptersBtn {
+    color: #dc3545 !important;
+}
+
+.batch-actions #batchDeleteChaptersBtn:hover {
+    background: rgba(220, 53, 69, 0.15) !important;
+}
+
+.batch-actions #batchMoveChaptersBtn {
+    color: #007aff !important;
+}
+
+.batch-actions #batchMoveChaptersBtn:hover {
+    background: rgba(0, 122, 255, 0.15) !important;
+}
+
+/* 分卷标题 */
+.volume-title {
+    font-weight: 500 !important;
+    font-size: 13px !important;
+    padding: 4px 0 !important;
+}

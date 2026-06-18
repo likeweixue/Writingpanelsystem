@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>启动中...</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            overflow: hidden;
+        }
+        
+        .splash-container {
+            width: 480px;
+            height: 320px;
+            background: linear-gradient(145deg, #fcf9f2, #f0ebe0);
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* 装饰线条 */
+        .splash-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #9b784e00, #d4b88c00, #9b784e00);
+        }
+        
+        /* Logo 区域 */
+        .logo-area {
+            font-size: 72px;
+            margin-bottom: 12px;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .app-name {
+            font-size: 28px;
+            font-weight: 700;
+            color: #5c3e25;
+            letter-spacing: 2px;
+            margin-bottom: 4px;
+        }
+        
+        .app-sub {
+            font-size: 14px;
+            color: #b48b62;
+            letter-spacing: 4px;
+            margin-bottom: 20px;
+        }
+        
+        /* 加载进度条 */
+        .progress-bar {
+            width: 240px;
+            height: 4px;
+            background: #e8ddd0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #9b784e, #d4b88c);
+            border-radius: 4px;
+            animation: loading 2s ease-in-out forwards;
+        }
+        
+        @keyframes loading {
+            0% { width: 0%; }
+            30% { width: 45%; }
+            60% { width: 70%; }
+            85% { width: 88%; }
+            100% { width: 100%; }
+        }
+        
+        .loading-text {
+            font-size: 11px;
+            color: #c4aa8a;
+            margin-top: 8px;
+            letter-spacing: 1px;
+        }
+        
+        /* 版本号 */
+        .version {
+            position: absolute;
+            bottom: 12px;
+            right: 20px;
+            font-size: 11px;
+            color: #c4aa8a;
+        }
+        
+        /* 右下角装饰 */
+        .deco {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            font-size: 120px;
+            opacity: 0.06;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="splash-container">
+        <div class="logo-area">✍️</div>
+        <div class="app-name">写作帮手</div>
+        <div class="app-sub">WritingPanelSystem</div>
+        <div class="progress-bar">
+            <div class="progress-fill"></div>
+        </div>
+        <div class="loading-text">📖 加载中...</div>
+        <div class="version">v1.5.0</div>
+        <div class="deco">📝</div>
+    </div>
+</body>
+</html>

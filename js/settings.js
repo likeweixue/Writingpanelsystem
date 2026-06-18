@@ -88,35 +88,30 @@ function saveBackupSettings() {
 
 function performBackup() {
     if (!books || books.length === 0) {
-        alert('没有书籍需要备份');
+        // 静默处理，不弹出提示
+        console.log('没有书籍需要备份');
         return;
     }
     
     if (window.electron && window.electron.backupAllBooks) {
-        alert('正在备份到文档文件夹，请稍候...');
-        window.electron.backupAllBooks(books).then(results => {
-            let successCount = 0;
-            let message = '';
+        // 静默备份，不显示提示框
+        window.electron.backupAllBooks(books).then(function(results) {
+            var successCount = 0;
             for (var i = 0; i < results.length; i++) {
-                var r = results[i];
-                if (r.success) {
-                    successCount++;
-                    message += `✅ ${r.bookName}: ${r.chapterCount}章, ${r.totalWords}字\n`;
-                } else {
-                    message += `❌ ${r.bookName}: 备份失败\n`;
-                }
+                if (results[i].success) successCount++;
             }
-            alert(`备份完成！\n成功备份 ${successCount}/${results.length} 本书籍\n\n备份位置：~/Documents/写作帮手备份/\n\n${message}`);
-        }).catch(err => {
-            alert('备份失败：' + err.message);
+            // 只在控制台输出，不弹窗
+            console.log('备份完成，成功 ' + successCount + '/' + results.length + ' 本书籍');
+        }).catch(function(err) {
+            console.error('备份失败:', err);
         });
     } else {
+        // 网页版备份 - 静默
         var today = new Date();
-        var dateStr = today.getFullYear() + '年' + (today.getMonth() + 1) + '月' + today.getDate() + '日';
         var dateFolder = today.getFullYear() + '' + String(today.getMonth() + 1).padStart(2,'0') + String(today.getDate()).padStart(2,'0');
         var backupData = { backupTime: new Date().toISOString(), books: books, groups: groups };
         localStorage.setItem('openwrite_backup_' + dateFolder, JSON.stringify(backupData));
-        alert('备份完成！备份时间：' + dateStr);
+        console.log('备份完成，备份时间：' + new Date().toLocaleString());
     }
 }
 

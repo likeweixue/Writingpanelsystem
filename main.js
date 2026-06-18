@@ -5,6 +5,93 @@ const os = require('os');
 
 let mainWindow;
 
+// 创建启动画面
+function createSplashWindow() {
+    splashWindow = new BrowserWindow({
+        width: 500,
+        height: 350,
+        frame: false,          // 无边框
+        transparent: true,     // 透明背景
+        alwaysOnTop: true,     // 置顶
+        resizable: false,
+        center: true,
+        skipTaskbar: true,     // 不在任务栏显示
+        webPreferences: {
+            nodeIntegration: false,
+            contextIsolation: true
+        }
+    });
+    
+    // 加载启动画面 HTML
+    splashWindow.loadFile('splash.html');
+    
+    // 2秒后自动关闭（如果主窗口还没加载完）
+    setTimeout(() => {
+        if (splashWindow && !splashWindow.isDestroyed()) {
+            splashWindow.close();
+            splashWindow = null;
+        }
+    }, 3000);
+}
+
+function createWindow() {
+    // 先显示启动画面
+    createSplashWindow();
+    
+    setTimeout(() => {
+        mainWindow = new BrowserWindow({
+            width: 1400,
+            height: 900,
+            minWidth: 800,
+            minHeight: 600,
+            show: false,
+            webPreferences: {
+                nodeIntegration: false,
+                contextIsolation: true,
+                preload: path.join(__dirname, 'preload.js'),
+                webSecurity: false,
+                allowRunningInsecureContent: true,
+                // ========== 新增：允许弹出窗口 ==========
+                sandbox: false,
+                additionalArguments: ['--allow-popups']
+            },
+            icon: path.join(__dirname, 'icon.icns'),
+            title: '写作帮手 OpenWrite',
+            frame: true
+        });
+
+        mainWindow.loadFile('index.html');
+        
+        // ========== 修改：允许新窗口打开 ==========
+        mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    // 创建新窗口
+    const newWindow = new BrowserWindow({
+        width: 1200,
+        height: 800,
+        parent: mainWindow,
+        modal: false,
+        show: false,
+        frame: true,
+        webPreferences: {
+            nodeIntegration: false,
+            contextIsolation: true,
+            preload: path.join(__dirname, 'preload.js')
+        }
+    });
+    
+    newWindow.loadURL(url);
+    newWindow.once('ready-to-show', () => {
+        newWindow.show();
+    });
+    
+    // 必须返回 allow
+    return { action: 'allow' };
+});
+        
+        // ... 其他代码保持不变 ...
+    }, 100);
+}
+
 // 获取文档目录中的备份文件夹
 const documentsPath = path.join(os.homedir(), 'Documents', '写作帮手备份');
 
@@ -21,6 +108,7 @@ function sanitizeFileName(name) {
     if (!name) return '未命名';
     return name.replace(/[\\/:*?"<>|]/g, '_').replace(/\s+$/g, '');
 }
+
 
 // 备份单本书籍
 async function backupBook(book) {
@@ -177,7 +265,7 @@ function createWindow() {
                         dialog.showMessageBox(mainWindow, {
                             type: 'info',
                             title: '关于 写作帮手 Writingpanelsystem',
-                            message: '写作帮手 Writingpanelsystem 版本 1.4.0\n\n免费，开源，自由的写作软件n\n开发者@麻昌生',
+                            message: '写作帮手 Writingpanelsystem 版本 1.5.0\n\n免费，开源，自由的写作软件n\n开发者@麻昌生',
                             detail: 'GitHub: https://github.com/likeweixue/Writingpanelsystem\n\n备份位置：~/Documents/写作帮手备份/'
                         });
                     }
