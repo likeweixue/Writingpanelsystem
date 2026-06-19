@@ -498,19 +498,27 @@ function renderOutlinePage() {
                 <div class="outline-sidebar-header" style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:rgba(0,0,0,0.03);border-bottom:1px solid var(--border-color, rgba(0,0,0,0.08));flex-shrink:0;">
                     <span style="font-weight:600;">📋 大纲目录</span>
                     <div style="display:flex;gap:6px;">
-                        <button id="outlineAddRootBtn" title="新增根节点" style="background:none;border:none;cursor:pointer;font-size:16px;">📂</button>
-                        <button id="outlineRefreshBtn" title="刷新" style="background:none;border:none;cursor:pointer;font-size:16px;">🔄</button>
-                        <button id="outlineCloseBtn" title="关闭" style="background:none;border:none;cursor:pointer;font-size:16px;">✕</button>
-                    </div>
+    <button id="outlineAddRootBtn" title="新增根节点" style="background:none;border:none;cursor:pointer;font-size:16px;">
+        <img src="icons/folder.svg" width="16" height="16" alt="新增根节点">
+    </button>
+    <button id="outlineRefreshBtn" title="刷新" style="background:none;border:none;cursor:pointer;font-size:16px;">
+        <img src="icons/refresh.svg" width="16" height="16" alt="刷新">
+    </button>
+    <button id="outlineCloseBtn" title="关闭" style="background:none;border:none;cursor:pointer;font-size:16px;">
+        <img src="icons/close.svg" width="16" height="16" alt="关闭">
+    </button>
+</div>
                 </div>
                 <!-- 搜索框 -->
                 <div style="padding:8px 12px;flex-shrink:0;">
-                    <input type="text" id="outlineSearchInput" placeholder="🔍 搜索大纲..." style="width:100%;padding:6px 10px;border:1px solid var(--border-color, #ddd);border-radius:6px;font-size:12px;background:var(--input-bg, #f8f8f8);color:var(--text-color, #333);">
+                    <input type="text" id="outlineSearchInput" placeholder="搜索大纲..." style="width:100%;padding:6px 10px 6px 32px;border:1px solid var(--border-color, #ddd);border-radius:6px;font-size:12px;background:var(--input-bg, #f8f8f8) url('icons/search.svg') no-repeat 8px center;background-size:16px 16px;color:var(--text-color, #333);">
                 </div>
                 <!-- 添加按钮 - 一左一右 -->
                 <div style="display:flex;gap:6px;padding:0 12px 8px 12px;flex-shrink:0;">
-                    <button id="outlineAddChapterBtn" title="新增章节" style="flex:1;background:#28a745;color:white;border:none;border-radius:4px;cursor:pointer;font-size:12px;padding:5px 0;font-weight:500;">➕ 章节</button>
-                    <button id="outlineAddFolderBtn" title="新增文件夹" style="flex:1;background:#9b784e;color:white;border:none;border-radius:4px;cursor:pointer;font-size:12px;padding:5px 0;font-weight:500;">📁 分卷</button>
+                    <button id="outlineAddChapterBtn" title="新增章节" style="flex:1;background:#28a745;color:white;border:none;border-radius:4px;cursor:pointer;font-size:12px;padding:5px 0;font-weight:500;">+ 章节</button>
+                     <button id="outlineAddFolderBtn" title="新增文件夹" style="flex:1;background:#9b784e;color:white;border:none;border-radius:4px;cursor:pointer;font-size:12px;padding:5px 0;font-weight:500;">
+        <img src="icons/folder.svg" width="14" height="14" alt="分卷" style="vertical-align:middle; margin-right:4px;"> 分卷
+    </button>
                 </div>
                 <div id="outlineTree" class="outline-tree-container" style="flex:1;overflow-y:auto;padding:8px 4px;"></div>
                 <div style="padding:8px 12px;border-top:1px solid var(--border-color, rgba(0,0,0,0.08));font-size:11px;color:#888;display:flex;justify-content:space-between;flex-shrink:0;">
@@ -523,9 +531,15 @@ function renderOutlinePage() {
                 <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 20px;border-bottom:1px solid var(--border-color, rgba(0,0,0,0.08));flex-shrink:0;">
                     <input type="text" id="outlineEditorTitle" placeholder="大纲标题" style="font-size:18px;font-weight:600;border:none;background:transparent;outline:none;flex:1;color:var(--text-color, #333);">
                     <div style="display:flex;gap:8px;">
-                        <button id="outlinePinBtn" title="收起为侧边栏" style="padding:6px 12px;background:#6c757d;color:white;border:none;border-radius:6px;cursor:pointer;font-size:13px;">📌 缩起</button>
-                        <button id="outlineSaveBtn" style="padding:6px 16px;background:#9b784e;color:white;border:none;border-radius:6px;cursor:pointer;">💾 保存</button>
-                        <button id="outlineDeleteBtn" style="padding:6px 16px;background:#dc3545;color:white;border:none;border-radius:6px;cursor:pointer;">🗑 删除</button>
+    <button id="outlinePinBtn" title="收起为侧边栏" style="padding:6px 12px;background:#6c757d;color:white;border:none;border-radius:6px;cursor:pointer;font-size:13px;">
+        <img src="icons/label.svg" width="14" height="14" alt="缩起" style="vertical-align:middle; margin-right:4px;"> 缩起
+    </button>
+    <button id="outlineSaveBtn" style="padding:6px 16px;background:#9b784e;color:white;border:none;border-radius:6px;cursor:pointer;">
+        <img src="icons/toolbar.svg" width="14" height="14" alt="保存" style="vertical-align:middle; margin-right:4px;"> 保存
+    </button>
+    <button id="outlineDeleteBtn" style="padding:6px 16px;background:#dc3545;color:white;border:none;border-radius:6px;cursor:pointer;">
+        <img src="icons/trash.svg" width="14" height="14" alt="删除" style="vertical-align:middle; margin-right:4px;"> 删除
+    </button>
                     </div>
                 </div>
                 <textarea id="outlineEditorContent" style="flex:1;padding:20px;border:none;outline:none;resize:none;font-size:14px;line-height:1.8;background:transparent;color:var(--text-color, #333);font-family:inherit;" placeholder="在此撰写大纲内容..."></textarea>
@@ -774,7 +788,7 @@ function renderCompactOutlinePanel() {
                 <div style="width:38%;min-width:120px;max-width:180px;border-right:1px solid var(--border-color, rgba(0,0,0,0.08));display:flex;flex-direction:column;overflow:hidden;">
                     <!-- 搜索框 -->
                     <div style="padding:4px 8px;flex-shrink:0;">
-                        <input type="text" id="compactOutlineSearch" placeholder="🔍 搜索..." style="width:100%;padding:3px 8px;border:1px solid var(--border-color, #ddd);border-radius:4px;font-size:12px;background:var(--input-bg, #f8f8f8);color:var(--text-color, #333);">
+                        <input type="text" id="outlineSearchInput" placeholder="搜索..." style="width:100%;padding:6px 10px 6px 32px;border:1px solid var(--border-color, #ddd);border-radius:6px;font-size:12px;background:var(--input-bg, #f8f8f8) url('icons/search.svg') no-repeat 8px center;background-size:16px 16px;color:var(--text-color, #333);">
                     </div>
                     <!-- 添加按钮 - 一左一右 -->
                     <div style="display:flex;gap:6px;padding:4px 8px 6px 8px;flex-shrink:0;">

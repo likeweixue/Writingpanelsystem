@@ -511,7 +511,7 @@ function renderRelationPage() {
                     </div>
                 </div>
                 <div style="padding:6px 10px;flex-shrink:0;">
-                    <input type="text" id="relationSearchInput" placeholder="🔍 搜索..." style="width:100%;padding:4px 8px;border:1px solid var(--border-color, #ddd);border-radius:4px;font-size:12px;background:var(--input-bg, #f8f8f8);color:var(--text-color, #333);">
+                    <input type="text" id="outlineSearchInput" placeholder="搜索..." style="width:100%;padding:6px 10px 6px 32px;border:1px solid var(--border-color, #ddd);border-radius:6px;font-size:12px;background:var(--input-bg, #f8f8f8) url('icons/search.svg') no-repeat 8px center;background-size:16px 16px;color:var(--text-color, #333);">
                 </div>
                 <div style="padding:0 10px;flex-shrink:0;font-size:11px;color:#888;display:flex;gap:12px;">
                     <span>👤 <span id="relationCharCount">0</span></span>
@@ -669,7 +669,7 @@ function renderCompactRelationPanel() {
             <div style="display:flex;flex:1;overflow:hidden;">
                 <div style="width:35%;min-width:100px;max-width:160px;border-right:1px solid var(--border-color, rgba(0,0,0,0.08));display:flex;flex-direction:column;overflow:hidden;">
                     <div style="padding:4px 6px;flex-shrink:0;">
-                        <input type="text" id="compactRelationSearch" placeholder="🔍 搜索..." style="width:100%;padding:2px 6px;border:1px solid var(--border-color, #ddd);border-radius:3px;font-size:11px;background:var(--input-bg, #f8f8f8);color:var(--text-color, #333);">
+                        <input type="text" id="outlineSearchInput" placeholder="搜索..." style="width:100%;padding:6px 10px 6px 32px;border:1px solid var(--border-color, #ddd);border-radius:6px;font-size:12px;background:var(--input-bg, #f8f8f8) url('icons/search.svg') no-repeat 8px center;background-size:16px 16px;color:var(--text-color, #333);">
                     </div>
                     <div id="compactRelationEntityList" style="flex:1;overflow-y:auto;padding:4px 4px;"></div>
                     <div id="compactRelationList" style="max-height:100px;overflow-y:auto;padding:4px 6px;border-top:1px solid var(--border-color, rgba(0,0,0,0.08));"></div>

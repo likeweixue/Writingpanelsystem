@@ -309,13 +309,15 @@ function renderBookEditor(bookId) {
         '<div class="icon-sidebar" id="iconSidebar">' +
         '<div class="icon-sidebar-content">' +
         '<div class="icon-sidebar-item" data-target="chapters" title="章节">' +
-        '<div class="icon-sidebar-icon">📖</div>' +
-        '</div>' +
-        '<div class="icon-sidebar-item" data-target="library" title="书库">' +
-        '<div class="icon-sidebar-icon">📚</div>' +
-        '</div>' +
-        '<div class="icon-sidebar-item" data-target="history" title="历史">' +
-        '<div class="icon-sidebar-icon">⏱️</div>' +
+'<div class="icon-sidebar-icon"><img src="icons/list.svg" width="24" height="24" alt="章节"></div>' +
+'</div>' +
+// 书库
+'<div class="icon-sidebar-item" data-target="library" title="书库">' +
+'<div class="icon-sidebar-icon"><img src="icons/library.svg" width="24" height="24" alt="书库"></div>' +
+'</div>' +
+// 历史
+'<div class="icon-sidebar-item" data-target="history" title="历史">' +
+'<div class="icon-sidebar-icon"><img src="icons/history.svg" width="24" height="24" alt="历史"></div>' +
         '</div>' +
         '</div>' +
         '</div>' +
@@ -354,10 +356,21 @@ function renderBookEditor(bookId) {
         '<div id="editor" contenteditable="true" class="editor-content"><p>开始写作...</p></div>' +
         '<div class="status-bar">' +
         '<div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">' +
-        '<span>📝 <span id="wordCount">0</span> 字</span>' +
-        '<span>💾 <span id="saveStatus">已保存</span></span>' +
-        '<span>⏰ <span id="currentTime">--:--:--</span></span>' +
-        '<span>📦 <span id="backupStatus">备份待命</span></span>' +
+'<span>' +
+'<img src="icons/font.svg" width="14" height="14" alt="字数" style="vertical-align:middle; margin-right:2px;">' +
+'<span id="wordCount">0</span> 字' +
+'</span>' +
+'<span>' +
+'<img src="icons/toolbar.svg" width="14" height="14" alt="保存" style="vertical-align:middle; margin-right:2px;">' +
+'<span id="saveStatus">已保存</span>' +
+'</span>' +
+'<span>' +
+'<img src="icons/history.svg" width="14" height="14" alt="时间" style="vertical-align:middle; margin-right:2px;">' +
+'<span id="currentTime">--:--:--</span>' +
+'</span>' +
+'<span>' +
+'<img src="icons/check1.svg" width="14" height="14" alt="备份" style="vertical-align:middle; margin-right:2px;">' +
+'<span id="backupStatus">备份待命</span>' +
         '</div>' +
         '</div>' +
         '</div>' +  // 结束 detail-editor
@@ -365,53 +378,54 @@ function renderBookEditor(bookId) {
 // 在 renderBookEditor 函数中，修改右侧边栏
 '<div class="right-sidebar" id="rightSidebar">' +
 '<div class="right-sidebar-header">' +
+
 '</div>' +
 '<div class="right-sidebar-content">' +
-// 大纲 - 带展开按钮
+// 大纲
 '<div class="sidebar-tool-item" data-tool="outline">' +
-'<div class="sidebar-tool-icon">📋</div>' +
+'<div class="sidebar-tool-icon"><img src="icons/outline.svg" width="24" height="24" alt="大纲"></div>' +
 '<div class="sidebar-tool-label">大纲</div>' +
 '<button class="tool-expand-btn" data-tool="outline" title="在新标签页打开" style="background:none; border:none; cursor:pointer; font-size:12px; opacity:0.4; margin-left:auto;">⤢</button>' +
 '</div>' +
 // 时间线
 '<div class="sidebar-tool-item" data-tool="timeline">' +
-'<div class="sidebar-tool-icon">⏱️</div>' +
+'<div class="sidebar-tool-icon"><img src="icons/timeline.svg" width="24" height="24" alt="时间线"></div>' +
 '<div class="sidebar-tool-label">时间线</div>' +
 '<button class="tool-expand-btn" data-tool="timeline" title="在新标签页打开" style="background:none; border:none; cursor:pointer; font-size:12px; opacity:0.4; margin-left:auto;">⤢</button>' +
 '</div>' +
 // 角色
 '<div class="sidebar-tool-item" data-tool="characters">' +
-'<div class="sidebar-tool-icon">👥</div>' +
+'<div class="sidebar-tool-icon"><img src="icons/user.svg" width="24" height="24" alt="角色"></div>' +
 '<div class="sidebar-tool-label">角色</div>' +
 '<button class="tool-expand-btn" data-tool="characters" title="在新标签页打开" style="background:none; border:none; cursor:pointer; font-size:12px; opacity:0.4; margin-left:auto;">⤢</button>' +
 '</div>' +
 // 设定
 '<div class="sidebar-tool-item" data-tool="setting">' +
-'<div class="sidebar-tool-icon">⚙️</div>' +
+'<div class="sidebar-tool-icon"><img src="icons/settings.svg" width="24" height="24" alt="设定"></div>' +
 '<div class="sidebar-tool-label">设定</div>' +
 '<button class="tool-expand-btn" data-tool="setting" title="在新标签页打开" style="background:none; border:none; cursor:pointer; font-size:12px; opacity:0.4; margin-left:auto;">⤢</button>' +
 '</div>' +
 // 关系图
 '<div class="sidebar-tool-item" data-tool="relation">' +
-'<div class="sidebar-tool-icon">🔗</div>' +
+'<div class="sidebar-tool-icon"><img src="icons/relationship.svg" width="24" height="24" alt="关系图"></div>' +
 '<div class="sidebar-tool-label">关系图</div>' +
 '<button class="tool-expand-btn" data-tool="relation" title="在新标签页打开" style="background:none; border:none; cursor:pointer; font-size:12px; opacity:0.4; margin-left:auto;">⤢</button>' +
 '</div>' +
 // 无边记
 '<div class="sidebar-tool-item" data-tool="whiteboard">' +
-'<div class="sidebar-tool-icon">📝</div>' +
+'<div class="sidebar-tool-icon"><img src="icons/mindmap.svg" width="24" height="24" alt="无边记"></div>' +
 '<div class="sidebar-tool-label">无边记</div>' +
 '<button class="tool-expand-btn" data-tool="whiteboard" title="在新标签页打开" style="background:none; border:none; cursor:pointer; font-size:12px; opacity:0.4; margin-left:auto;">⤢</button>' +
 '</div>' +
 // 起名
 '<div class="sidebar-tool-item" data-tool="namegen">' +
-'<div class="sidebar-tool-icon">✏️</div>' +
+'<div class="sidebar-tool-icon"><img src="icons/name.svg" width="24" height="24" alt="起名"></div>' +
 '<div class="sidebar-tool-label">起名</div>' +
 '<button class="tool-expand-btn" data-tool="namegen" title="在新标签页打开" style="background:none; border:none; cursor:pointer; font-size:12px; opacity:0.4; margin-left:auto;">⤢</button>' +
 '</div>' +
 // 笔记
 '<div class="sidebar-tool-item" data-tool="notes">' +
-'<div class="sidebar-tool-icon">📓</div>' +
+'<div class="sidebar-tool-icon"><img src="icons/notes.svg" width="24" height="24" alt="笔记"></div>' +
 '<div class="sidebar-tool-label">笔记</div>' +
 '<button class="tool-expand-btn" data-tool="notes" title="在新标签页打开" style="background:none; border:none; cursor:pointer; font-size:12px; opacity:0.4; margin-left:auto;">⤢</button>' +
         '</div>' +  // 结束 right-sidebar
@@ -991,11 +1005,19 @@ function renderVolumeList() {
         volDiv.innerHTML = '<div class="volume-header" style="display:flex; align-items:center; justify-content:space-between; padding:8px 12px; background:rgba(0,0,0,0.03); border-radius:8px; margin-bottom:4px;">' +
             '<span class="volume-title" style="font-weight:600; cursor:pointer;">' + escapeHtml(vol.name) + ' <span style="font-size:11px; font-weight:normal;">(' + (vol.chapters ? vol.chapters.length : 0) + '章)</span></span>' +
             '<div class="volume-actions" style="display:flex; gap:4px; opacity:0.6; transition:opacity 0.2s;">' +
-            '<button class="volume-move-up" title="上移" style="background:none; border:none; cursor:pointer; font-size:14px; padding:2px 6px; border-radius:4px;">⬆️</button>' +
-            '<button class="volume-move-down" title="下移" style="background:none; border:none; cursor:pointer; font-size:14px; padding:2px 6px; border-radius:4px;">⬇️</button>' +
-            '<button class="volume-rename" title="重命名" style="background:none; border:none; cursor:pointer; font-size:14px; padding:2px 6px; border-radius:4px;">✏️</button>' +
-            '<button class="volume-delete" title="删除分卷" style="background:none; border:none; cursor:pointer; font-size:14px; padding:2px 6px; border-radius:4px; color:#999;">✖</button>' +
-            '</div>' +
+'<button class="volume-move-up" title="上移" style="background:none; border:none; cursor:pointer; font-size:14px; padding:2px 6px; border-radius:4px;">' +
+'<img src="icons/up.svg" width="14" height="14" alt="上移">' +
+'</button>' +
+'<button class="volume-move-down" title="下移" style="background:none; border:none; cursor:pointer; font-size:14px; padding:2px 6px; border-radius:4px;">' +
+'<img src="icons/down.svg" width="14" height="14" alt="下移">' +
+'</button>' +
+'<button class="volume-rename" title="重命名" style="background:none; border:none; cursor:pointer; font-size:14px; padding:2px 6px; border-radius:4px;">' +
+'<img src="icons/rename.svg" width="14" height="14" alt="重命名">' +
+'</button>' +
+'<button class="volume-delete" title="删除分卷" style="background:none; border:none; cursor:pointer; font-size:14px; padding:2px 6px; border-radius:4px; color:#999;">' +
+'<img src="icons/delete.svg" width="14" height="14" alt="删除分卷">' +
+'</button>' +
+'</div>' +
             '</div>' +
             '<div class="chapter-list" data-volume="' + vol.id + '"></div>';
         
@@ -1016,12 +1038,21 @@ function renderVolumeList() {
                 chDiv.innerHTML = 
                     '<input type="checkbox" class="chapter-checkbox" data-chapter-id="' + ch.id + '" data-vol-id="' + vol.id + '" style="margin-right: 8px; cursor: pointer;">' +
                     '<span class="chapter-title" style="flex:1; cursor:pointer;">' + escapeHtml(ch.title) + '</span>' +
-                    '<div class="chapter-actions" style="display:flex; gap:4px;">' +
-                    '<button class="chapter-move-up" title="上移" style="background:none; border:none; cursor:pointer; font-size:14px;">⬆️</button>' +
-                    '<button class="chapter-move-down" title="下移" style="background:none; border:none; cursor:pointer; font-size:14px;">⬇️</button>' +
-                    '<button class="chapter-rename" title="重命名" style="background:none; border:none; cursor:pointer; font-size:14px;">✏️</button>' +
-                    '<button class="delete-chapter" title="删除" style="background:none; border:none; cursor:pointer; font-size:14px; color:#999;">✖</button>' +
-                    '</div>';
+                    // 章节操作按钮
+'<div class="chapter-actions" style="display:flex; gap:4px;">' +
+'<button class="chapter-move-up" title="上移" style="background:none; border:none; cursor:pointer; font-size:14px;">' +
+'<img src="icons/up.svg" width="16" height="16" alt="上移">' +
+'</button>' +
+'<button class="chapter-move-down" title="下移" style="background:none; border:none; cursor:pointer; font-size:14px;">' +
+'<img src="icons/down.svg" width="16" height="16" alt="下移">' +
+'</button>' +
+'<button class="chapter-rename" title="重命名" style="background:none; border:none; cursor:pointer; font-size:14px;">' +
+'<img src="icons/rename.svg" width="16" height="16" alt="重命名">' +
+'</button>' +
+'<button class="delete-chapter" title="删除" style="background:none; border:none; cursor:pointer; font-size:14px; color:#999;">' +
+'<img src="icons/delete.svg" width="16" height="16" alt="删除">' +
+'</button>' +
+'</div>';
                 
                 // 章节标题点击
                 chDiv.querySelector('.chapter-title').onclick = (function(volId, chId) {
@@ -1667,7 +1698,7 @@ function updateBackupStatus(message, isSuccess) {
         backupSpan.style.color = isSuccess ? '#28a745' : '#dc3545';
         setTimeout(function() {
             if (backupSpan) {
-                backupSpan.textContent = '📦 备份待命';
+                backupSpan.textContent = ' 备份待命';
                 backupSpan.style.color = '';
             }
         }, 3000);
@@ -2366,8 +2397,8 @@ function addBatchActionButtons() {
     batchDiv.innerHTML = `
         <button id="selectAllChaptersBtn" style="padding: 2px 8px; font-size: 11px; background: #6c757d; color: white; border: none; border-radius: 3px; cursor: pointer; white-space: nowrap;">☑ 全选</button>
         <button id="deselectAllChaptersBtn" style="padding: 2px 8px; font-size: 11px; background: #6c757d; color: white; border: none; border-radius: 3px; cursor: pointer; white-space: nowrap;">☐ 取消</button>
-        <button id="batchDeleteChaptersBtn" style="padding: 2px 8px; font-size: 11px; background: #dc3545; color: white; border: none; border-radius: 3px; cursor: pointer; white-space: nowrap;">🗑 删除</button>
-        <button id="batchMoveChaptersBtn" style="padding: 2px 8px; font-size: 11px; background: #007aff; color: white; border: none; border-radius: 3px; cursor: pointer; white-space: nowrap;">📂 移动</button>
+        <button id="batchDeleteChaptersBtn" style="padding: 2px 8px; font-size: 11px; background: #dc3545; color: white; border: none; border-radius: 3px; cursor: pointer; white-space: nowrap;"> 删除</button>
+        <button id="batchMoveChaptersBtn" style="padding: 2px 8px; font-size: 11px; background: #007aff; color: white; border: none; border-radius: 3px; cursor: pointer; white-space: nowrap;"> 移动</button>
     `;
     
     container.appendChild(batchDiv);
@@ -2418,11 +2449,11 @@ function updateBatchButtonState() {
     
     if (batchDeleteBtn) {
         if (selected.length > 0) {
-            batchDeleteBtn.innerHTML = '🗑 批量删除 (' + selected.length + ')';
-            batchMoveBtn.innerHTML = '📂 批量移动 (' + selected.length + ')';
+            batchDeleteBtn.innerHTML = '批量删除 (' + selected.length + ')';
+            batchMoveBtn.innerHTML = '批量移动 (' + selected.length + ')';
         } else {
-            batchDeleteBtn.innerHTML = '🗑 批量删除';
-            batchMoveBtn.innerHTML = '📂 批量移动';
+            batchDeleteBtn.innerHTML = '批量删除';
+            batchMoveBtn.innerHTML = '批量移动';
         }
     }
 }
@@ -2696,7 +2727,7 @@ function updateFeeDisplay() {
         // 创建稿费显示
         var feeSpan = document.createElement('span');
         feeSpan.id = 'feeDisplay';
-        feeSpan.style.cssText = 'background: linear-gradient(135deg, #f5e6d3, #ecd9c0); padding: 4px 12px; border-radius: 20px; font-weight: 500; color: #9b784e;';
+        feeSpan.style.cssText = 'background: linear-gradient(135deg, #fefefe00, #ecd9c000); padding: 4px 12px; border-radius: 20px; font-weight: 500; color: #9b784e;';
         
         // 根据进度显示不同表情
         var emoji = '';
@@ -2709,7 +2740,7 @@ function updateFeeDisplay() {
         } else if (progressPercent >= 25) {
             emoji = '✍️';
         } else {
-            emoji = '💪';
+            emoji = '';
         }
         
         feeSpan.innerHTML = `${emoji} 本章稿费: ¥${chapterFee} | 全书稿费: ¥${totalFee} | 目标: ${(targetWords/10000).toFixed(0)}万字 (${progressPercent}%) | 剩余稿费: ¥${remainingFee}`;

@@ -1,6 +1,6 @@
 {
   "name": "WritingPanelSystem",
-  "version": "v 1.5.0",
+  "version": "v 1.6.0",
   "description": "写作帮手 - 免费的写作软件",
   "main": "main.js",
   "scripts": {
