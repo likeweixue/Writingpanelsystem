@@ -434,6 +434,12 @@ function renderBookEditor(bookId) {
 }
 
 function initBookEditor(tabId, bookId) {
+    // 在 initBookEditor 函数开头添加
+console.log('检查工具函数是否已加载:');
+console.log('openOutlineSidebar:', typeof window.openOutlineSidebar);
+console.log('openCharacterSidebar:', typeof window.openCharacterSidebar);
+console.log('openWhiteboardSidebar:', typeof window.openWhiteboardSidebar);
+console.log('openNameGenSidebar:', typeof window.openNameGenSidebar);
     currentBookId = bookId;
     var book = getCurrentBook();
     if (book && book.volumes && book.volumes.length > 0) {
@@ -879,91 +885,188 @@ function addResizeHandle() {
         };
     }
 
-    // 绑定工具点击事件
-    // 在 initBookEditor 函数中
-// 绑定工具点击事件
-// 在 initBookEditor 函数中，找到绑定工具点击事件的代码
-// 绑定工具点击事件
-// 在 initBookEditor 函数中，替换工具绑定部分
+// ========== 在 initBookEditor 函数中，替换工具绑定部分 ==========
 
-// 工具面板映射
-var toolPanelMap = {
-    outline: window.openOutlinePanel,
-    timeline: window.openTimelinePanel,
-    characters: window.openCharacterPanel,
-    setting: window.openSettingPanel,
-    relation: window.openRelationPanel,
-    whiteboard: window.openWhiteboardPanel,
-    namegen: window.openNameGenPanel,
-    notes: window.openNotePanel
+// ---- 工具面板统一管理 ----
+// 工具 -> 侧边栏打开函数映射
+var toolSidebarMap = {
+    outline: window.openOutlineSidebar || function() { console.warn('大纲侧边栏未加载'); },
+    timeline: window.openTimelineSidebar || function() { console.warn('时间线侧边栏未加载'); },
+    characters: window.openCharacterSidebar || function() { console.warn('角色侧边栏未加载'); },
+    setting: window.openSettingSidebar || function() { console.warn('设定侧边栏未加载'); },
+    relation: window.openRelationSidebar || function() { console.warn('关系图侧边栏未加载'); },
+    whiteboard: window.openWhiteboardSidebar || function() { console.warn('白板侧边栏未加载'); },
+    namegen: window.openNameGenSidebar || function() { console.warn('起名侧边栏未加载'); },
+    notes: window.openNoteSidebar || function() { console.warn('笔记侧边栏未加载'); }
 };
 
-// 绑定工具点击事件（点击图标区域打开侧边栏模式）
+// 工具 -> 新窗口打开函数映射
+var toolNewWindowMap = {
+    outline: window.openOutlineInNewWindow || function() { 
+        window.open('html/outline.html', '_blank', 'width=1200,height=800,resizable=yes'); 
+    },
+    timeline: window.openTimelineInNewWindow || function() { 
+        window.open('html/timeline.html', '_blank', 'width=1200,height=800,resizable=yes'); 
+    },
+    characters: window.openCharacterInNewWindow || function() { 
+        window.open('html/characters.html', '_blank', 'width=1200,height=800,resizable=yes'); 
+    },
+    setting: window.openSettingInNewWindow || function() { 
+        window.open('html/setting.html', '_blank', 'width=1200,height=800,resizable=yes'); 
+    },
+    relation: window.openRelationInNewWindow || function() { 
+        window.open('html/relation.html', '_blank', 'width=1200,height=800,resizable=yes'); 
+    },
+    whiteboard: window.openWhiteboardInNewWindow || function() { 
+        window.open('html/whiteboard.html', '_blank', 'width=1200,height=800,resizable=yes'); 
+    },
+    namegen: window.openNameGenInNewWindow || function() { 
+        window.open('html/namegen.html', '_blank', 'width=1200,height=800,resizable=yes'); 
+    },
+    notes: window.openNoteInNewWindow || function() { 
+        window.open('html/notes.html', '_blank', 'width=1200,height=800,resizable=yes'); 
+    }
+};
+
+// ---- 全局关闭浮动面板函数 ----
+window.closeFloatingPanel = function() {
+    var panel = document.getElementById('floatingToolPanel');
+    if (panel) {
+        var tool = panel.getAttribute('data-tool');
+        panel.remove();
+        // 取消高亮
+        var toolItems = document.querySelectorAll('.sidebar-tool-item');
+        toolItems.forEach(function(item) {
+            if (item.getAttribute('data-tool') === tool) {
+                item.style.background = '';
+                item.style.borderRadius = '';
+                item.style.color = '';
+            }
+        });
+    }
+    var rightSidebar = document.getElementById('rightSidebar');
+    if (rightSidebar) {
+        rightSidebar.style.width = '48px';
+        rightSidebar.style.minWidth = '48px';
+        rightSidebar.style.display = 'flex';
+    }
+    localStorage.setItem('rightSidebar_collapsed', 'false');
+};
+
+// ---- 绑定工具点击事件 ----
+// 先移除所有旧的事件监听（避免重复绑定）
 var tools = document.querySelectorAll('.sidebar-tool-item');
 for (var i = 0; i < tools.length; i++) {
-    // 点击整个项（图标+文字区域）打开侧边栏模式
     var item = tools[i];
+    // 移除旧的 onclick 事件
+    item.onclick = null;
+    
+    // 设置新的事件
     item.onclick = function(e) {
         // 如果点击的是展开按钮，不触发
-        if (e.target.classList && e.target.classList.contains('tool-expand-btn')) return;
+        if (e.target.closest && e.target.closest('.tool-expand-btn')) return;
+        
         var tool = this.getAttribute('data-tool');
-        var openFn = toolPanelMap[tool];
-        if (typeof openFn === 'function') {
-            openFn();
-        } else {
-            openSecondaryWindow(tool);
+        var openFn = toolSidebarMap[tool];
+        
+        if (typeof openFn !== 'function') {
+            console.warn('未找到工具侧边栏函数:', tool);
+            return;
         }
+        
+        // 检查是否已经有浮动面板
+        var existingPanel = document.getElementById('floatingToolPanel');
+        if (existingPanel) {
+            var panelTool = existingPanel.getAttribute('data-tool');
+            if (panelTool === tool) {
+                // 同一个工具，关闭面板
+                closeFloatingPanel();
+                return;
+            } else {
+                // 不同工具，先关闭再打开新的
+                closeFloatingPanel();
+            }
+        }
+        
+        // 打开侧边栏
+        try {
+            openFn();
+        } catch(err) {
+            console.error('打开侧边栏失败:', err);
+            // 降级：尝试用新窗口打开
+            var newWindowFn = toolNewWindowMap[tool];
+            if (typeof newWindowFn === 'function') {
+                newWindowFn();
+            }
+        }
+        
+        // 高亮当前工具
+        var toolItems = document.querySelectorAll('.sidebar-tool-item');
+        toolItems.forEach(function(ti) {
+            ti.style.background = '';
+            ti.style.borderRadius = '';
+            ti.style.color = '';
+        });
+        this.style.background = 'rgba(0,122,255,0.15)';
+        this.style.borderRadius = '8px';
+        this.style.color = '#007aff';
     };
     
-    // 绑定展开按钮（点击后在新标签页打开全屏模式）
+    // 绑定展开按钮（点击后在新窗口打开）
     var expandBtn = item.querySelector('.tool-expand-btn');
     if (expandBtn) {
+        // 移除旧的 onclick
+        expandBtn.onclick = null;
         expandBtn.onclick = function(e) {
             e.stopPropagation();
             var tool = this.getAttribute('data-tool');
-            // 在新窗口打开全屏版本
-            openToolFullscreen(tool);
+            // 关闭已有的浮动面板
+            closeFloatingPanel();
+            // 在新窗口打开
+            var openFn = toolNewWindowMap[tool];
+            if (typeof openFn === 'function') {
+                try {
+                    openFn();
+                } catch(err) {
+                    console.error('打开新窗口失败:', err);
+                    // 降级方案
+                    var fileMap = {
+                        outline: 'html/outline.html',
+                        timeline: 'html/timeline.html',
+                        characters: 'html/characters.html',
+                        setting: 'html/setting.html',
+                        relation: 'html/relation.html',
+                        whiteboard: 'html/whiteboard.html',
+                        namegen: 'html/namegen.html',
+                        notes: 'html/notes.html'
+                    };
+                    var file = fileMap[tool];
+                    if (file) {
+                        window.open(file, '_blank', 'width=1200,height=800,resizable=yes');
+                    }
+                }
+            } else {
+                // 降级方案
+                var fileMap = {
+                    outline: 'html/outline.html',
+                    timeline: 'html/timeline.html',
+                    characters: 'html/characters.html',
+                    setting: 'html/setting.html',
+                    relation: 'html/relation.html',
+                    whiteboard: 'html/whiteboard.html',
+                    namegen: 'html/namegen.html',
+                    notes: 'html/notes.html'
+                };
+                var file = fileMap[tool];
+                if (file) {
+                    window.open(file, '_blank', 'width=1200,height=800,resizable=yes');
+                }
+            }
         };
     }
 }
 
-// 全屏打开工具
-function openToolFullscreen(tool) {
-    // 关闭当前标签页中的工具面板（如果有）
-    var tabMap = {
-        outline: 'outline_panel',
-        timeline: 'timeline_panel',
-        characters: 'character_panel',
-        setting: 'setting_panel',
-        relation: 'relation_panel',
-        whiteboard: 'whiteboard_panel',
-        namegen: 'namegen_panel',
-        notes: 'note_panel'
-    };
-    var tabId = tabMap[tool];
-    if (tabId) {
-        var existingPage = document.querySelector('.page[data-page="' + tabId + '"]');
-        if (existingPage) {
-            closeTab(tabId);
-        }
-    }
-    
-    // 在新窗口中打开
-    var fileMap = {
-        outline: 'html/outline.html',
-        timeline: 'html/timeline.html',
-        characters: 'html/characters.html',
-        setting: 'html/setting.html',
-        relation: 'html/relation.html',
-        whiteboard: 'html/whiteboard.html',
-        namegen: 'html/namegen.html',
-        notes: 'html/notes.html'
-    };
-    var file = fileMap[tool];
-    if (file) {
-        window.open(file, '_blank', 'width=1200,height=800,resizable=yes');
-    }
-}
+console.log('✅ 工具面板统一绑定完成');
     
     // 启动状态栏定时器
     startStatusBarTimers();

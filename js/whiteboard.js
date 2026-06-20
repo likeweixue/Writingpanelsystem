@@ -479,4 +479,284 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+// ========== 白板侧边栏模式 ==========
+
+function openWhiteboardSidebar() {
+    if (typeof openToolSidebar === 'function') {
+        openToolSidebar('whiteboard');
+    } else {
+        window.open('html/whiteboard.html', '_blank', 'width=1200,height=800,resizable=yes');
+    }
+}
+
+function openWhiteboardInNewWindow() {
+    // 关闭浮动面板
+    if (typeof closeFloatingPanel === 'function') {
+        closeFloatingPanel();
+    }
+    // 在新窗口打开
+    window.open('html/whiteboard.html', '_blank', 'width=1200,height=800,resizable=yes');
+}
+// ========== 白板紧凑模式（侧边栏） ==========
+
+function renderCompactWhiteboardPanel() {
+    return `
+        <div style="display:flex;flex-direction:column;height:100%;width:100%;">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 14px;border-bottom:1px solid var(--border-color, rgba(0,0,0,0.08));flex-shrink:0;">
+                <span style="font-weight:600;font-size:14px;">📝 无边记</span>
+                <div style="display:flex;gap:4px;">
+                    <button id="compactWbExpandBtn" title="新窗口打开" style="background:none;border:none;cursor:pointer;font-size:14px;padding:2px 8px;border-radius:4px;">⤢</button>
+                    <button id="compactWbCloseBtn" title="关闭面板" style="background:none;border:none;cursor:pointer;font-size:14px;padding:2px 8px;border-radius:4px;">✕</button>
+                </div>
+            </div>
+            <div style="display:flex;gap:6px;padding:8px 12px;flex-shrink:0;flex-wrap:wrap;">
+                <button id="compactWbAddNote" style="padding:4px 10px;background:#f0f0f0;border:none;border-radius:6px;cursor:pointer;font-size:12px;">📝 笔记</button>
+                <button id="compactWbAddTodo" style="padding:4px 10px;background:#f0f0f0;border:none;border-radius:6px;cursor:pointer;font-size:12px;">✅ 待办</button>
+                <button id="compactWbAddQuote" style="padding:4px 10px;background:#f0f0f0;border:none;border-radius:6px;cursor:pointer;font-size:12px;">💡 灵感</button>
+                <button id="compactWbClearAll" style="padding:4px 10px;background:#dc3545;color:white;border:none;border-radius:6px;cursor:pointer;font-size:12px;">清空</button>
+            </div>
+            <div id="compactWhiteboardCanvas" style="flex:1;position:relative;overflow:hidden;background:radial-gradient(circle at 1px 1px, rgba(0,0,0,0.05) 1px, transparent 1px);background-size:20px 20px;margin:0 8px 8px 8px;border-radius:12px;border:1px solid var(--border-color, rgba(0,0,0,0.06));">
+                <svg id="compactWbSvg" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1;"></svg>
+                <div id="compactWbCards" style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:2;"></div>
+                <div style="position:absolute;bottom:8px;right:12px;font-size:10px;color:#888;background:rgba(255,255,255,0.8);padding:2px 10px;border-radius:10px;z-index:3;">
+                    卡片: <span id="compactWbCardCount">0</span>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function renderCompactWhiteboardCards() {
+    var container = document.getElementById('compactWbCards');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    whiteboardData.cards.forEach(function(card) {
+        var cardDiv = document.createElement('div');
+        cardDiv.className = 'compact-wb-card';
+        cardDiv.style.cssText = 'position:absolute;left:' + card.x + 'px;top:' + card.y + 'px;width:' + (card.width || 180) + 'px;min-height:' + (card.height || 80) + 'px;background:rgba(255,255,245,0.95);border-radius:12px;padding:10px;box-shadow:0 2px 8px rgba(0,0,0,0.08);cursor:default;z-index:2;';
+        cardDiv.setAttribute('data-id', card.id);
+        
+        var icons = { note: '📝', todo: '✅', quote: '💡' };
+        cardDiv.innerHTML = `
+            <div style="display:flex;justify-content:space-between;align-items:center;font-size:10px;color:#888;margin-bottom:4px;">
+                <span>${icons[card.type] || '📝'}</span>
+                <span class="compact-wb-delete" data-id="${card.id}" style="cursor:pointer;opacity:0.5;">✕</span>
+            </div>
+            <div class="compact-wb-content" contenteditable="true" data-id="${card.id}" style="font-size:12px;line-height:1.5;outline:none;white-space:pre-wrap;word-break:break-word;cursor:text;min-height:40px;">${card.text}</div>
+        `;
+        container.appendChild(cardDiv);
+    });
+    
+    // 卡片拖拽
+    document.querySelectorAll('.compact-wb-card').forEach(function(cardEl) {
+        var isDragging = false;
+        var startX, startY, origX, origY;
+        
+        cardEl.addEventListener('mousedown', function(e) {
+            if (e.target.closest('.compact-wb-delete')) return;
+            if (e.target.closest('.compact-wb-content')) return;
+            isDragging = true;
+            var rect = cardEl.getBoundingClientRect();
+            var containerRect = document.getElementById('compactWbCards').getBoundingClientRect();
+            startX = e.clientX;
+            startY = e.clientY;
+            origX = parseFloat(cardEl.style.left);
+            origY = parseFloat(cardEl.style.top);
+            cardEl.style.cursor = 'grabbing';
+            cardEl.style.zIndex = '10';
+            e.preventDefault();
+        });
+        
+        document.addEventListener('mousemove', function(e) {
+            if (!isDragging) return;
+            var dx = (e.clientX - startX);
+            var dy = (e.clientY - startY);
+            var newX = origX + dx;
+            var newY = origY + dy;
+            cardEl.style.left = Math.max(0, newX) + 'px';
+            cardEl.style.top = Math.max(0, newY) + 'px';
+            var card = getWhiteboardCard(cardEl.getAttribute('data-id'));
+            if (card) {
+                card.x = Math.max(0, newX);
+                card.y = Math.max(0, newY);
+            }
+            renderCompactWhiteboardLines();
+        });
+        
+        document.addEventListener('mouseup', function() {
+            if (isDragging) {
+                isDragging = false;
+                cardEl.style.cursor = 'default';
+                cardEl.style.zIndex = '2';
+                saveWhiteboardData();
+                renderCompactWhiteboardLines();
+            }
+        });
+    });
+    
+    // 内容编辑
+    document.querySelectorAll('.compact-wb-content').forEach(function(content) {
+        content.addEventListener('blur', function() {
+            var card = getWhiteboardCard(this.getAttribute('data-id'));
+            if (card) {
+                card.text = this.innerText;
+                saveWhiteboardData();
+            }
+        });
+    });
+    
+    // 删除
+    document.querySelectorAll('.compact-wb-delete').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            var id = this.getAttribute('data-id');
+            whiteboardData.cards = whiteboardData.cards.filter(function(c) { return c.id !== id; });
+            saveWhiteboardData();
+            renderCompactWhiteboardCards();
+            renderCompactWhiteboardLines();
+            updateCompactWbStats();
+        });
+    });
+    
+    updateCompactWbStats();
+}
+
+function renderCompactWhiteboardLines() {
+    var svg = document.getElementById('compactWbSvg');
+    if (!svg) return;
+    
+    svg.innerHTML = '';
+    whiteboardData.connections.forEach(function(conn) {
+        var from = getWhiteboardCard(conn.fromId);
+        var to = getWhiteboardCard(conn.toId);
+        if (!from || !to) return;
+        
+        var fromX = from.x + (from.width || 180) / 2;
+        var fromY = from.y + (from.height || 80) / 2;
+        var toX = to.x + (to.width || 180) / 2;
+        var toY = to.y + (to.height || 80) / 2;
+        
+        var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', fromX);
+        line.setAttribute('y1', fromY);
+        line.setAttribute('x2', toX);
+        line.setAttribute('y2', toY);
+        line.setAttribute('stroke', '#8b8a90');
+        line.setAttribute('stroke-width', '1.5');
+        line.setAttribute('stroke-dasharray', '4 3');
+        svg.appendChild(line);
+    });
+}
+
+function updateCompactWbStats() {
+    var el = document.getElementById('compactWbCardCount');
+    if (el) el.textContent = whiteboardData.cards.length;
+}
+
+function bindCompactWhiteboardEvents() {
+    console.log('绑定白板事件...');
+    
+    // 添加卡片 - 检查元素是否存在
+    var addNoteBtn = document.getElementById('compactWbAddNote');
+    if (addNoteBtn) {
+        addNoteBtn.onclick = function() { 
+            addCompactWhiteboardCard('note'); 
+        };
+    } else {
+        console.warn('compactWbAddNote 按钮不存在');
+    }
+    
+    var addTodoBtn = document.getElementById('compactWbAddTodo');
+    if (addTodoBtn) {
+        addTodoBtn.onclick = function() { 
+            addCompactWhiteboardCard('todo'); 
+        };
+    } else {
+        console.warn('compactWbAddTodo 按钮不存在');
+    }
+    
+    var addQuoteBtn = document.getElementById('compactWbAddQuote');
+    if (addQuoteBtn) {
+        addQuoteBtn.onclick = function() { 
+            addCompactWhiteboardCard('quote'); 
+        };
+    } else {
+        console.warn('compactWbAddQuote 按钮不存在');
+    }
+    
+    // 清空
+    var clearBtn = document.getElementById('compactWbClearAll');
+    if (clearBtn) {
+        clearBtn.onclick = function() {
+            if (confirm('确定清空所有卡片吗？')) {
+                whiteboardData.cards = [];
+                whiteboardData.connections = [];
+                saveWhiteboardData();
+                renderCompactWhiteboardCards();
+                renderCompactWhiteboardLines();
+                updateCompactWbStats();
+            }
+        };
+    } else {
+        console.warn('compactWbClearAll 按钮不存在');
+    }
+    
+    // 展开
+    var expandBtn = document.getElementById('compactWbExpandBtn');
+    if (expandBtn) {
+        expandBtn.onclick = function() {
+            if (typeof closeFloatingPanel === 'function') {
+                closeFloatingPanel();
+            }
+            window.open('html/whiteboard.html', '_blank', 'width=1200,height=800,resizable=yes');
+        };
+    } else {
+        console.warn('compactWbExpandBtn 按钮不存在');
+    }
+    
+    // 关闭
+    var closeBtn = document.getElementById('compactWbCloseBtn');
+    if (closeBtn) {
+        closeBtn.onclick = function() {
+            if (typeof closeFloatingPanel === 'function') {
+                closeFloatingPanel();
+            }
+        };
+    } else {
+        console.warn('compactWbCloseBtn 按钮不存在');
+    }
+    
+    console.log('白板事件绑定完成');
+}
+
+function addCompactWhiteboardCard(type) {
+    var textMap = {
+        note: '双击编辑笔记...',
+        todo: '□ 任务一\n□ 任务二',
+        quote: '「写下灵感语录」'
+    };
+    var newCard = {
+        id: genWhiteboardId('card'),
+        type: type,
+        text: textMap[type] || '新卡片',
+        x: 20 + Math.random() * 100,
+        y: 20 + Math.random() * 80,
+        width: 180,
+        height: 80
+    };
+    whiteboardData.cards.push(newCard);
+    saveWhiteboardData();
+    renderCompactWhiteboardCards();
+    renderCompactWhiteboardLines();
+    updateCompactWbStats();
+}
+
+// 导出
+window.openWhiteboardSidebar = openWhiteboardSidebar;
+window.openWhiteboardInNewWindow = openWhiteboardInNewWindow;
+
+console.log('白板侧边栏函数已注册');
 console.log('无边记工具已加载');
+console.log('✅ whiteboard.js 已加载，renderCompactWhiteboardPanel 存在:', typeof renderCompactWhiteboardPanel === 'function');
+console.log('✅ getWhiteboardData 存在:', typeof getWhiteboardData === 'function');

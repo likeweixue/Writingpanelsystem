@@ -11,6 +11,7 @@ var outlineData = {
 
 function getOutlineData() {
     var bookId = currentBookId || 'global';
+    console.log('getOutlineData 使用 bookId:', bookId);
     var key = 'openwrite_outline_' + bookId;
     var saved = localStorage.getItem(key);
     if (saved) {
@@ -19,10 +20,15 @@ function getOutlineData() {
             outlineData.nodes = data.nodes || [];
             outlineData.selectedId = data.selectedId || null;
             outlineData.nextId = data.nextId || 1;
+            console.log('📂 从 localStorage 加载了', outlineData.nodes.length, '个大纲节点');
             return;
-        } catch(e) {}
+        } catch(e) {
+            console.error('解析大纲数据失败:', e);
+        }
     }
+    console.log('📂 未找到大纲数据，使用默认数据');
     setDefaultOutlineData();
+    console.log('📂 默认数据已设置，节点数:', outlineData.nodes.length);
 }
 
 function setDefaultOutlineData() {
@@ -710,10 +716,11 @@ function updateNodeCount() {
     if (el) el.textContent = count;
 }
 
-// ========== 浮动面板（紧凑模式） ==========
+// ========== 通用侧边栏打开函数 ==========
 
 function openToolSidebar(tool) {
     console.log('openToolSidebar 被调用，工具:', tool);
+    
     var sidebar = document.querySelector('.sidebar-menu');
     if (sidebar) { sidebar.style.display = 'none'; }
     
@@ -736,29 +743,134 @@ function openToolSidebar(tool) {
     if (detailMain) {
         var panel = document.createElement('div');
         panel.id = 'floatingToolPanel';
+        panel.setAttribute('data-tool', tool);
         panel.style.cssText = 'width:420px;min-width:350px;max-width:550px;height:100%;background:var(--panel-bg, rgba(255,255,255,0.98));backdrop-filter:blur(12px);border-left:1px solid var(--border-color, rgba(0,0,0,0.08));border-right:1px solid var(--border-color, rgba(0,0,0,0.08));display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;z-index:10;transition:width 0.2s ease;box-shadow:-2px 0 12px rgba(0,0,0,0.08);';
-        panel.innerHTML = renderCompactOutlinePanel();
+        
+        // 1. 先创建 panel
+    var panel = document.createElement('div');
+    panel.id = 'floatingToolPanel';
+    panel.setAttribute('data-tool', tool);
+    panel.style.cssText = 'width:420px;min-width:350px;max-width:550px;height:100%;background:var(--panel-bg, rgba(255,255,255,0.98));backdrop-filter:blur(12px);border-left:1px solid var(--border-color, rgba(0,0,0,0.08));border-right:1px solid var(--border-color, rgba(0,0,0,0.08));display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;z-index:10;transition:width 0.2s ease;box-shadow:-2px 0 12px rgba(0,0,0,0.08);';
+    
+    // 2. 先把 panel 添加到 DOM
+    var editor = document.querySelector('.detail-editor');
+    if (editor && editor.nextSibling) {
+        detailMain.insertBefore(panel, editor.nextSibling);
+    } else {
+        detailMain.appendChild(panel);
+    }
+    
+    // 3. 再设置 innerHTML 和渲染内容
+    switch(tool) {
+        case 'outline':
+            console.log('📋 大纲面板开始加载...');
+            console.log('📋 当前 bookId:', currentBookId);
+            
+            panel.innerHTML = renderCompactOutlinePanel();
+            console.log('📋 大纲面板 HTML 已渲染');
+            
+            getOutlineData();
+            console.log('📋 大纲数据已加载，节点数:', outlineData.nodes.length);
+            
+            renderCompactOutlineTree();
+            console.log('📋 大纲树已渲染');
+            
+            updateCompactEditor();
+            console.log('📋 大纲编辑器已更新');
+            
+            bindCompactOutlineEvents();
+            console.log('📋 大纲事件已绑定');
+            break;
+    break;
+            case 'timeline':
+                panel.innerHTML = renderCompactTimelinePanel();
+                getTimelineData();
+                renderCompactTimelineTree();
+                updateCompactTimelineEditor();
+                bindCompactTimelineEvents();
+                break;
+            case 'characters':
+                panel.innerHTML = renderCompactCharacterPanel();
+                getCharacterData();
+                renderCompactCharacterTree();
+                updateCompactCharacterEditor();
+                bindCompactCharacterEvents();
+                break;
+            case 'setting':
+                panel.innerHTML = renderCompactSettingPanel();
+                getSettingData();
+                renderCompactSettingTree();
+                updateCompactSettingEditor();
+                bindCompactSettingEvents();
+                break;
+            case 'relation':
+                panel.innerHTML = renderCompactRelationPanel();
+                getRelationData();
+                renderCompactRelationEntities();
+                renderCompactRelationList();
+                setTimeout(function() {
+                    initCompactRelationCanvas();
+                }, 200);
+                bindCompactRelationEvents();
+                break;
+            // 在 outline.js 中修改 openToolSidebar 的 whiteboard 和 namegen 分支
+
+case 'whiteboard':
+    // 直接调用，不检查函数是否存在
+    try {
+        panel.innerHTML = renderCompactWhiteboardPanel();
+        getWhiteboardData();
+        renderCompactWhiteboardCards();
+        renderCompactWhiteboardLines();
+        bindCompactWhiteboardEvents();
+    } catch(e) {
+        console.error('白板渲染失败:', e);
+        panel.innerHTML = '<div style="padding:20px;text-align:center;color:#888;">白板加载失败，请刷新后重试</div>';
+    }
+    break;
+case 'namegen':
+    try {
+        panel.innerHTML = renderCompactNameGenPanel();
+        loadNameGenSettings();
+        renderCompactNameGenFavorites();
+        bindCompactNameGenEvents();
+    } catch(e) {
+        console.error('起名生成器渲染失败:', e);
+        panel.innerHTML = '<div style="padding:20px;text-align:center;color:#888;">起名生成器加载失败，请刷新后重试</div>';
+    }
+    break;
+            case 'notes':
+                panel.innerHTML = renderCompactNotePanel();
+                getNoteData();
+                renderCompactNoteTree();
+                updateCompactNoteEditor();
+                bindCompactNoteEvents();
+                break;
+            default:
+                console.warn('未知工具类型:', tool);
+                panel.innerHTML = '<div style="padding:20px;text-align:center;color:#888;">工具加载中...</div>';
+        }
+        
         var editor = document.querySelector('.detail-editor');
         if (editor && editor.nextSibling) {
             detailMain.insertBefore(panel, editor.nextSibling);
         } else {
             detailMain.appendChild(panel);
         }
-        getOutlineData();
-        renderCompactOutlineTree();
-        updateCompactEditor();
-        bindCompactOutlineEvents();
     }
     
+    // 高亮当前工具
     setTimeout(function() {
         var toolItems = document.querySelectorAll('.sidebar-tool-item');
         toolItems.forEach(function(item) {
             if (item.getAttribute('data-tool') === tool) {
                 item.style.background = 'rgba(0,122,255,0.15)';
                 item.style.borderRadius = '8px';
-                setTimeout(function() {
-                    item.style.background = '';
-                }, 1500);
+                item.style.color = '#007aff';
+            } else {
+                item.style.background = '';
+                item.style.borderRadius = '';
+                item.style.color = '';
             }
         });
     }, 200);
@@ -822,18 +934,34 @@ function renderCompactOutlinePanel() {
 
 function renderCompactOutlineTree() {
     var container = document.getElementById('compactOutlineTree');
-    if (!container) return;
+    if (!container) {
+        console.warn('⚠️ compactOutlineTree 元素不存在');
+        return;
+    }
+    
+    console.log('🔄 开始渲染大纲树，节点数:', outlineData.nodes.length);
     container.innerHTML = '';
-    var roots = outlineData.nodes.filter(function(n) { return n.parentId === null; }).sort(function(a, b) { return (a.order || 0) - (b.order || 0); });
+    
+    var roots = outlineData.nodes.filter(function(n) { 
+        return n.parentId === null; 
+    }).sort(function(a, b) { 
+        return (a.order || 0) - (b.order || 0); 
+    });
+    
     if (roots.length === 0) {
+        console.log('⚠️ 没有根节点');
         container.innerHTML = '<div style="padding:12px;text-align:center;color:#888;font-size:12px;">暂无大纲节点</div>';
         return;
     }
+    
+    console.log('🌳 找到', roots.length, '个根节点');
     roots.forEach(function(root) {
         container.appendChild(createCompactOutlineNode(root, 0));
     });
+    
     var countEl = document.getElementById('compactNodeCount');
     if (countEl) countEl.textContent = outlineData.nodes.length;
+    console.log('✅ 大纲树渲染完成，共', outlineData.nodes.length, '个节点');
 }
 
 function createCompactOutlineNode(node, depth) {
@@ -1598,3 +1726,17 @@ console.log('大纲工具已加载');
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(bindOutlineToolEntry, 500);
 });
+// ========== 导出大纲侧边栏函数 ==========
+// 在 outline.js 末尾添加
+
+function openOutlineSidebar() {
+    if (typeof openToolSidebar === 'function') {
+        openToolSidebar('outline');
+    } else {
+        window.open('html/outline.html', '_blank', 'width=1200,height=800,resizable=yes');
+    }
+}
+
+// 确保导出到 window
+window.openOutlineSidebar = openOutlineSidebar;
+window.openOutlineInNewWindow = openOutlineInNewWindow;

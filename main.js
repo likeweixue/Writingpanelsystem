@@ -56,7 +56,7 @@ function createWindow() {
                 additionalArguments: ['--allow-popups']
             },
             icon: path.join(__dirname, 'icon.icns'),
-            title: '写作帮手 OpenWrite',
+            title: '写作面板系统 WritingPanelSystem',
             frame: true
         });
 
@@ -93,7 +93,7 @@ function createWindow() {
 }
 
 // 获取文档目录中的备份文件夹
-const documentsPath = path.join(os.homedir(), 'Documents', '写作帮手备份');
+const documentsPath = path.join(os.homedir(), 'Documents', '写作面板系统备份');
 
 // 确保备份目录存在
 function ensureBackupDir() {
@@ -209,7 +209,7 @@ function createWindow() {
             allowRunningInsecureContent: true
         },
         icon: path.join(__dirname, 'icon.icns'),
-        title: '写作帮手 OpenWrite',
+        title: '写作面板系统 WritingPanelSystem',
         frame: true
     });
 
@@ -264,9 +264,9 @@ function createWindow() {
                     click: () => {
                         dialog.showMessageBox(mainWindow, {
                             type: 'info',
-                            title: '关于 写作帮手 Writingpanelsystem',
-                            message: '写作帮手 Writingpanelsystem 版本 1.6.0\n\n免费，开源，自由的写作软件n\n开发者@麻昌生',
-                            detail: 'GitHub: https://github.com/likeweixue/Writingpanelsystem\n\n备份位置：~/Documents/写作帮手备份/'
+                            title: '关于 写作面板系统 Writingpanelsystem',
+                            message: '写作面板系统 Writingpanelsystem 版本 1.7.0\n\n免费，开源，自由的写作软件n\n开发者@麻昌生',
+                            detail: 'GitHub: https://github.com/likeweixue/Writingpanelsystem\n\n备份位置：~/Documents/写作面板系统备份/'
                         });
                     }
                 },

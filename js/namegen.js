@@ -450,4 +450,207 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+// ========== 起名生成器侧边栏模式 ==========
+
+function openNameGenSidebar() {
+    if (typeof openToolSidebar === 'function') {
+        openToolSidebar('namegen');
+    } else {
+        window.open('html/namegen.html', '_blank', 'width=1200,height=800,resizable=yes');
+    }
+}
+
+function openNameGenInNewWindow() {
+    // 关闭浮动面板
+    if (typeof closeFloatingPanel === 'function') {
+        closeFloatingPanel();
+    }
+    // 在新窗口打开
+    window.open('html/namegen.html', '_blank', 'width=1200,height=800,resizable=yes');
+}
+// ========== 起名生成器紧凑模式（侧边栏） ==========
+
+function renderCompactNameGenPanel() {
+    return `
+        <div style="display:flex;flex-direction:column;height:100%;width:100%;">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 14px;border-bottom:1px solid var(--border-color, rgba(0,0,0,0.08));flex-shrink:0;">
+                <span style="font-weight:600;font-size:14px;">✏️ 起名</span>
+                <div style="display:flex;gap:4px;">
+                    <button id="compactNameGenExpandBtn" title="新窗口打开" style="background:none;border:none;cursor:pointer;font-size:14px;padding:2px 8px;border-radius:4px;">⤢</button>
+                    <button id="compactNameGenCloseBtn" title="关闭面板" style="background:none;border:none;cursor:pointer;font-size:14px;padding:2px 8px;border-radius:4px;">✕</button>
+                </div>
+            </div>
+            <div style="padding:12px;flex-shrink:0;">
+                <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
+                    ${['1','2','3','不限'].map(function(len) {
+                        var active = (len === nameGenData.wordLength) ? 'background:#9b784e;color:white;' : 'background:#f0f0f0;';
+                        return '<button data-cLen="' + len + '" style="padding:2px 10px;border:none;border-radius:14px;cursor:pointer;font-size:11px;' + active + '">' + len + '字</button>';
+                    }).join('')}
+                </div>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
+                    ${['none','single','double'].map(function(mode) {
+                        var active = (mode === nameGenData.surnameMode) ? 'background:#9b784e;color:white;' : 'background:#f0f0f0;';
+                        var label = mode === 'none' ? '无姓' : (mode === 'single' ? '单姓' : '复姓');
+                        return '<button data-cMode="' + mode + '" style="padding:2px 10px;border:none;border-radius:14px;cursor:pointer;font-size:11px;' + active + '">' + label + '</button>';
+                    }).join('')}
+                </div>
+                <div style="display:flex;gap:8px;">
+                    <input type="text" id="compactNameGenSurname" placeholder="自定义姓氏" value="${nameGenData.customSurname || ''}" style="flex:1;padding:4px 8px;border:1px solid #ddd;border-radius:6px;font-size:12px;background:transparent;color:var(--text-color, #333);">
+                    <button id="compactNameGenGenerateBtn" style="padding:4px 14px;background:#9b784e;color:white;border:none;border-radius:6px;cursor:pointer;font-size:12px;">🎲</button>
+                </div>
+                <div style="text-align:center;padding:8px 0;font-size:22px;font-weight:700;color:var(--text-color, #333);letter-spacing:2px;" id="compactNameGenResult">妙笔生花</div>
+            </div>
+            <div style="flex:1;overflow-y:auto;padding:0 12px 12px 12px;">
+                <div style="font-size:11px;color:#888;margin-bottom:6px;">⭐ 收藏</div>
+                <div id="compactNameGenFavorites" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+            </div>
+        </div>
+    `;
+}
+
+function renderCompactNameGenFavorites() {
+    var container = document.getElementById('compactNameGenFavorites');
+    if (!container) return;
+    
+    if (nameGenData.favoriteChars.length === 0) {
+        container.innerHTML = '<div style="color:#ccc;font-size:11px;">暂无收藏</div>';
+        return;
+    }
+    
+    container.innerHTML = '';
+    nameGenData.favoriteChars.forEach(function(name) {
+        var span = document.createElement('span');
+        span.style.cssText = 'padding:2px 10px;background:rgba(155,120,78,0.15);border-radius:14px;font-size:12px;cursor:pointer;transition:background 0.2s;';
+        span.textContent = name;
+        span.onclick = function() {
+            navigator.clipboard.writeText(name).then(function() {
+                alert('已复制：' + name);
+            }).catch(function() {
+                var textarea = document.createElement('textarea');
+                textarea.value = name;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                alert('已复制：' + name);
+            });
+        };
+        container.appendChild(span);
+    });
+}
+
+function bindCompactNameGenEvents() {
+    console.log('绑定起名事件...');
+    
+    // 长度选择
+    var lenBtns = document.querySelectorAll('[data-cLen]');
+    if (lenBtns.length > 0) {
+        lenBtns.forEach(function(btn) {
+            btn.onclick = function() {
+                document.querySelectorAll('[data-cLen]').forEach(function(b) {
+                    b.style.background = '#f0f0f0';
+                    b.style.color = '';
+                });
+                this.style.background = '#9b784e';
+                this.style.color = 'white';
+                nameGenData.wordLength = this.getAttribute('data-cLen');
+                saveNameGenSettings();
+            };
+        });
+    } else {
+        console.warn('data-cLen 按钮不存在');
+    }
+    
+    // 姓氏模式
+    var modeBtns = document.querySelectorAll('[data-cMode]');
+    if (modeBtns.length > 0) {
+        modeBtns.forEach(function(btn) {
+            btn.onclick = function() {
+                document.querySelectorAll('[data-cMode]').forEach(function(b) {
+                    b.style.background = '#f0f0f0';
+                    b.style.color = '';
+                });
+                this.style.background = '#9b784e';
+                this.style.color = 'white';
+                nameGenData.surnameMode = this.getAttribute('data-cMode');
+                saveNameGenSettings();
+            };
+        });
+    } else {
+        console.warn('data-cMode 按钮不存在');
+    }
+    
+    // 自定义姓氏
+    var surnameInput = document.getElementById('compactNameGenSurname');
+    if (surnameInput) {
+        surnameInput.oninput = function() {
+            nameGenData.customSurname = this.value;
+            saveNameGenSettings();
+        };
+    } else {
+        console.warn('compactNameGenSurname 输入框不存在');
+    }
+    
+    // 生成
+    var generateBtn = document.getElementById('compactNameGenGenerateBtn');
+    if (generateBtn) {
+        generateBtn.onclick = function() {
+            var name = generateName();
+            var resultEl = document.getElementById('compactNameGenResult');
+            if (resultEl) {
+                resultEl.textContent = name;
+                // 点击名字收藏
+                resultEl.onclick = function() {
+                    var name = this.textContent;
+                    if (name && name !== '妙笔生花' && nameGenData.favoriteChars.indexOf(name) === -1) {
+                        nameGenData.favoriteChars.push(name);
+                        saveNameGenSettings();
+                        renderCompactNameGenFavorites();
+                        alert('已收藏：' + name);
+                    } else if (nameGenData.favoriteChars.indexOf(name) !== -1) {
+                        alert('已收藏过这个名字');
+                    } else {
+                        alert('请先生成一个名字');
+                    }
+                };
+            }
+        };
+    } else {
+        console.warn('compactNameGenGenerateBtn 按钮不存在');
+    }
+    
+    // 展开
+    var expandBtn = document.getElementById('compactNameGenExpandBtn');
+    if (expandBtn) {
+        expandBtn.onclick = function() {
+            if (typeof closeFloatingPanel === 'function') {
+                closeFloatingPanel();
+            }
+            window.open('html/namegen.html', '_blank', 'width=1200,height=800,resizable=yes');
+        };
+    } else {
+        console.warn('compactNameGenExpandBtn 按钮不存在');
+    }
+    
+    // 关闭
+    var closeBtn = document.getElementById('compactNameGenCloseBtn');
+    if (closeBtn) {
+        closeBtn.onclick = function() {
+            if (typeof closeFloatingPanel === 'function') {
+                closeFloatingPanel();
+            }
+        };
+    } else {
+        console.warn('compactNameGenCloseBtn 按钮不存在');
+    }
+    
+    console.log('起名事件绑定完成');
+}
+// 导出
+window.openNameGenSidebar = openNameGenSidebar;
+window.openNameGenInNewWindow = openNameGenInNewWindow;
+
+console.log('起名生成器侧边栏函数已注册');
 console.log('起名生成器工具已加载');
+console.log('✅ namegen.js 已加载，renderCompactNameGenPanel 存在:', typeof renderCompactNameGenPanel === 'function');
+console.log('✅ loadNameGenSettings 存在:', typeof loadNameGenSettings === 'function');

@@ -4,7 +4,7 @@
     <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.min.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>写作帮手WritingPanelSystem - 自由的写作软件</title>
+    <title>写作面板系统WritingPanelSystem - 自由的写作软件</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="themes/default.css" id="themeStyle">
     <script src="jszip.min.js"></script>
@@ -73,7 +73,7 @@
         <!-- 左侧菜单 -->
         <div class="sidebar-menu" id="sidebarMenu">
             <div class="logo-area">
-                <h3>写作帮手Writingpanelsystem</h3>
+                <h3>写作面板系统Writingpanelsystem</h3>
                 <p class="slogan">免费，开源，自由的写作软件</p>
             </div>
             <nav class="menu-nav">
@@ -113,10 +113,10 @@
                 <!-- 关于页面 -->
                 <div class="page" data-page="about">
                     <div class="about-content">
-                        <h2>📝 写作帮手 WritingPanelSystem</h2>
+                        <h2>写作面板系统 WritingPanelSystem</h2>
                         <p>免费，开源，自由的写作软件</p>
                         <p>软件官网 WritingPanelSystem.com</p>
-                        <p>版本 v 1.6.0 正式版</p>
+                        <p>版本 v 1.7.0 正式版</p>
                         <p>GitHub: <a href="https://github.com/likeweixue/Writingpanelsystem" target="_blank">https://github.com/likeweixue/Writingpanelsystem</a></p>
                     </div>
                 </div>
@@ -349,7 +349,7 @@ setTimeout(function() {
             '<p style="font-size: 14px; line-height: 1.8;">风吹屁屁凉，泽墨川，【女频写手】长兮常相忆，读者读者读者读者读者读者读者读者作者男生，岚音</p>' +
             '</div>' +
             '<div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(0,0,0,0.1);">' +
-            '<h3>写作帮手寄语</h3>' +
+            '<h3>写作面板系统寄语</h3>' +
             '<p style="font-size: 14px; line-height: 1.8; text-align: left;">这里借用马克·扎克伯格（Facebook 创始人）的话，想法一开始并不是完美的，没有人一开始就会，都是在做的过程中不断遇到与解决问题，我们要做的是迈出第一步，所以，开始书写故事吧！</p>' +
             '</div>';
         aboutPage.insertAdjacentHTML('beforeend', thanksHtml);
@@ -382,23 +382,24 @@ console.log('createNewGroupV2:', typeof createNewGroupV2);
 </script>
 
 <!-- JS 文件（放在最后加载） -->
+<!-- 先加载工具模块 -->
 <script src="js/data.js"></script>
 <script src="js/ui.js"></script>
-<script src="js/books.js"></script>
+<script src="js/outline.js"></script>      <!-- 大纲 -->
+<script src="js/setting.js"></script>
+<script src="js/characters.js"></script>   <!-- 角色 -->
+<script src="js/notes.js"></script>
+<script src="js/timeline.js"></script>     <!-- 时间线 -->
+<script src="js/relation.js"></script>     <!-- 关系图 -->
+<script src="js/namegen.js"></script>      <!-- 起名 -->
+<script src="js/whiteboard.js"></script>   <!-- 无边记 -->
 <script src="js/settings.js"></script>
 <script src="js/jianghu.js"></script>
 <script src="js/xuefu.js"></script>
 <script src="js/toolbar.js"></script>
-<script src="js/app.js"></script>
 <script src="js/sidebar.js"></script>
-<script src="js/outline.js"></script>
-<script src="js/setting.js"></script>
-<script src="js/characters.js"></script>
-<script src="js/notes.js"></script>
-<script src="js/timeline.js"></script>
-<script src="js/relation.js"></script>
-<script src="js/namegen.js"></script>
-<script src="js/whiteboard.js"></script>
+<script src="js/books.js"></script>        <!-- 书籍管理（依赖上面的工具） -->
+<script src="js/app.js"></script>
 
 
 </body>
