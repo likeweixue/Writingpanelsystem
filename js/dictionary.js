@@ -146,6 +146,8 @@ function addDictionaryEntry(word, category, meaning, content, tags) {
     updateDictionaryEditor();
     renderCompactDictionaryTree();
     updateCompactDictionaryEditor();
+    renderDictionaryStats();
+    renderCompactDictionaryStats();
     return newEntry;
 }
 
@@ -177,6 +179,8 @@ function deleteDictionaryEntry(id) {
     updateDictionaryEditor();
     renderCompactDictionaryTree();
     updateCompactDictionaryEditor();
+    renderDictionaryStats();
+    renderCompactDictionaryStats();
 }
 
 // ========== 全屏模式渲染 ==========
@@ -345,6 +349,7 @@ function openDictionaryPanel() {
     renderDictionaryTree();
     updateDictionaryEditor();
     initDictionaryEvents();
+    renderDictionaryStats();
     switchToTab(tabId);
     var sidebar = document.querySelector('.sidebar-menu');
     if (sidebar) sidebar.style.display = 'none';
@@ -394,6 +399,12 @@ function renderDictionaryPage() {
                         <img src="icons/folder.svg" width="14" height="14" alt="分类" style="vertical-align:middle; margin-right:4px;"> 分类
                     </button>
                 </div>
+                <div style="display:flex;gap:4px;padding:0 12px 6px 12px;flex-shrink:0;">
+                    <button id="dictImportCsvBtn" title="导入CSV" style="flex:1;background:#17a2b8;color:white;border:none;border-radius:4px;cursor:pointer;font-size:10px;padding:3px 0;font-weight:500;">📥 导入CSV</button>
+                    <button id="dictExportCsvBtn" title="导出CSV" style="flex:1;background:#6c757d;color:white;border:none;border-radius:4px;cursor:pointer;font-size:10px;padding:3px 0;font-weight:500;">📤 导出CSV</button>
+                </div>
+                <!-- 统计区域 -->
+                <div id="dictStats" style="padding:6px 12px;border-bottom:1px solid var(--border-color, rgba(0,0,0,0.06));flex-shrink:0;min-height:28px;"></div>
                 <div id="dictionaryTree" style="flex:1;overflow-y:auto;padding:8px 4px;"></div>
                 <div style="padding:8px 12px;border-top:1px solid var(--border-color, rgba(0,0,0,0.08));font-size:11px;color:#888;display:flex;justify-content:space-between;flex-shrink:0;">
                     <span>词条: <span id="dictNodeCount">0</span></span>
@@ -402,6 +413,7 @@ function renderDictionaryPage() {
                 <div id="dictResizeHandle" style="position:absolute;right:-4px;top:0;width:6px;height:100%;cursor:ew-resize;background:transparent;z-index:10;transition:background 0.2s;"></div>
             </div>
             <div class="dictionary-editor" style="flex:1;display:flex;flex-direction:column;background:var(--panel-bg, rgba(255,255,255,0.9));overflow:hidden;">
+                <!-- ... 编辑器内容保持不变 ... -->
                 <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 20px;border-bottom:1px solid var(--border-color, rgba(0,0,0,0.08));flex-shrink:0;flex-wrap:wrap;gap:8px;">
                     <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:200px;">
                         <input type="text" id="dictEditorWord" placeholder="词条名" style="font-size:18px;font-weight:600;border:none;background:transparent;outline:none;flex:1;color:var(--text-color, #333);min-width:80px;">
@@ -668,6 +680,7 @@ function openDictionarySidebar(tool) {
                 renderCompactDictionaryTree();
                 updateCompactDictionaryEditor();
                 bindCompactDictionaryEvents();
+                renderCompactDictionaryStats();
             }, 50);
         } catch(e) {
             console.error('词典面板渲染失败:', e);
@@ -723,6 +736,12 @@ function renderCompactDictionaryPanel() {
                         <button id="compactDictAddBtn" title="新增词条" style="flex:1;background:#28a745;color:white;border:none;border-radius:4px;cursor:pointer;font-size:12px;padding:4px 0;font-weight:500;">➕ 词条</button>
                         <button id="compactDictAddCategoryBtn" title="新增分类" style="flex:1;background:#9b784e;color:white;border:none;border-radius:4px;cursor:pointer;font-size:12px;padding:4px 0;font-weight:500;">📁 分类</button>
                     </div>
+                    <div style="display:flex;gap:4px;padding:0 8px 6px 8px;flex-shrink:0;">
+                        <button id="compactDictImportCsvBtn" title="导入CSV" style="flex:1;background:#17a2b8;color:white;border:none;border-radius:4px;cursor:pointer;font-size:10px;padding:3px 0;font-weight:500;">📥 导入CSV</button>
+                        <button id="compactDictExportCsvBtn" title="导出CSV" style="flex:1;background:#6c757d;color:white;border:none;border-radius:4px;cursor:pointer;font-size:10px;padding:3px 0;font-weight:500;">📤 导出CSV</button>
+                    </div>
+                    <!-- 统计区域 -->
+                    <div id="compactDictStats" style="padding:4px 8px;border-bottom:1px solid var(--border-color, rgba(0,0,0,0.06));flex-shrink:0;min-height:22px;"></div>
                     <div id="compactDictionaryTree" style="flex:1;overflow-y:auto;padding:4px 4px;"></div>
                     <div style="padding:3px 10px;border-top:1px solid var(--border-color, rgba(0,0,0,0.08));font-size:10px;color:#888;flex-shrink:0;display:flex;justify-content:space-between;">
                         <span>词条: <span id="compactDictNodeCount">0</span></span>
@@ -730,6 +749,7 @@ function renderCompactDictionaryPanel() {
                     </div>
                 </div>
                 <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:150px;">
+                    <!-- ... 编辑器内容保持不变 ... -->
                     <div style="padding:6px 12px;border-bottom:1px solid var(--border-color, rgba(0,0,0,0.08));flex-shrink:0;display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
                         <input type="text" id="compactDictWord" placeholder="词条名" style="flex:1;font-size:15px;font-weight:600;border:none;background:transparent;outline:none;color:var(--text-color, #333);min-width:60px;">
                         <select id="compactDictCategory" style="padding:2px 6px;border:1px solid var(--border-color, #ddd);border-radius:4px;font-size:11px;background:transparent;color:var(--text-color, #333);">
@@ -883,7 +903,6 @@ function bindCompactDictionaryEvents() {
     var addBtn = document.getElementById('compactDictAddBtn');
     if (addBtn) {
         addBtn.onclick = function() {
-            // 清空编辑器，准备新建
             document.getElementById('compactDictWord').value = '';
             document.getElementById('compactDictMeaning').value = '';
             document.getElementById('compactDictContent').value = '';
@@ -904,7 +923,6 @@ function bindCompactDictionaryEvents() {
                 saveDictionaryData();
                 renderCompactDictionaryTree();
                 updateCompactDictionaryEditor();
-                // 刷新分类下拉框
                 var catSelect = document.getElementById('compactDictCategory');
                 if (catSelect) {
                     catSelect.innerHTML = dictionaryData.categories.map(function(c) {
@@ -918,6 +936,22 @@ function bindCompactDictionaryEvents() {
         };
     }
     
+    // ===== 导入导出按钮事件 =====
+    var importBtn = document.getElementById('compactDictImportCsvBtn');
+    if (importBtn) {
+        importBtn.onclick = function() {
+            importDictionaryFromCsv();
+        };
+    }
+    
+    var exportBtn = document.getElementById('compactDictExportCsvBtn');
+    if (exportBtn) {
+        exportBtn.onclick = function() {
+            exportDictionaryToCsv();
+        };
+    }
+    
+    // 展开按钮
     var expandBtn = document.getElementById('compactDictExpandBtn');
     if (expandBtn) {
         expandBtn.onclick = function() {
@@ -925,6 +959,7 @@ function bindCompactDictionaryEvents() {
         };
     }
     
+    // 关闭按钮
     var closeBtn = document.getElementById('compactDictCloseBtn');
     if (closeBtn) {
         closeBtn.onclick = function() {
@@ -945,6 +980,7 @@ function bindCompactDictionaryEvents() {
         };
     }
     
+    // 保存按钮
     var saveBtn = document.getElementById('compactDictSaveBtn');
     if (saveBtn) {
         saveBtn.onclick = function() {
@@ -955,7 +991,6 @@ function bindCompactDictionaryEvents() {
             var contentArea = document.getElementById('compactDictContent');
             
             if (!entry) {
-                // 新建词条
                 var word = wordInput.value.trim();
                 if (!word) { alert('请输入词条名'); return; }
                 var category = catSelect.value;
@@ -985,6 +1020,7 @@ function bindCompactDictionaryEvents() {
         };
     }
     
+    // 搜索
     var searchInput = document.getElementById('compactDictSearch');
     if (searchInput) {
         searchInput.oninput = function() {
@@ -1445,6 +1481,390 @@ function bindDictionaryToolEntry() {
             }
         };
     }
+}
+// ========== CSV 导入导出功能 ==========
+
+// 导出词典为 CSV
+function exportDictionaryToCsv() {
+    if (dictionaryData.entries.length === 0) {
+        alert('词典为空，没有可导出的词条');
+        return;
+    }
+    
+    // CSV 头部
+    var headers = ['词条名', '分类', '简短释义', '详细内容', '标签'];
+    var csvRows = [];
+    csvRows.push(headers.join(','));
+    
+    // 遍历词条
+    for (var i = 0; i < dictionaryData.entries.length; i++) {
+        var entry = dictionaryData.entries[i];
+        var row = [
+            escapeCsvField(entry.word || ''),
+            escapeCsvField(entry.category || ''),
+            escapeCsvField(entry.meaning || ''),
+            escapeCsvField(entry.content || ''),
+            escapeCsvField((entry.tags || []).join('、'))
+        ];
+        csvRows.push(row.join(','));
+    }
+    
+    var csvContent = csvRows.join('\n');
+    
+    // 添加 BOM 以便 Excel 正确识别 UTF-8
+    var blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = '词典数据_' + new Date().toISOString().slice(0,10) + '.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+    
+    alert('✅ 导出成功！共导出 ' + dictionaryData.entries.length + ' 个词条');
+}
+
+// 转义 CSV 字段（处理逗号、引号、换行）
+function escapeCsvField(field) {
+    if (field === null || field === undefined) return '';
+    var str = String(field);
+    // 如果包含逗号、引号或换行符，需要用引号包裹
+    if (str.indexOf(',') !== -1 || str.indexOf('"') !== -1 || str.indexOf('\n') !== -1) {
+        // 将引号替换为两个引号
+        str = str.replace(/"/g, '""');
+        return '"' + str + '"';
+    }
+    return str;
+}
+
+// 导入 CSV 文件
+function importDictionaryFromCsv() {
+    var input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.csv,.txt';
+    input.onchange = function(e) {
+        var file = e.target.files[0];
+        if (!file) return;
+        
+        var reader = new FileReader();
+        reader.onload = function(ev) {
+            try {
+                var content = ev.target.result;
+                // 移除 BOM
+                if (content.charCodeAt(0) === 0xFEFF) {
+                    content = content.slice(1);
+                }
+                
+                var lines = content.split(/\r?\n/).filter(function(line) { 
+                    return line.trim() !== ''; 
+                });
+                
+                if (lines.length < 2) {
+                    alert('CSV 文件至少需要包含表头行和一行数据');
+                    return;
+                }
+                
+                // 解析 CSV（处理引号内的逗号）
+                function parseCsvLine(line) {
+                    var result = [];
+                    var current = '';
+                    var insideQuotes = false;
+                    for (var i = 0; i < line.length; i++) {
+                        var char = line[i];
+                        if (char === '"') {
+                            if (insideQuotes && line[i+1] === '"') {
+                                current += '"';
+                                i++;
+                            } else {
+                                insideQuotes = !insideQuotes;
+                            }
+                        } else if (char === ',' && !insideQuotes) {
+                            result.push(current.trim());
+                            current = '';
+                        } else {
+                            current += char;
+                        }
+                    }
+                    result.push(current.trim());
+                    return result;
+                }
+                
+                // 解析表头
+                var headers = parseCsvLine(lines[0]);
+                // 查找列索引
+                var wordIdx = -1, categoryIdx = -1, meaningIdx = -1, contentIdx = -1, tagsIdx = -1;
+                for (var i = 0; i < headers.length; i++) {
+                    var h = headers[i].replace(/^["']|["']$/g, '').trim();
+                    if (h === '词条名' || h === '词条' || h === 'word') wordIdx = i;
+                    else if (h === '分类' || h === 'category') categoryIdx = i;
+                    else if (h === '简短释义' || h === '释义' || h === 'meaning') meaningIdx = i;
+                    else if (h === '详细内容' || h === '内容' || h === 'content') contentIdx = i;
+                    else if (h === '标签' || h === 'tags') tagsIdx = i;
+                }
+                
+                if (wordIdx === -1) {
+                    alert('CSV 文件缺少"词条名"列，请确保第一行为表头');
+                    return;
+                }
+                
+                var imported = 0;
+                var skipped = 0;
+                var duplicateCount = 0;
+                
+                // 获取已有词条名（用于去重）
+                var existingWords = {};
+                for (var i = 0; i < dictionaryData.entries.length; i++) {
+                    existingWords[dictionaryData.entries[i].word] = true;
+                }
+                
+                for (var rowIdx = 1; rowIdx < lines.length; rowIdx++) {
+                    var fields = parseCsvLine(lines[rowIdx]);
+                    var word = fields[wordIdx] ? fields[wordIdx].replace(/^["']|["']$/g, '').trim() : '';
+                    
+                    if (!word) {
+                        skipped++;
+                        continue;
+                    }
+                    
+                    // 检查是否已存在
+                    if (existingWords[word]) {
+                        duplicateCount++;
+                        continue;
+                    }
+                    
+                    var category = fields[categoryIdx] ? fields[categoryIdx].replace(/^["']|["']$/g, '').trim() : '术语概念';
+                    var meaning = fields[meaningIdx] ? fields[meaningIdx].replace(/^["']|["']$/g, '').trim() : '';
+                    var content = fields[contentIdx] ? fields[contentIdx].replace(/^["']|["']$/g, '').trim() : '';
+                    var tagsStr = fields[tagsIdx] ? fields[tagsIdx].replace(/^["']|["']$/g, '').trim() : '';
+                    
+                    // 处理标签
+                    var tags = tagsStr ? tagsStr.split(/[、，,，\s]+/).filter(function(t) { return t.trim(); }) : [];
+                    
+                    // 如果分类不存在，自动添加
+                    if (category && dictionaryData.categories.indexOf(category) === -1) {
+                        dictionaryData.categories.push(category);
+                    }
+                    
+                    var newEntry = {
+                        id: genDictionaryId(),
+                        word: word,
+                        category: category || '术语概念',
+                        meaning: meaning || '',
+                        content: content || '',
+                        tags: tags || []
+                    };
+                    dictionaryData.entries.push(newEntry);
+                    imported++;
+                    existingWords[word] = true;
+                }
+                
+                if (imported > 0) {
+                    dictionaryData.selectedId = dictionaryData.entries.length > 0 ? dictionaryData.entries[0].id : null;
+                    saveDictionaryData();
+                    renderDictionaryTree();
+                    updateDictionaryEditor();
+                    renderCompactDictionaryTree();
+                    updateCompactDictionaryEditor();
+                    renderDictionaryStats();
+                    renderCompactDictionaryStats();
+                    
+                    var msg = '✅ 导入成功！共导入 ' + imported + ' 个词条';
+                    if (duplicateCount > 0) msg += '，跳过 ' + duplicateCount + ' 个重复词条';
+                    if (skipped > 0) msg += '，跳过 ' + skipped + ' 个空行';
+                    alert(msg);
+                } else {
+                    var msg = '没有新词条可导入';
+                    if (duplicateCount > 0) msg += '，' + duplicateCount + ' 个词条已存在';
+                    alert(msg);
+                }
+                
+            } catch(err) {
+                alert('导入失败：' + err.message);
+                console.error(err);
+            }
+        };
+        reader.readAsText(file, 'UTF-8');
+    };
+    input.click();
+}
+
+// 导出为 JSON（保留完整数据，作为备份）
+function exportDictionaryToJson() {
+    var data = {
+        version: '1.0',
+        exportTime: new Date().toISOString(),
+        categories: dictionaryData.categories,
+        entries: dictionaryData.entries
+    };
+    var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = '词典备份_' + new Date().toISOString().slice(0,10) + '.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    alert('✅ JSON 备份导出成功！');
+}
+
+// 导入 JSON 备份
+function importDictionaryFromJson() {
+    var input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = function(e) {
+        var file = e.target.files[0];
+        if (!file) return;
+        var reader = new FileReader();
+        reader.onload = function(ev) {
+            try {
+                var data = JSON.parse(ev.target.result);
+                if (!data.entries || data.entries.length === 0) {
+                    alert('JSON 文件格式无效或没有词条数据');
+                    return;
+                }
+                
+                if (!confirm('将导入 ' + data.entries.length + ' 个词条，是否覆盖当前数据？\n\n点击"确定"覆盖，点击"取消"追加')) {
+                    // 追加模式
+                    var existingWords = {};
+                    for (var i = 0; i < dictionaryData.entries.length; i++) {
+                        existingWords[dictionaryData.entries[i].word] = true;
+                    }
+                    var added = 0;
+                    for (var i = 0; i < data.entries.length; i++) {
+                        var entry = data.entries[i];
+                        if (!existingWords[entry.word]) {
+                            entry.id = genDictionaryId();
+                            dictionaryData.entries.push(entry);
+                            existingWords[entry.word] = true;
+                            added++;
+                        }
+                    }
+                    if (data.categories) {
+                        for (var i = 0; i < data.categories.length; i++) {
+                            if (dictionaryData.categories.indexOf(data.categories[i]) === -1) {
+                                dictionaryData.categories.push(data.categories[i]);
+                            }
+                        }
+                    }
+                    saveDictionaryData();
+                    renderDictionaryTree();
+                    updateDictionaryEditor();
+                    renderCompactDictionaryTree();
+                    updateCompactDictionaryEditor();
+                    alert('✅ 追加成功！新增 ' + added + ' 个词条');
+                } else {
+                    // 覆盖模式
+                    dictionaryData.entries = data.entries || [];
+                    dictionaryData.categories = data.categories || ['人物称谓', '功法境界', '地名势力', '兵器法宝', '灵植异兽', '术语概念', '历史事件', '写作术语'];
+                    dictionaryData.selectedId = dictionaryData.entries.length > 0 ? dictionaryData.entries[0].id : null;
+                    saveDictionaryData();
+                    renderDictionaryTree();
+                    updateDictionaryEditor();
+                    renderCompactDictionaryTree();
+                    updateCompactDictionaryEditor();
+                    alert('✅ 导入成功！共导入 ' + dictionaryData.entries.length + ' 个词条');
+                }
+            } catch(err) {
+                alert('导入失败：' + err.message);
+            }
+        };
+        reader.readAsText(file);
+    };
+    input.click();
+}
+
+// ========== 词条统计功能 ==========
+
+// 获取分类统计
+function getCategoryStats() {
+    var stats = {};
+    var categories = dictionaryData.categories;
+    
+    for (var i = 0; i < categories.length; i++) {
+        var cat = categories[i];
+        var count = dictionaryData.entries.filter(function(e) {
+            return e.category === cat;
+        }).length;
+        if (count > 0) {
+            stats[cat] = count;
+        }
+    }
+    
+    // 统计"未分类"的词条（如果有分类为空或不在categories中的）
+    var uncategorized = dictionaryData.entries.filter(function(e) {
+        return !e.category || dictionaryData.categories.indexOf(e.category) === -1;
+    }).length;
+    if (uncategorized > 0) {
+        stats['未分类'] = uncategorized;
+    }
+    
+    return stats;
+}
+
+// 渲染统计信息
+function renderDictionaryStats() {
+    var container = document.getElementById('dictStats');
+    if (!container) return;
+    
+    var stats = getCategoryStats();
+    var total = dictionaryData.entries.length;
+    
+    if (total === 0) {
+        container.innerHTML = '<span style="color:#888;font-size:12px;">暂无词条</span>';
+        return;
+    }
+    
+    var html = '<div style="display:flex;flex-wrap:wrap;gap:6px 12px;font-size:12px;color:var(--text-color, #666);">';
+    html += '<span style="font-weight:600;">📊 共 ' + total + ' 个词条</span>';
+    
+    var sortedKeys = Object.keys(stats).sort();
+    for (var i = 0; i < sortedKeys.length; i++) {
+        var cat = sortedKeys[i];
+        var count = stats[cat];
+        var percentage = Math.round((count / total) * 100);
+        html += '<span style="background:rgba(155,120,78,0.1);padding:1px 10px;border-radius:12px;">' + 
+            cat + ': <strong>' + count + '</strong> (' + percentage + '%)</span>';
+    }
+    
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+// 渲染紧凑模式统计
+function renderCompactDictionaryStats() {
+    var container = document.getElementById('compactDictStats');
+    if (!container) return;
+    
+    var stats = getCategoryStats();
+    var total = dictionaryData.entries.length;
+    
+    if (total === 0) {
+        container.innerHTML = '<span style="color:#888;font-size:10px;">暂无词条</span>';
+        return;
+    }
+    
+    var html = '<div style="display:flex;flex-wrap:wrap;gap:3px 8px;font-size:10px;color:var(--text-color, #666);">';
+    html += '<span style="font-weight:600;">共 ' + total + '</span>';
+    
+    var sortedKeys = Object.keys(stats).sort();
+    // 紧凑模式只显示前5个分类
+    var displayKeys = sortedKeys;
+    if (sortedKeys.length > 5) {
+        displayKeys = sortedKeys.slice(0, 5);
+    }
+    
+    for (var i = 0; i < displayKeys.length; i++) {
+        var cat = displayKeys[i];
+        var count = stats[cat];
+        html += '<span style="background:rgba(155,120,78,0.08);padding:0 8px;border-radius:10px;">' + 
+            cat + ': ' + count + '</span>';
+    }
+    
+    if (sortedKeys.length > 5) {
+        html += '<span style="color:#888;">+ ' + (sortedKeys.length - 5) + ' 个分类</span>';
+    }
+    
+    html += '</div>';
+    container.innerHTML = html;
 }
 
 // ========== 导出 ==========

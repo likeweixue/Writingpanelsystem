@@ -324,3 +324,384 @@ if (originalOpenBookTab) {
 setTimeout(fixToolbarVisibility, 100);
 
 init();
+
+// ========== 快捷键系统 ==========
+
+var shortcutKeys = {
+    // 全局
+    'Ctrl+N': function() { openNewBookPanelV2(); },
+    'Ctrl+O': function() { switchToTab('home'); },
+    'Ctrl+W': function() { 
+        if (activeTabId && activeTabId !== 'home') {
+            closeTab(activeTabId);
+        }
+    },
+    'Ctrl+Tab': function(e) { 
+        e.preventDefault();
+        switchToNextTab();
+    },
+    'Ctrl+Shift+Tab': function(e) { 
+        e.preventDefault();
+        switchToPrevTab();
+    },
+    // 编辑器
+    'Ctrl+S': function(e) { 
+        e.preventDefault();
+        if (typeof saveCurrentChapter === 'function') {
+            saveCurrentChapter();
+            showShortcutToast('💾 已保存');
+        }
+    },
+    'Ctrl+F': function(e) { 
+        e.preventDefault();
+        // 检查是否在书籍编辑页面
+        var activePage = document.querySelector('.page.active');
+        if (activePage && activePage.getAttribute('data-page') && activePage.getAttribute('data-page').indexOf('book_') === 0) {
+            // 优先聚焦章节搜索框
+            var searchInput = document.getElementById('chapterSearchInput');
+            if (searchInput) {
+                searchInput.focus();
+                searchInput.select();
+                showShortcutToast('🔍 搜索章节');
+                return;
+            }
+        }
+        openFindReplacePanel();
+    },
+    'Ctrl+H': function(e) { 
+        e.preventDefault();
+        openFindReplacePanel();
+        var replaceInput = document.getElementById('replaceTextFloat');
+        if (replaceInput) {
+            setTimeout(function() { replaceInput.focus(); }, 100);
+        }
+    },
+    'Ctrl+Z': function(e) { 
+        e.preventDefault();
+        if (typeof undo === 'function') {
+            undo();
+        }
+    },
+    'Ctrl+Y': function(e) { 
+        e.preventDefault();
+        if (typeof redo === 'function') {
+            redo();
+        }
+    },
+    // 工具快捷键
+    'Ctrl+Shift+O': function(e) { 
+        e.preventDefault();
+        toggleTool('outline', openOutlineSidebar, closeOutlineFloatingPanel);
+    },
+    'Ctrl+Shift+T': function(e) { 
+        e.preventDefault();
+        toggleTool('timeline', openTimelineSidebar, closeTimelineFloatingPanel);
+    },
+    'Ctrl+Shift+R': function(e) { 
+        e.preventDefault();
+        toggleTool('characters', openCharacterSidebar, closeCharacterFloatingPanel);
+    },
+    'Ctrl+Shift+E': function(e) { 
+        e.preventDefault();
+        toggleTool('setting', openSettingSidebar, closeSettingFloatingPanel);
+    },
+    'Ctrl+Shift+G': function(e) { 
+        e.preventDefault();
+        toggleTool('relation', openRelationSidebar, closeRelationFloatingPanel);
+    },
+    'Ctrl+Shift+W': function(e) { 
+        e.preventDefault();
+        toggleTool('whiteboard', openWhiteboardSidebar, closeWhiteboardFloatingPanel);
+    },
+    'Ctrl+Shift+N': function(e) { 
+        e.preventDefault();
+        toggleTool('namegen', openNameGenSidebar, closeNameGenFloatingPanel);
+    },
+    'Ctrl+Shift+M': function(e) { 
+        e.preventDefault();
+        toggleTool('notes', openNoteSidebar, closeNoteFloatingPanel);
+    },
+    'Ctrl+Shift+D': function(e) { 
+        e.preventDefault();
+        toggleTool('dictionary', openDictionarySidebar, closeDictionaryFloatingPanel);
+    },
+    // 视图
+    'F11': function(e) { 
+        e.preventDefault();
+        toggleFullscreen();
+    },
+    'Ctrl+Shift+L': function(e) { 
+        e.preventDefault();
+        toggleDualMode();
+    },
+    // 关闭面板
+    'Escape': function(e) {
+        var panel = document.getElementById('floatingToolPanel');
+        if (panel) {
+            if (typeof closeFloatingPanel === 'function') {
+                closeFloatingPanel();
+                showShortcutToast('已关闭面板');
+            }
+        }
+        // 如果有搜索框聚焦，清空搜索
+        var searchInput = document.getElementById('chapterSearchInput');
+        if (searchInput && document.activeElement === searchInput) {
+            searchInput.value = '';
+            searchInput.oninput();
+            searchInput.blur();
+        }
+    }
+};
+
+// 切换工具（打开/关闭）
+function toggleTool(tool, openFn, closeFn) {
+    var panel = document.getElementById('floatingToolPanel');
+    if (panel) {
+        var panelTool = panel.getAttribute('data-tool');
+        if (panelTool === tool) {
+            if (typeof closeFn === 'function') {
+                closeFn();
+                showShortcutToast('已关闭 ' + getToolName(tool));
+            }
+            return;
+        } else {
+            // 关闭当前面板，打开新的
+            if (typeof closeFloatingPanel === 'function') {
+                closeFloatingPanel();
+            }
+        }
+    }
+    if (typeof openFn === 'function') {
+        openFn();
+        showShortcutToast('已打开 ' + getToolName(tool));
+    }
+}
+
+function getToolName(tool) {
+    var names = {
+        'outline': '大纲',
+        'timeline': '时间线',
+        'characters': '角色',
+        'setting': '设定',
+        'relation': '关系图',
+        'whiteboard': '无边记',
+        'namegen': '起名',
+        'notes': '笔记',
+        'dictionary': '词典'
+    };
+    return names[tool] || tool;
+}
+
+// 切换标签页
+function switchToNextTab() {
+    if (openTabs.length <= 1) return;
+    var currentIndex = -1;
+    for (var i = 0; i < openTabs.length; i++) {
+        if (openTabs[i].id === activeTabId) {
+            currentIndex = i;
+            break;
+        }
+    }
+    if (currentIndex === -1) return;
+    var nextIndex = (currentIndex + 1) % openTabs.length;
+    switchToTab(openTabs[nextIndex].id);
+}
+
+function switchToPrevTab() {
+    if (openTabs.length <= 1) return;
+    var currentIndex = -1;
+    for (var i = 0; i < openTabs.length; i++) {
+        if (openTabs[i].id === activeTabId) {
+            currentIndex = i;
+            break;
+        }
+    }
+    if (currentIndex === -1) return;
+    var prevIndex = (currentIndex - 1 + openTabs.length) % openTabs.length;
+    switchToTab(openTabs[prevIndex].id);
+}
+
+// 显示快捷键提示
+function showShortcutToast(message) {
+    var existing = document.getElementById('shortcutToast');
+    if (existing) {
+        existing.remove();
+    }
+    var toast = document.createElement('div');
+    toast.id = 'shortcutToast';
+    toast.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.8);color:white;padding:8px 20px;border-radius:20px;font-size:14px;z-index:99999;pointer-events:none;transition:opacity 0.3s;backdrop-filter:blur(10px);';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    setTimeout(function() {
+        toast.style.opacity = '0';
+        setTimeout(function() {
+            if (toast.parentNode) toast.remove();
+        }, 300);
+    }, 1200);
+}
+
+// ========== 快捷键事件监听 ==========
+
+document.addEventListener('keydown', function(e) {
+    // 如果输入框或文本区获得焦点，不触发快捷键（除了特定的组合）
+    var activeElement = document.activeElement;
+    var isInputFocused = activeElement && (
+        activeElement.tagName === 'INPUT' || 
+        activeElement.tagName === 'TEXTAREA' || 
+        activeElement.tagName === 'SELECT' ||
+        activeElement.getAttribute('contenteditable') === 'true'
+    );
+    
+    // 构建快捷键字符串
+    var key = '';
+    var ctrl = e.ctrlKey || e.metaKey;
+    var shift = e.shiftKey;
+    var alt = e.altKey;
+    
+    if (ctrl) key += 'Ctrl+';
+    if (shift) key += 'Shift+';
+    key += e.key;
+    
+    // 特殊处理 F11（没有 Ctrl 前缀）
+    if (e.key === 'F11') {
+        key = 'F11';
+    }
+    
+    // 特殊处理 Escape
+    if (e.key === 'Escape') {
+        key = 'Escape';
+    }
+    
+    // 特殊处理 Ctrl+Tab 和 Ctrl+Shift+Tab
+    if (ctrl && e.key === 'Tab' && !shift) {
+        key = 'Ctrl+Tab';
+    }
+    if (ctrl && e.key === 'Tab' && shift) {
+        key = 'Ctrl+Shift+Tab';
+    }
+    
+    // 查找快捷键
+    var handler = shortcutKeys[key];
+    if (handler) {
+        // 对于编辑器快捷键，即使在输入框中也可以触发
+        var editorShortcuts = ['Ctrl+S', 'Ctrl+F', 'Ctrl+H', 'Ctrl+Z', 'Ctrl+Y', 'Ctrl+B', 'Ctrl+I', 'Ctrl+U', 'Ctrl+Shift+F', 'Ctrl+Shift+C', 'Ctrl+Shift+P'];
+        var globalShortcuts = ['Ctrl+N', 'Ctrl+O', 'Ctrl+W', 'Ctrl+Tab', 'Ctrl+Shift+Tab', 'F11', 'Escape', 'Ctrl+Shift+L'];
+        var toolShortcuts = ['Ctrl+Shift+O', 'Ctrl+Shift+T', 'Ctrl+Shift+R', 'Ctrl+Shift+E', 'Ctrl+Shift+G', 'Ctrl+Shift+W', 'Ctrl+Shift+N', 'Ctrl+Shift+M', 'Ctrl+Shift+D'];
+        
+        // 如果是编辑器快捷键，即使在输入框中也可以触发（Ctrl+S 等）
+        if (editorShortcuts.indexOf(key) !== -1 || toolShortcuts.indexOf(key) !== -1 || globalShortcuts.indexOf(key) !== -1) {
+            handler(e);
+            return;
+        }
+        
+        // 如果是在输入框中，不触发其他快捷键
+        if (isInputFocused) {
+            return;
+        }
+        
+        handler(e);
+    }
+});
+
+// ========== 快捷键帮助面板 ==========
+
+function showShortcutHelp() {
+    var existing = document.getElementById('shortcutHelpPanel');
+    if (existing) {
+        existing.remove();
+        return;
+    }
+    
+    var panel = document.createElement('div');
+    panel.id = 'shortcutHelpPanel';
+    panel.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:600px;max-height:80vh;overflow-y:auto;background:rgba(255,255,255,0.98);backdrop-filter:blur(20px);border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,0.3);z-index:100000;padding:24px;';
+    
+    var html = `
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+            <h2 style="margin:0;">⌨️ 快捷键</h2>
+            <button onclick="this.closest('#shortcutHelpPanel').remove()" style="background:none;border:none;font-size:24px;cursor:pointer;">✕</button>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+            <div>
+                <h4 style="margin:0 0 8px 0;color:#9b784e;">📁 全局</h4>
+                <div style="font-size:13px;line-height:2;">
+                    <div><kbd style="background:#f0f0f0;padding:2px 8px;border-radius:4px;font-size:12px;">Ctrl+N</kbd> 新建书籍</div>
+                    <div><kbd style="background:#f0f0f0;padding:2px 8px;border-radius:4px;font-size:12px;">Ctrl+O</kbd> 打开首页</div>
+                    <div><kbd style="background:#f0f0f0;padding:2px 8px;border-radius:4px;font-size:12px;">Ctrl+W</kbd> 关闭标签页</div>
+                    <div><kbd style="background:#f0f0f0;padding:2px 8px;border-radius:4px;font-size:12px;">Ctrl+Tab</kbd> 切换标签页</div>
+                    <div><kbd style="background:#f0f0f0;padding:2px 8px;border-radius:4px;font-size:12px;">Esc</kbd> 关闭面板/清空搜索</div>
+                </div>
+            </div>
+            <div>
+                <h4 style="margin:0 0 8px 0;color:#9b784e;">✏️ 编辑器</h4>
+                <div style="font-size:13px;line-height:2;">
+                    <div><kbd style="background:#f0f0f0;padding:2px 8px;border-radius:4px;font-size:12px;">Ctrl+S</kbd> 保存章节</div>
+                    <div><kbd style="background:#f0f0f0;padding:2px 8px;border-radius:4px;font-size:12px;">Ctrl+F</kbd> 查找替换</div>
+                    <div><kbd style="background:#f0f0f0;padding:2px 8px;border-radius:4px;font-size:12px;">Ctrl+Z</kbd> 撤销</div>
+                    <div><kbd style="background:#f0f0f0;padding:2px 8px;border-radius:4px;font-size:12px;">Ctrl+Y</kbd> 恢复</div>
+                    <div><kbd style="background:#f0f0f0;padding:2px 8px;border-radius:4px;font-size:12px;">Ctrl+Shift+F</kbd> 排版</div>
+                    <div><kbd style="background:#f0f0f0;padding:2px 8px;border-radius:4px;font-size:12px;">Ctrl+Shift+C</kbd> 清理</div>
+                </div>
+            </div>
+            <div>
+                <h4 style="margin:0 0 8px 0;color:#9b784e;">🛠️ 工具</h4>
+                <div style="font-size:13px;line-height:2;">
+                    <div><kbd style="background:#f0f0f0;padding:2px 8px;border-radius:4px;font-size:12px;">Ctrl+Shift+O</kbd> 大纲</div>
+                    <div><kbd style="background:#f0f0f0;padding:2px 8px;border-radius:4px;font-size:12px;">Ctrl+Shift+T</kbd> 时间线</div>
+                    <div><kbd style="background:#f0f0f0;padding:2px 8px;border-radius:4px;font-size:12px;">Ctrl+Shift+R</kbd> 角色</div>
+                    <div><kbd style="background:#f0f0f0;padding:2px 8px;border-radius:4px;font-size:12px;">Ctrl+Shift+E</kbd> 设定</div>
+                    <div><kbd style="background:#f0f0f0;padding:2px 8px;border-radius:4px;font-size:12px;">Ctrl+Shift+G</kbd> 关系图</div>
+                    <div><kbd style="background:#f0f0f0;padding:2px 8px;border-radius:4px;font-size:12px;">Ctrl+Shift+W</kbd> 无边记</div>
+                    <div><kbd style="background:#f0f0f0;padding:2px 8px;border-radius:4px;font-size:12px;">Ctrl+Shift+N</kbd> 起名</div>
+                    <div><kbd style="background:#f0f0f0;padding:2px 8px;border-radius:4px;font-size:12px;">Ctrl+Shift+M</kbd> 笔记</div>
+                    <div><kbd style="background:#f0f0f0;padding:2px 8px;border-radius:4px;font-size:12px;">Ctrl+Shift+D</kbd> 词典</div>
+                </div>
+            </div>
+            <div>
+                <h4 style="margin:0 0 8px 0;color:#9b784e;">👁️ 视图</h4>
+                <div style="font-size:13px;line-height:2;">
+                    <div><kbd style="background:#f0f0f0;padding:2px 8px;border-radius:4px;font-size:12px;">F11</kbd> 全屏</div>
+                    <div><kbd style="background:#f0f0f0;padding:2px 8px;border-radius:4px;font-size:12px;">Ctrl+Shift+L</kbd> 双栏模式</div>
+                </div>
+                <h4 style="margin:16px 0 8px 0;color:#9b784e;">📖 章节</h4>
+                <div style="font-size:13px;line-height:2;">
+                    <div><kbd style="background:#f0f0f0;padding:2px 8px;border-radius:4px;font-size:12px;">Ctrl+F</kbd> 搜索章节</div>
+                </div>
+            </div>
+        </div>
+        <div style="margin-top:16px;padding-top:16px;border-top:1px solid #eee;text-align:center;font-size:12px;color:#888;">
+            💡 按 <kbd style="background:#f0f0f0;padding:2px 8px;border-radius:4px;font-size:12px;">Esc</kbd> 关闭此面板
+        </div>
+    `;
+    
+    panel.innerHTML = html;
+    document.body.appendChild(panel);
+    
+    // 点击外部关闭
+    panel.addEventListener('click', function(e) {
+        if (e.target === panel) {
+            panel.remove();
+        }
+    });
+    
+    // Esc 关闭
+    document.addEventListener('keydown', function closeHelp(e) {
+        if (e.key === 'Escape') {
+            var helpPanel = document.getElementById('shortcutHelpPanel');
+            if (helpPanel) {
+                helpPanel.remove();
+                document.removeEventListener('keydown', closeHelp);
+            }
+        }
+    });
+}
+
+// 添加快捷键帮助的触发（Ctrl+/ 或 Cmd+/）
+document.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === '/') {
+        e.preventDefault();
+        showShortcutHelp();
+    }
+});
+
+console.log('⌨️ 快捷键系统已加载');

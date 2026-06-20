@@ -1728,85 +1728,324 @@ function getCurrentWordCount() {
     return 0;
 }
 
-// ========== 查找替换 ==========
+// ========== 查找替换 - 增强版（支持正则表达式） ==========
+
+// ========== 查找替换 - 增强版（支持正则表达式） ==========
+
 function openFindReplacePanel() {
     var existingWin = document.getElementById('findReplaceFloatWin');
-    if (existingWin) { existingWin.style.display = 'flex'; existingWin.style.zIndex = '10000'; return; }
+    if (existingWin) { 
+        existingWin.style.display = 'flex'; 
+        existingWin.style.zIndex = '10000'; 
+        return; 
+    }
     
     var rightSidebar = document.getElementById('rightSidebar');
     var rightSidebarRect = rightSidebar ? rightSidebar.getBoundingClientRect() : null;
-    var leftPos = rightSidebarRect ? (rightSidebarRect.left - 420) : (window.innerWidth - 440);
+    var leftPos = rightSidebarRect ? (rightSidebarRect.left - 440) : (window.innerWidth - 460);
     var topPos = rightSidebarRect ? (rightSidebarRect.top + 50) : 150;
     
     var win = document.createElement('div');
     win.id = 'findReplaceFloatWin';
-    win.style.cssText = 'position: fixed; top: ' + topPos + 'px; left: ' + leftPos + 'px; width: 400px; background: var(--panel-bg, rgba(255, 255, 255, 0.95)); backdrop-filter: blur(8px); border-radius: 0px; box-shadow: 0 8px 28px rgba(0,0,0,0.25); z-index: 10000; overflow: hidden;';
-    win.innerHTML = '<div class="find-header" style="padding: 16px 20px; background: var(--header-bg, rgba(0,0,0,0.03)); border-bottom: 1px solid var(--border-color, rgba(0,0,0,0.1)); display: flex; justify-content: space-between; align-items: center; cursor: move;"><h3 style="margin: 0;">查找替换</h3><button class="find-close-btn" style="background: none; border: none; font-size: 20px; cursor: pointer;">✕</button></div>' +
-        '<div style="padding: 20px;">' +
-        '<div style="margin-bottom: 20px;"><label style="display: block; margin-bottom: 8px;">查找</label><input type="text" id="findTextFloat" placeholder="输入查找词" style="width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px;"><button id="searchBookBtn" style="margin-top: 8px; padding: 6px 12px; background: #f0f0f0; border: 1px solid #ddd; border-radius: 6px; cursor: pointer;">🔍 搜索全书</button></div>' +
-        '<div style="margin-bottom: 24px;"><label style="display: block; margin-bottom: 8px;">替换</label><input type="text" id="replaceTextFloat" placeholder="输入替换词" style="width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px;"></div>' +
-        '<div style="display: flex; gap: 12px;"><button id="replaceCurrentBtn" style="flex:1; padding: 8px; background: #f0f0f0; border: 1px solid #ddd; border-radius: 8px; cursor: pointer;">替换</button><button id="replaceChapterBtn" style="flex:1; padding: 8px; background: #f0f0f0; border: 1px solid #ddd; border-radius: 8px; cursor: pointer;">本章替换</button><button id="replaceAllBtn" style="flex:1; padding: 8px; background: #f0f0f0; border: 1px solid #ddd; border-radius: 8px; cursor: pointer;">全书替换</button></div>' +
-        '<div id="searchResultArea" style="margin-top: 16px; padding: 10px; background: #f8f8f8; border-radius: 8px; display: none;"></div></div>';
+    win.style.cssText = 'position: fixed; top: ' + topPos + 'px; left: ' + leftPos + 'px; width: 400px; background: var(--panel-bg, rgba(255, 255, 255, 0.95)); backdrop-filter: blur(8px); border-radius: 0px; box-shadow: 0 8px 28px rgba(0,0,0,0.25); z-index: 10000; overflow: hidden; cursor: move;';
+    
+    win.innerHTML = `
+        <!-- 内容区（带右上角关闭按钮） -->
+        <div style="padding: 14px 16px; position: relative;">
+            <!-- 右上角关闭按钮 -->
+            <button class="find-close-btn" style="position: absolute; top: 10px; right: 12px; background: none; border: none; font-size: 16px; cursor: pointer; opacity: 0.3; padding: 2px 6px; border-radius: 4px; color: var(--text-color, #666); z-index: 10; transition: opacity 0.2s;">✕</button>
+            
+            <!-- 查找行 -->
+            <div style="margin-bottom: 8px; display: flex; align-items: center; gap: 10px;">
+                <label style="font-size: 13px; font-weight: 500; min-width: 36px; color: var(--text-color, #666); flex-shrink: 0;">查找</label>
+                <input type="text" id="findTextFloat" placeholder="输入查找词..." style="flex: 1; padding: 6px 10px; border: 1px solid var(--border-color, #ddd); border-radius: 4px; font-size: 13px; background: var(--input-bg, #f8f8f8); color: var(--text-color, #333); outline: none; transition: border-color 0.2s; min-width: 0;">
+            </div>
+            
+            <!-- 替换行 -->
+            <div style="margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
+                <label style="font-size: 13px; font-weight: 500; min-width: 36px; color: var(--text-color, #666); flex-shrink: 0;">替换</label>
+                <input type="text" id="replaceTextFloat" placeholder="替换词为空时，执行删除" style="flex: 1; padding: 6px 10px; border: 1px solid var(--border-color, #ddd); border-radius: 4px; font-size: 13px; background: var(--input-bg, #f8f8f8); color: var(--text-color, #333); outline: none; transition: border-color 0.2s; min-width: 0;">
+            </div>
+            
+            <!-- 选项行 -->
+            <div style="display: flex; gap: 14px; flex-wrap: wrap; align-items: center; margin-bottom: 10px; padding: 6px 0; border-top: 1px solid var(--border-color, rgba(0,0,0,0.05)); border-bottom: 1px solid var(--border-color, rgba(0,0,0,0.05));">
+                <label style="display: flex; align-items: center; gap: 4px; font-size: 12px; cursor: pointer; color: var(--text-color, #666);">
+                    <input type="checkbox" id="regexCheckbox" style="margin: 0;"> 正则
+                </label>
+                <label style="display: flex; align-items: center; gap: 4px; font-size: 12px; cursor: pointer; color: var(--text-color, #666);">
+                    <input type="checkbox" id="caseSensitiveCheckbox" style="margin: 0;"> 区分大小写
+                </label>
+                <label style="display: flex; align-items: center; gap: 4px; font-size: 12px; cursor: pointer; color: var(--text-color, #666);">
+                    <input type="checkbox" id="wholeWordCheckbox" style="margin: 0;"> 全字匹配
+                </label>
+                <button id="findHelpBtn" title="正则表达式帮助" style="background: none; border: none; cursor: pointer; font-size: 13px; opacity: 0.4; padding: 2px 6px; border-radius: 4px; margin-left: auto; color: var(--text-color, #666);">❓</button>
+            </div>
+            
+            <!-- 按钮行 -->
+            <div style="display: flex; gap: 4px; flex-wrap: wrap; align-items: center;">
+                <button id="findCountBtn" style="padding: 3px 10px; font-size: 11px; background: #6c757d; color: white; border: none; border-radius: 3px; cursor: pointer; white-space: nowrap;">📊 统计</button>
+                <button id="replaceCurrentBtn" style="padding: 3px 10px; font-size: 11px; background: #6c757d; color: white; border: none; border-radius: 3px; cursor: pointer; white-space: nowrap;">替换</button>
+                <button id="replaceChapterBtn" style="padding: 3px 10px; font-size: 11px; background: #6c757d; color: white; border: none; border-radius: 3px; cursor: pointer; white-space: nowrap;">本章替换</button>
+                <button id="replaceAllBtn" style="padding: 3px 10px; font-size: 11px; background: #dc3545; color: white; border: none; border-radius: 3px; cursor: pointer; white-space: nowrap;">全书替换</button>
+            </div>
+            
+            <!-- 搜索结果区域 -->
+            <div id="searchResultArea" style="margin-top: 10px; padding: 8px 10px; background: var(--result-bg, #f8f8f8); border-radius: 4px; display: none; max-height: 180px; overflow-y: auto; font-size: 12px; white-space: pre-wrap; word-break: break-all; color: var(--text-color, #666); border: 1px solid var(--border-color, rgba(0,0,0,0.05));"></div>
+            
+            <!-- 正则表达式帮助 -->
+            <div id="regexHelpArea" style="margin-top: 8px; padding: 8px 10px; background: rgba(155,120,78,0.06); border-radius: 4px; display: none; font-size: 11px; color: #666; max-height: 130px; overflow-y: auto; border: 1px solid rgba(155,120,78,0.1);">
+                <div style="font-weight: 600; color: #9b784e; margin-bottom: 4px; font-size: 12px;">📖 正则表达式语法</div>
+                <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 2px 10px; font-size: 11px;">
+                    <span><code style="background: rgba(0,0,0,0.05); padding: 1px 5px; border-radius: 2px; font-size: 11px;">.</code></span>
+                    <span>匹配任意字符</span>
+                    <span><code style="background: rgba(0,0,0,0.05); padding: 1px 5px; border-radius: 2px; font-size: 11px;">*</code></span>
+                    <span>零次或多次</span>
+                    <span><code style="background: rgba(0,0,0,0.05); padding: 1px 5px; border-radius: 2px; font-size: 11px;">+</code></span>
+                    <span>一次或多次</span>
+                    <span><code style="background: rgba(0,0,0,0.05); padding: 1px 5px; border-radius: 2px; font-size: 11px;">?</code></span>
+                    <span>零次或一次</span>
+                    <span><code style="background: rgba(0,0,0,0.05); padding: 1px 5px; border-radius: 2px; font-size: 11px;">\d</code></span>
+                    <span>数字 [0-9]</span>
+                    <span><code style="background: rgba(0,0,0,0.05); padding: 1px 5px; border-radius: 2px; font-size: 11px;">\w</code></span>
+                    <span>字母数字下划线</span>
+                    <span><code style="background: rgba(0,0,0,0.05); padding: 1px 5px; border-radius: 2px; font-size: 11px;">\s</code></span>
+                    <span>空白字符</span>
+                    <span><code style="background: rgba(0,0,0,0.05); padding: 1px 5px; border-radius: 2px; font-size: 11px;">[abc]</code></span>
+                    <span>匹配 a/b/c</span>
+                    <span><code style="background: rgba(0,0,0,0.05); padding: 1px 5px; border-radius: 2px; font-size: 11px;">$1</code></span>
+                    <span>替换引用捕获组</span>
+                </div>
+            </div>
+        </div>
+    `;
     document.body.appendChild(win);
     
-    var header = win.querySelector('.find-header');
-    var isDragging = false, offsetX, offsetY;
-    header.addEventListener('mousedown', function(e) {
-        if (e.target.tagName === 'BUTTON') return;
+    // ===== 拖拽功能 =====
+    var isDragging = false;
+    var offsetX = 0;
+    var offsetY = 0;
+    
+    win.addEventListener('mousedown', function(e) {
+        // 如果点击的是按钮或输入框，不触发拖拽
+        if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT' || e.target.tagName === 'LABEL' || e.target.tagName === 'SELECT') {
+            return;
+        }
         isDragging = true;
-        offsetX = e.clientX - win.offsetLeft;
-        offsetY = e.clientY - win.offsetTop;
-        win.style.top = win.offsetTop + 'px';
-        win.style.left = win.offsetLeft + 'px';
+        var rect = win.getBoundingClientRect();
+        offsetX = e.clientX - rect.left;
+        offsetY = e.clientY - rect.top;
+        win.style.cursor = 'grabbing';
+        win.style.transition = 'none';
+        e.preventDefault();
     });
+    
     document.addEventListener('mousemove', function(e) {
         if (!isDragging) return;
-        var newLeft = e.clientX - offsetX, newTop = e.clientY - offsetY;
+        var newLeft = e.clientX - offsetX;
+        var newTop = e.clientY - offsetY;
         newLeft = Math.max(0, Math.min(newLeft, window.innerWidth - win.offsetWidth));
         newTop = Math.max(0, Math.min(newTop, window.innerHeight - win.offsetHeight));
         win.style.left = newLeft + 'px';
         win.style.top = newTop + 'px';
     });
-    document.addEventListener('mouseup', function() { isDragging = false; });
-    win.querySelector('.find-close-btn').onclick = function() { win.style.display = 'none'; };
     
-    win.querySelector('#replaceCurrentBtn').onclick = function() {
-        var findText = document.getElementById('findTextFloat').value;
-        var replaceText = document.getElementById('replaceTextFloat').value;
-        var editor = document.getElementById('editor');
-        if (!editor || !findText) { alert('请输入查找内容'); return; }
-        var content = editor.innerHTML;
-        if (content.indexOf(findText) !== -1) {
-            editor.innerHTML = content.replace(findText, replaceText);
-            if (typeof saveCurrentChapter === 'function') saveCurrentChapter();
-            alert('已替换');
-        } else { alert('未找到'); }
+    document.addEventListener('mouseup', function() {
+        if (isDragging) {
+            isDragging = false;
+            win.style.cursor = 'move';
+        }
+    });
+    
+    // 鼠标移入时显示可拖动光标
+    win.addEventListener('mouseenter', function() {
+        win.style.cursor = 'move';
+    });
+    
+    // 关闭按钮
+    win.querySelector('.find-close-btn').onclick = function() { 
+        win.style.display = 'none'; 
     };
     
-    win.querySelector('#replaceChapterBtn').onclick = function() {
+    // 正则表达式帮助按钮
+    document.getElementById('findHelpBtn').onclick = function() {
+        var helpArea = document.getElementById('regexHelpArea');
+        if (helpArea.style.display === 'block') {
+            helpArea.style.display = 'none';
+        } else {
+            helpArea.style.display = 'block';
+        }
+    };
+    
+    // 获取搜索选项
+    function getSearchOptions() {
+        return {
+            regex: document.getElementById('regexCheckbox').checked,
+            caseSensitive: document.getElementById('caseSensitiveCheckbox').checked,
+            wholeWord: document.getElementById('wholeWordCheckbox').checked
+        };
+    }
+    
+    // 构建正则表达式
+    function buildRegex(findText, options) {
+        if (!findText) return null;
+        var pattern = findText;
+        if (!options.regex) {
+            pattern = pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+        if (options.wholeWord) {
+            pattern = '\\b' + pattern + '\\b';
+        }
+        var flags = 'g';
+        if (!options.caseSensitive) {
+            flags += 'i';
+        }
+        try {
+            return new RegExp(pattern, flags);
+        } catch(e) {
+            return null;
+        }
+    }
+    
+    // 统计匹配数量
+    function countMatches(text, findText, options) {
+        if (!findText || !text) return 0;
+        var regex = buildRegex(findText, options);
+        if (!regex) return 0;
+        var matches = text.match(regex);
+        return matches ? matches.length : 0;
+    }
+    
+    // 统计按钮
+    document.getElementById('findCountBtn').onclick = function() {
+        var findText = document.getElementById('findTextFloat').value;
+        var editor = document.getElementById('editor');
+        if (!editor || !findText) {
+            alert('请输入查找内容');
+            return;
+        }
+        var options = getSearchOptions();
+        var content = editor.innerHTML;
+        var tempDiv = document.createElement('div');
+        tempDiv.innerHTML = content;
+        var textContent = tempDiv.innerText;
+        
+        var count = countMatches(textContent, findText, options);
+        var resultArea = document.getElementById('searchResultArea');
+        resultArea.style.display = 'block';
+        
+        if (count === 0) {
+            resultArea.innerHTML = '❌ 未找到匹配内容';
+            resultArea.style.color = '#dc3545';
+        } else {
+            var regex = buildRegex(findText, options);
+            if (regex) {
+                var matches = textContent.match(regex);
+                var preview = '✅ 找到 <strong>' + count + '</strong> 处匹配';
+                if (matches && matches.length > 0) {
+                    preview += '<br><br><span style="font-size:11px;color:#888;">匹配示例：</span><br>';
+                    var shown = 0;
+                    var matchIterator = textContent.matchAll(regex);
+                    for (var m of matchIterator) {
+                        if (shown >= 3) break;
+                        var idx = m.index;
+                        var start = Math.max(0, idx - 20);
+                        var end = Math.min(textContent.length, idx + m[0].length + 20);
+                        var context = textContent.substring(start, end);
+                        if (start > 0) context = '...' + context;
+                        if (end < textContent.length) context = context + '...';
+                        var highlighted = context.replace(regex, function(match) {
+                            return '<mark style="background:#ffeb3b;padding:0 4px;border-radius:2px;">' + match + '</mark>';
+                        });
+                        preview += '<div style="font-size:11px;color:#666;margin:2px 0;padding:2px 6px;background:rgba(0,0,0,0.03);border-radius:3px;">' + highlighted + '</div>';
+                        shown++;
+                    }
+                }
+                resultArea.innerHTML = preview;
+                resultArea.style.color = 'var(--text-color, #333)';
+            }
+        }
+    };
+    
+    // 替换当前（单个替换）
+    document.getElementById('replaceCurrentBtn').onclick = function() {
         var findText = document.getElementById('findTextFloat').value;
         var replaceText = document.getElementById('replaceTextFloat').value;
         var editor = document.getElementById('editor');
         if (!editor || !findText) { alert('请输入查找内容'); return; }
+        var options = getSearchOptions();
         var content = editor.innerHTML;
-        var regex = new RegExp(findText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
-        var matches = content.match(regex);
+        var tempDiv = document.createElement('div');
+        tempDiv.innerHTML = content;
+        var textContent = tempDiv.innerText;
+        
+        var regex = buildRegex(findText, options);
+        if (!regex) { alert('正则表达式无效'); return; }
+        
+        if (regex.test(textContent)) {
+            var match = regex.exec(textContent);
+            if (match) {
+                var newContent = textContent.replace(regex, replaceText);
+                var formattedHtml = newContent.replace(/\n/g, '<br>');
+                formattedHtml = '<p>' + formattedHtml.replace(/<br><br>/g, '</p><p>') + '</p>';
+                formattedHtml = formattedHtml.replace(/<p><\/p>/g, '');
+                editor.innerHTML = formattedHtml;
+                if (typeof saveCurrentChapter === 'function') saveCurrentChapter();
+                var resultArea = document.getElementById('searchResultArea');
+                resultArea.style.display = 'block';
+                resultArea.innerHTML = '✅ 已替换 1 处';
+                resultArea.style.color = '#28a745';
+            }
+        } else {
+            alert('未找到匹配内容');
+        }
+    };
+    
+    // 本章替换
+    document.getElementById('replaceChapterBtn').onclick = function() {
+        var findText = document.getElementById('findTextFloat').value;
+        var replaceText = document.getElementById('replaceTextFloat').value;
+        var editor = document.getElementById('editor');
+        if (!editor || !findText) { alert('请输入查找内容'); return; }
+        var options = getSearchOptions();
+        var content = editor.innerHTML;
+        var tempDiv = document.createElement('div');
+        tempDiv.innerHTML = content;
+        var textContent = tempDiv.innerText;
+        
+        var regex = buildRegex(findText, options);
+        if (!regex) { alert('正则表达式无效'); return; }
+        
+        var matches = textContent.match(regex);
         var count = matches ? matches.length : 0;
         if (count > 0) {
-            editor.innerHTML = content.replace(regex, replaceText);
+            var newContent = textContent.replace(regex, replaceText);
+            var formattedHtml = newContent.replace(/\n/g, '<br>');
+            formattedHtml = '<p>' + formattedHtml.replace(/<br><br>/g, '</p><p>') + '</p>';
+            formattedHtml = formattedHtml.replace(/<p><\/p>/g, '');
+            editor.innerHTML = formattedHtml;
             if (typeof saveCurrentChapter === 'function') saveCurrentChapter();
-            alert('已替换 ' + count + ' 处');
-        } else { alert('未找到'); }
+            var resultArea = document.getElementById('searchResultArea');
+            resultArea.style.display = 'block';
+            resultArea.innerHTML = '✅ 已替换 ' + count + ' 处';
+            resultArea.style.color = '#28a745';
+        } else {
+            alert('未找到匹配内容');
+        }
     };
     
-    win.querySelector('#replaceAllBtn').onclick = function() {
+    // 全书替换
+    document.getElementById('replaceAllBtn').onclick = function() {
         var findText = document.getElementById('findTextFloat').value;
         var replaceText = document.getElementById('replaceTextFloat').value;
         if (!findText) { alert('请输入查找内容'); return; }
+        var options = getSearchOptions();
+        var regex = buildRegex(findText, options);
+        if (!regex) { alert('正则表达式无效'); return; }
+        
         var totalCount = 0;
-        var regex = new RegExp(findText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
-        for (var i = 0; i < books.length; i++) {
-            var book = books[i];
+        var bookList = books;
+        for (var i = 0; i < bookList.length; i++) {
+            var book = bookList[i];
             if (book.volumes) {
                 for (var j = 0; j < book.volumes.length; j++) {
                     var vol = book.volumes[j];
@@ -1814,10 +2053,17 @@ function openFindReplacePanel() {
                         for (var k = 0; k < vol.chapters.length; k++) {
                             var ch = vol.chapters[k];
                             if (ch.content) {
-                                var matches = (ch.content.match(regex) || []).length;
-                                if (matches > 0) {
-                                    ch.content = ch.content.replace(regex, replaceText);
-                                    totalCount += matches;
+                                var tempDiv = document.createElement('div');
+                                tempDiv.innerHTML = ch.content;
+                                var textContent = tempDiv.innerText;
+                                var matches = textContent.match(regex);
+                                if (matches && matches.length > 0) {
+                                    var newContent = textContent.replace(regex, replaceText);
+                                    var formattedHtml = newContent.replace(/\n/g, '<br>');
+                                    formattedHtml = '<p>' + formattedHtml.replace(/<br><br>/g, '</p><p>') + '</p>';
+                                    formattedHtml = formattedHtml.replace(/<p><\/p>/g, '');
+                                    ch.content = formattedHtml;
+                                    totalCount += matches.length;
                                 }
                             }
                         }
@@ -1825,12 +2071,48 @@ function openFindReplacePanel() {
                 }
             }
         }
+        
         if (totalCount > 0) {
             if (typeof saveAllData === 'function') saveAllData();
             if (typeof renderCurrentChapter === 'function') renderCurrentChapter();
+            if (typeof updateWordCount === 'function') updateWordCount();
+            var resultArea = document.getElementById('searchResultArea');
+            resultArea.style.display = 'block';
+            resultArea.innerHTML = '✅ 全书已替换 ' + totalCount + ' 处';
+            resultArea.style.color = '#28a745';
             alert('全书已替换 ' + totalCount + ' 处');
-        } else { alert('未找到'); }
+        } else {
+            alert('未找到匹配内容');
+        }
     };
+    
+    // 快捷键：Ctrl+Enter 执行查找统计
+    document.getElementById('findTextFloat').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            document.getElementById('findCountBtn').click();
+        }
+    });
+    
+    // 切换正则表达式时，自动显示帮助
+    document.getElementById('regexCheckbox').addEventListener('change', function() {
+        var helpArea = document.getElementById('regexHelpArea');
+        if (this.checked) {
+            helpArea.style.display = 'block';
+        } else {
+            helpArea.style.display = 'none';
+        }
+    });
+    
+    // 输入框聚焦时边框高亮
+    win.querySelectorAll('input[type="text"]').forEach(function(input) {
+        input.addEventListener('focus', function() {
+            this.style.borderColor = '#9b784e';
+        });
+        input.addEventListener('blur', function() {
+            this.style.borderColor = 'var(--border-color, #ddd)';
+        });
+    });
     
     win.style.display = 'flex';
 }
