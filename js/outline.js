@@ -718,6 +718,8 @@ function updateNodeCount() {
 
 // ========== 通用侧边栏打开函数 ==========
 
+// ========== 通用侧边栏打开函数 ==========
+
 function openToolSidebar(tool) {
     console.log('openToolSidebar 被调用，工具:', tool);
     
@@ -740,13 +742,12 @@ function openToolSidebar(tool) {
     }
     
     var detailMain = document.querySelector('.detail-main');
-    if (detailMain) {
-        var panel = document.createElement('div');
-        panel.id = 'floatingToolPanel';
-        panel.setAttribute('data-tool', tool);
-        panel.style.cssText = 'width:420px;min-width:350px;max-width:550px;height:100%;background:var(--panel-bg, rgba(255,255,255,0.98));backdrop-filter:blur(12px);border-left:1px solid var(--border-color, rgba(0,0,0,0.08));border-right:1px solid var(--border-color, rgba(0,0,0,0.08));display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;z-index:10;transition:width 0.2s ease;box-shadow:-2px 0 12px rgba(0,0,0,0.08);';
-        
-        // 1. 先创建 panel
+    if (!detailMain) {
+        console.warn('detailMain 不存在');
+        return;
+    }
+    
+    // 1. 创建 panel（只创建一次！）
     var panel = document.createElement('div');
     panel.id = 'floatingToolPanel';
     panel.setAttribute('data-tool', tool);
@@ -760,106 +761,141 @@ function openToolSidebar(tool) {
         detailMain.appendChild(panel);
     }
     
-    // 3. 再设置 innerHTML 和渲染内容
+    // 3. 根据工具类型渲染内容
     switch(tool) {
         case 'outline':
             console.log('📋 大纲面板开始加载...');
             console.log('📋 当前 bookId:', currentBookId);
-            
             panel.innerHTML = renderCompactOutlinePanel();
-            console.log('📋 大纲面板 HTML 已渲染');
-            
             getOutlineData();
-            console.log('📋 大纲数据已加载，节点数:', outlineData.nodes.length);
-            
             renderCompactOutlineTree();
-            console.log('📋 大纲树已渲染');
-            
             updateCompactEditor();
-            console.log('📋 大纲编辑器已更新');
-            
             bindCompactOutlineEvents();
-            console.log('📋 大纲事件已绑定');
             break;
-    break;
-            case 'timeline':
-                panel.innerHTML = renderCompactTimelinePanel();
-                getTimelineData();
-                renderCompactTimelineTree();
-                updateCompactTimelineEditor();
-                bindCompactTimelineEvents();
-                break;
-            case 'characters':
-                panel.innerHTML = renderCompactCharacterPanel();
-                getCharacterData();
-                renderCompactCharacterTree();
-                updateCompactCharacterEditor();
-                bindCompactCharacterEvents();
-                break;
-            case 'setting':
-                panel.innerHTML = renderCompactSettingPanel();
-                getSettingData();
-                renderCompactSettingTree();
-                updateCompactSettingEditor();
-                bindCompactSettingEvents();
-                break;
-            case 'relation':
-                panel.innerHTML = renderCompactRelationPanel();
-                getRelationData();
-                renderCompactRelationEntities();
-                renderCompactRelationList();
-                setTimeout(function() {
-                    initCompactRelationCanvas();
-                }, 200);
-                bindCompactRelationEvents();
-                break;
-            // 在 outline.js 中修改 openToolSidebar 的 whiteboard 和 namegen 分支
-
-case 'whiteboard':
-    // 直接调用，不检查函数是否存在
+            
+        case 'timeline':
+            panel.innerHTML = renderCompactTimelinePanel();
+            getTimelineData();
+            renderCompactTimelineTree();
+            updateCompactTimelineEditor();
+            bindCompactTimelineEvents();
+            break;
+            
+        case 'characters':
+            panel.innerHTML = renderCompactCharacterPanel();
+            getCharacterData();
+            renderCompactCharacterTree();
+            updateCompactCharacterEditor();
+            bindCompactCharacterEvents();
+            break;
+            
+        case 'setting':
+            panel.innerHTML = renderCompactSettingPanel();
+            getSettingData();
+            renderCompactSettingTree();
+            updateCompactSettingEditor();
+            bindCompactSettingEvents();
+            break;
+            
+        case 'relation':
+            panel.innerHTML = renderCompactRelationPanel();
+            getRelationData();
+            renderCompactRelationEntities();
+            renderCompactRelationList();
+            setTimeout(function() {
+                initCompactRelationCanvas();
+            }, 200);
+            bindCompactRelationEvents();
+            break;
+            
+        case 'whiteboard':
+            try {
+                panel.innerHTML = renderCompactWhiteboardPanel();
+                getWhiteboardData();
+                renderCompactWhiteboardCards();
+                renderCompactWhiteboardLines();
+                bindCompactWhiteboardEvents();
+            } catch(e) {
+                console.error('白板渲染失败:', e);
+                panel.innerHTML = '<div style="padding:20px;text-align:center;color:#888;">白板加载失败，请刷新后重试</div>';
+            }
+            break;
+            
+        case 'namegen':
+            try {
+                panel.innerHTML = renderCompactNameGenPanel();
+                loadNameGenSettings();
+                renderCompactNameGenFavorites();
+                bindCompactNameGenEvents();
+            } catch(e) {
+                console.error('起名生成器渲染失败:', e);
+                panel.innerHTML = '<div style="padding:20px;text-align:center;color:#888;">起名生成器加载失败，请刷新后重试</div>';
+            }
+            break;
+            
+        case 'notes':
+            panel.innerHTML = renderCompactNotePanel();
+            getNoteData();
+            renderCompactNoteTree();
+            updateCompactNoteEditor();
+            bindCompactNoteEvents();
+            break;
+            
+        case 'dictionary':
+    console.log('📚 词典面板开始加载...');
+    console.log('📚 当前 bookId:', currentBookId);
+    
+    // 渲染面板 HTML
     try {
-        panel.innerHTML = renderCompactWhiteboardPanel();
-        getWhiteboardData();
-        renderCompactWhiteboardCards();
-        renderCompactWhiteboardLines();
-        bindCompactWhiteboardEvents();
-    } catch(e) {
-        console.error('白板渲染失败:', e);
-        panel.innerHTML = '<div style="padding:20px;text-align:center;color:#888;">白板加载失败，请刷新后重试</div>';
-    }
-    break;
-case 'namegen':
-    try {
-        panel.innerHTML = renderCompactNameGenPanel();
-        loadNameGenSettings();
-        renderCompactNameGenFavorites();
-        bindCompactNameGenEvents();
-    } catch(e) {
-        console.error('起名生成器渲染失败:', e);
-        panel.innerHTML = '<div style="padding:20px;text-align:center;color:#888;">起名生成器加载失败，请刷新后重试</div>';
-    }
-    break;
-            case 'notes':
-                panel.innerHTML = renderCompactNotePanel();
-                getNoteData();
-                renderCompactNoteTree();
-                updateCompactNoteEditor();
-                bindCompactNoteEvents();
-                break;
-            default:
-                console.warn('未知工具类型:', tool);
-                panel.innerHTML = '<div style="padding:20px;text-align:center;color:#888;">工具加载中...</div>';
+        if (typeof renderCompactDictionaryPanel === 'function') {
+            panel.innerHTML = renderCompactDictionaryPanel();
+            console.log('📚 词典面板 HTML 已设置');
+        } else {
+            console.error('❌ renderCompactDictionaryPanel 不是函数');
+            panel.innerHTML = '<div style="padding:20px;text-align:center;color:#888;">词典加载失败：renderCompactDictionaryPanel 未定义</div>';
+            break;
         }
         
-        var editor = document.querySelector('.detail-editor');
-        if (editor && editor.nextSibling) {
-            detailMain.insertBefore(panel, editor.nextSibling);
+        // 加载数据
+        if (typeof getDictionaryData === 'function') {
+            getDictionaryData();
+            console.log('📚 词典数据已加载，词条数:', dictionaryData.entries.length);
         } else {
-            detailMain.appendChild(panel);
+            console.error('❌ getDictionaryData 不是函数');
         }
+        
+        // 渲染树 - 延迟执行以确保 DOM 已更新
+        setTimeout(function() {
+            if (typeof renderCompactDictionaryTree === 'function') {
+                renderCompactDictionaryTree();
+                console.log('📚 词典树已渲染');
+            } else {
+                console.error('❌ renderCompactDictionaryTree 不是函数');
+            }
+            
+            if (typeof updateCompactDictionaryEditor === 'function') {
+                updateCompactDictionaryEditor();
+                console.log('📚 词典编辑器已更新');
+            }
+            
+            if (typeof bindCompactDictionaryEvents === 'function') {
+                bindCompactDictionaryEvents();
+                console.log('📚 词典事件已绑定');
+            }
+        }, 50);
+        
+    } catch(e) {
+        console.error('❌ 词典面板渲染失败:', e);
+        panel.innerHTML = '<div style="padding:20px;text-align:center;color:#888;">词典加载失败：' + e.message + '</div>';
+    }
+    break;
+            
+        default:
+            console.warn('未知工具类型:', tool);
+            panel.innerHTML = '<div style="padding:20px;text-align:center;color:#888;">工具加载中...</div>';
     }
     
-    // 高亮当前工具
+    // 4. 高亮当前工具
     setTimeout(function() {
         var toolItems = document.querySelectorAll('.sidebar-tool-item');
         toolItems.forEach(function(item) {

@@ -322,9 +322,12 @@ function renderBookEditor(bookId) {
         '</div>' +
         '</div>' +
         '<div class="left-sidebar" id="leftSidebar" style="width:280px;">' +
-        '<div class="left-sidebar-header">' +
-        '<span> 章节</span>' +
-        '<button class="toggle-left-sidebar-btn" id="toggleLeftSidebarBtn" title="收起">◀</button>' +
+        '<div class="left-sidebar-header" style="display:flex; align-items:center; justify-content:space-between; padding:8px 12px; background:var(--editor-bg, rgba(255, 255, 255, 0.85)); border-bottom:1px solid var(--border-color, rgba(0,0,0,0.06)); flex-shrink:0; gap:8px;">' +
+    '<span style="font-weight:600; font-size:13px; flex-shrink:0;">📖 章节</span>' +
+    '<div style="flex:1; position:relative; min-width:60px;">' +
+        '<input type="text" id="chapterSearchInput" placeholder="搜索章节..." style="width:100%; padding:4px 8px 4px 28px; border:1px solid var(--border-color, rgba(0,0,0,0.08)); border-radius:6px; font-size:12px; background:var(--input-bg, rgba(255,255,255,0.6)) url(\'icons/search.svg\') no-repeat 6px center; background-size:14px 14px; outline:none; color:var(--text-color, #333); transition:border-color 0.2s;">' +
+    '</div>' +
+    '<button class="toggle-left-sidebar-btn" id="toggleLeftSidebarBtn" title="收起/展开章节栏" style="background:none; border:none; cursor:pointer; font-size:12px; padding:4px 6px; border-radius:4px; color:var(--text-color, #666); flex-shrink:0;">◀</button>' +
         '</div>' +
         '<div class="left-sidebar-content" id="leftSidebarContent">' +
         '<div class="chapters-header">' +
@@ -428,6 +431,13 @@ function renderBookEditor(bookId) {
 '<div class="sidebar-tool-icon"><img src="icons/notes.svg" width="24" height="24" alt="笔记"></div>' +
 '<div class="sidebar-tool-label">笔记</div>' +
 '<button class="tool-expand-btn" data-tool="notes" title="在新标签页打开" style="background:none; border:none; cursor:pointer; font-size:12px; opacity:0.4; margin-left:auto;">⤢</button>' +
+'</div>' +
+// 词典
+'<div class="sidebar-tool-item" data-tool="dictionary">' +
+'<div class="sidebar-tool-icon"><img src="icons/library.svg" width="24" height="24" alt="词典"></div>' +
+'<div class="sidebar-tool-label">词典</div>' +
+'<button class="tool-expand-btn" data-tool="dictionary" title="在新标签页打开" style="background:none; border:none; cursor:pointer; font-size:12px; opacity:0.4; margin-left:auto;">⤢</button>' +
+'</div>'
         '</div>' +  // 结束 right-sidebar
         '</div>' +  // 结束 detail-main
         '</div>';  // 结束 book-detail-page
@@ -451,6 +461,8 @@ console.log('openNameGenSidebar:', typeof window.openNameGenSidebar);
     renderVolumeList();
     renderCurrentChapter();
     bindEditorEvents();
+    // 初始化章节搜索
+    initChapterSearch();
     loadEditorSettings();
     initRightSidebar();
     setTimeout(ensureRightSidebarPosition, 200);
@@ -897,7 +909,8 @@ var toolSidebarMap = {
     relation: window.openRelationSidebar || function() { console.warn('关系图侧边栏未加载'); },
     whiteboard: window.openWhiteboardSidebar || function() { console.warn('白板侧边栏未加载'); },
     namegen: window.openNameGenSidebar || function() { console.warn('起名侧边栏未加载'); },
-    notes: window.openNoteSidebar || function() { console.warn('笔记侧边栏未加载'); }
+    notes: window.openNoteSidebar || function() { console.warn('笔记侧边栏未加载'); },
+    dictionary: window.openDictionarySidebar || function() { console.warn('词典侧边栏未加载'); }
 };
 
 // 工具 -> 新窗口打开函数映射
@@ -925,6 +938,9 @@ var toolNewWindowMap = {
     },
     notes: window.openNoteInNewWindow || function() { 
         window.open('html/notes.html', '_blank', 'width=1200,height=800,resizable=yes'); 
+    },
+    dictionary: window.openDictionaryInNewWindow || function() { 
+        window.open('html/dictionary.html', '_blank', 'width=1200,height=800,resizable=yes'); 
     }
 };
 
@@ -968,6 +984,7 @@ for (var i = 0; i < tools.length; i++) {
         
         var tool = this.getAttribute('data-tool');
         var openFn = toolSidebarMap[tool];
+        console.log('🔧 点击工具:', tool);  // ← 添加这行日志
         
         if (typeof openFn !== 'function') {
             console.warn('未找到工具侧边栏函数:', tool);
@@ -1622,6 +1639,105 @@ function bindEditorEvents() {
         };
     }
 }
+
+// ========== 章节搜索功能 ==========
+function initChapterSearch() {
+    var searchInput = document.getElementById('chapterSearchInput');
+    if (!searchInput) return;
+    
+    searchInput.oninput = function() {
+        var keyword = this.value.trim().toLowerCase();
+        var chapterItems = document.querySelectorAll('.chapter-item');
+        var volumeItems = document.querySelectorAll('.volume-item');
+        
+        if (!keyword) {
+            // 显示所有章节和分卷
+            chapterItems.forEach(function(item) {
+                item.style.display = '';
+            });
+            volumeItems.forEach(function(item) {
+                item.style.display = '';
+                // 展开所有分卷
+                var chapterList = item.querySelector('.chapter-list');
+                if (chapterList) chapterList.style.display = 'block';
+            });
+            return;
+        }
+        
+        // 遍历所有章节，检查是否匹配
+        var matchedChapterIds = [];
+        chapterItems.forEach(function(item) {
+            var titleEl = item.querySelector('.chapter-title');
+            var title = titleEl ? titleEl.textContent.toLowerCase() : '';
+            var isMatch = title.indexOf(keyword) !== -1;
+            
+            if (isMatch) {
+                item.style.display = '';
+                var chapterId = item.getAttribute('data-chapter-id');
+                if (chapterId) matchedChapterIds.push(chapterId);
+            } else {
+                item.style.display = 'none';
+            }
+        });
+        
+        // 处理分卷显示：如果分卷下有匹配的章节，显示该分卷
+        volumeItems.forEach(function(item) {
+            var hasMatch = false;
+            var chapters = item.querySelectorAll('.chapter-item');
+            chapters.forEach(function(ch) {
+                if (ch.style.display !== 'none') {
+                    hasMatch = true;
+                }
+            });
+            
+            if (hasMatch) {
+                item.style.display = '';
+                // 展开匹配的分卷
+                var chapterList = item.querySelector('.chapter-list');
+                if (chapterList) chapterList.style.display = 'block';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    };
+    
+    // 搜索框获得焦点时自动清空提示
+    searchInput.onfocus = function() {
+        if (this.value === '') {
+            this.placeholder = '输入章节名搜索...';
+        }
+    };
+    searchInput.onblur = function() {
+        if (this.value === '') {
+            this.placeholder = '搜索章节...';
+        }
+    };
+    
+    // 键盘快捷键：Ctrl+F 聚焦搜索框
+    document.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+            // 检查是否在书籍编辑页面
+            var activePage = document.querySelector('.page.active');
+            if (activePage && activePage.getAttribute('data-page') && activePage.getAttribute('data-page').indexOf('book_') === 0) {
+                e.preventDefault();
+                if (searchInput) {
+                    searchInput.focus();
+                    searchInput.select();
+                }
+            }
+        }
+        // ESC 键清空搜索
+        if (e.key === 'Escape' && document.activeElement === searchInput) {
+            searchInput.value = '';
+            searchInput.oninput();
+            searchInput.blur();
+        }
+    });
+}
+
+// 在 initBookEditor 函数中调用
+// 在 bindEditorEvents(); 之后添加
+initChapterSearch();
 
 function initRightSidebar() {
     if (document.getElementById('rightSidebar')) return;

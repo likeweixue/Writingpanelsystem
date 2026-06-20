@@ -3923,3 +3923,530 @@ body.theme-dark .library-book-item .book-meta {
     font-size: 13px !important;
     padding: 4px 0 !important;
 }
+
+/* 章节栏头部 - 与编辑器背景协调 */
+.left-sidebar-header {
+    background: rgba(255, 255, 255, 0.85) !important;
+    backdrop-filter: blur(8px) !important;
+}
+
+/* 护眼绿主题 */
+body.theme-eye .left-sidebar-header {
+    background: rgba(200, 219, 197, 0.85) !important;
+    backdrop-filter: blur(8px) !important;
+}
+
+/* 经典黄主题 */
+body.theme-warm .left-sidebar-header {
+    background: rgba(223, 213, 189, 0.85) !important;
+    backdrop-filter: blur(8px) !important;
+}
+
+/* 暗夜黑主题 */
+body.theme-dark .left-sidebar-header {
+    background: rgba(30, 30, 46, 0.85) !important;
+    backdrop-filter: blur(8px) !important;
+}
+
+/* Open 主题 */
+body.theme-open .left-sidebar-header {
+    background: rgba(255, 255, 255, 0.25) !important;
+    backdrop-filter: blur(20px) !important;
+}
+
+/* ========== 书库和历史面板头部 - 与编辑器背景协调 ========== */
+.library-sidebar-header,
+.history-sidebar-header {
+    background: rgba(255, 255, 255, 0.85) !important;
+    backdrop-filter: blur(8px) !important;
+}
+
+/* 护眼绿主题 */
+body.theme-eye .library-sidebar-header,
+body.theme-eye .history-sidebar-header {
+    background: rgba(200, 219, 197, 0.85) !important;
+    backdrop-filter: blur(8px) !important;
+}
+
+/* 经典黄主题 */
+body.theme-warm .library-sidebar-header,
+body.theme-warm .history-sidebar-header {
+    background: rgba(223, 213, 189, 0.85) !important;
+    backdrop-filter: blur(8px) !important;
+}
+
+/* 暗夜黑主题 */
+body.theme-dark .library-sidebar-header,
+body.theme-dark .history-sidebar-header {
+    background: rgba(30, 30, 46, 0.85) !important;
+    backdrop-filter: blur(8px) !important;
+}
+
+/* Open 主题 */
+body.theme-open .library-sidebar-header,
+body.theme-open .history-sidebar-header {
+    background: rgba(255, 255, 255, 0.25) !important;
+    backdrop-filter: blur(20px) !important;
+}
+
+/* 自定义背景时透明 */
+body.has-custom-bg .library-sidebar-header,
+body.has-custom-bg .history-sidebar-header {
+    background: rgba(255, 255, 255, 0.15) !important;
+    backdrop-filter: blur(20px) !important;
+}
+
+body.theme-dark.has-custom-bg .library-sidebar-header,
+body.theme-dark.has-custom-bg .history-sidebar-header {
+    background: rgba(30, 30, 46, 0.2) !important;
+    backdrop-filter: blur(20px) !important;
+}
+
+/* ========== 移除章节栏、书库、历史记录面板的头部边框线 ========== */
+
+/* 章节栏头部边框线去掉 */
+.left-sidebar-header {
+    border-bottom: none !important;
+}
+
+/* 书库面板头部边框线去掉 */
+.library-sidebar-header {
+    border-bottom: none !important;
+}
+
+/* 历史记录面板头部边框线去掉 */
+.history-sidebar-header {
+    border-bottom: none !important;
+}
+
+/* 可选：如果希望保留一点点分割效果，用阴影替代边框 */
+.left-sidebar-header,
+.library-sidebar-header,
+.history-sidebar-header {
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* ========== 不同主题下的适配 ========== */
+
+/* 护眼绿主题 */
+body.theme-eye .left-sidebar-header,
+body.theme-eye .library-sidebar-header,
+body.theme-eye .history-sidebar-header {
+    box-shadow: 0 1px 2px rgba(44, 62, 47, 0) !important;
+}
+
+/* 经典黄主题 */
+body.theme-warm .left-sidebar-header,
+body.theme-warm .library-sidebar-header,
+body.theme-warm .history-sidebar-header {
+    box-shadow: 0 1px 2px rgba(74, 59, 44, 0) !important;
+}
+
+/* 暗夜黑主题 */
+body.theme-dark .left-sidebar-header,
+body.theme-dark .library-sidebar-header,
+body.theme-dark .history-sidebar-header {
+    box-shadow: 0 1px 2px rgba(255, 255, 255, 0) !important;
+}
+
+/* Open 主题 */
+body.theme-open .left-sidebar-header,
+body.theme-open .library-sidebar-header,
+body.theme-open .history-sidebar-header {
+    box-shadow: none !important;
+}
+
+/* 自定义背景时 */
+body.has-custom-bg .left-sidebar-header,
+body.has-custom-bg .library-sidebar-header,
+body.has-custom-bg .history-sidebar-header {
+    box-shadow: 0 1px 2px rgba(255, 255, 255, 0) !important;
+}
+
+/* ========== 自定义背景时，让所有面板完全透明 ========== */
+
+/* 当有自定义背景时，标题输入框透明 */
+body.has-custom-bg .title-input {
+    background: transparent !important;
+    backdrop-filter: none !important;
+    border: none !important;
+}
+
+/* 当有自定义背景时，编辑器内容区透明 */
+body.has-custom-bg .editor-content {
+    background: transparent !important;
+    backdrop-filter: none !important;
+}
+
+/* 当有自定义背景时，章节栏头部透明 */
+body.has-custom-bg .left-sidebar-header {
+    background: transparent !important;
+    backdrop-filter: none !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+/* 当有自定义背景时，标签页透明 */
+body.has-custom-bg .tab {
+    background: rgba(255, 255, 255, 0.15) !important;
+    backdrop-filter: blur(10px) !important;
+}
+
+body.has-custom-bg .tab.active {
+    background: rgba(255, 255, 255, 0.25) !important;
+    backdrop-filter: blur(10px) !important;
+}
+
+/* 当有自定义背景时，标签栏容器透明 */
+body.has-custom-bg .tabs-container {
+    background: rgba(255, 255, 255, 0.1) !important;
+    backdrop-filter: blur(10px) !important;
+}
+
+/* 当有自定义背景时，工具栏透明 */
+body.has-custom-bg .main-toolbar {
+    background: rgba(255, 255, 255, 0.1) !important;
+    backdrop-filter: blur(10px) !important;
+}
+
+/* 当有自定义背景时，章节栏整体透明 */
+body.has-custom-bg .left-sidebar {
+    background: transparent !important;
+    backdrop-filter: none !important;
+}
+
+/* 当有自定义背景时，章节列表透明 */
+body.has-custom-bg .volume-list {
+    background: transparent !important;
+}
+
+/* 当有自定义背景时，分卷头部透明 */
+body.has-custom-bg .volume-header {
+    background: rgba(255, 255, 255, 0.08) !important;
+    backdrop-filter: blur(5px) !important;
+}
+
+/* 当有自定义背景时，章节项透明 */
+body.has-custom-bg .chapter-item {
+    background: transparent !important;
+}
+
+body.has-custom-bg .chapter-item:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+}
+
+body.has-custom-bg .chapter-item.active {
+    background: rgba(255, 255, 255, 0.15) !important;
+}
+
+/* 当有自定义背景时，编辑器整体透明 */
+body.has-custom-bg .detail-editor {
+    background: transparent !important;
+    backdrop-filter: none !important;
+}
+
+/* 当有自定义背景时，状态栏透明 */
+body.has-custom-bg .status-bar {
+    background: rgba(255, 255, 255, 0.08) !important;
+    backdrop-filter: blur(5px) !important;
+}
+
+/* 当有自定义背景时，右侧边栏透明 */
+body.has-custom-bg .right-sidebar {
+    background: transparent !important;
+    backdrop-filter: none !important;
+}
+
+/* 当有自定义背景时，工具按钮透明 */
+body.has-custom-bg .sidebar-tool-item {
+    background: rgba(255, 255, 255, 0.06) !important;
+    backdrop-filter: blur(5px) !important;
+}
+
+body.has-custom-bg .sidebar-tool-item:hover {
+    background: rgba(255, 255, 255, 0.15) !important;
+}
+
+/* 当有自定义背景时，图标边栏透明 */
+body.has-custom-bg .icon-sidebar {
+    background: transparent !important;
+    backdrop-filter: none !important;
+}
+
+body.has-custom-bg .icon-sidebar-item:hover {
+    background: rgba(255, 255, 255, 0.15) !important;
+}
+
+/* 当有自定义背景时，书库面板透明 */
+body.has-custom-bg .library-sidebar {
+    background: transparent !important;
+    backdrop-filter: none !important;
+}
+
+body.has-custom-bg .library-sidebar-header {
+    background: transparent !important;
+    backdrop-filter: none !important;
+}
+
+body.has-custom-bg .library-book-item {
+    background: rgba(255, 255, 255, 0.06) !important;
+    backdrop-filter: blur(5px) !important;
+}
+
+body.has-custom-bg .library-book-item:hover {
+    background: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* 当有自定义背景时，历史面板透明 */
+body.has-custom-bg .history-sidebar {
+    background: transparent !important;
+    backdrop-filter: none !important;
+}
+
+body.has-custom-bg .history-sidebar-header {
+    background: transparent !important;
+    backdrop-filter: none !important;
+}
+
+body.has-custom-bg .history-item {
+    background: rgba(255, 255, 255, 0.06) !important;
+    backdrop-filter: blur(5px) !important;
+}
+
+body.has-custom-bg .history-item:hover {
+    background: rgba(255, 255, 255, 0.12) !important;
+}
+
+body.has-custom-bg .history-item.history-current {
+    background: rgba(255, 255, 255, 0.15) !important;
+}
+
+/* 当有自定义背景时，浮动工具面板透明 */
+body.has-custom-bg #floatingToolPanel {
+    background: rgba(255, 255, 255, 0.12) !important;
+    backdrop-filter: blur(20px) !important;
+}
+
+/* 当有自定义背景时，章节栏头部搜索框透明 */
+body.has-custom-bg #chapterSearchInput {
+    background: rgba(255, 255, 255, 0.15) !important;
+    backdrop-filter: blur(5px) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* 当有自定义背景时，章节栏按钮透明 */
+body.has-custom-bg .top-actions button {
+    background: rgba(255, 255, 255, 0.12) !important;
+    backdrop-filter: blur(5px) !important;
+    color: #fff !important;
+}
+
+body.has-custom-bg .top-actions button:hover {
+    background: rgba(255, 255, 255, 0.25) !important;
+}
+
+/* 当有自定义背景时，批量操作按钮透明 */
+body.has-custom-bg .batch-actions button {
+    background: rgba(255, 255, 255, 0.12) !important;
+    backdrop-filter: blur(5px) !important;
+    color: #fff !important;
+}
+
+body.has-custom-bg .batch-actions button:hover {
+    background: rgba(255, 255, 255, 0.25) !important;
+}
+
+/* 当有自定义背景时，文本颜色调亮以适应深色背景 */
+body.has-custom-bg .left-sidebar-header span,
+body.has-custom-bg .left-sidebar-header input,
+body.has-custom-bg .left-sidebar-header button,
+body.has-custom-bg .volume-title,
+body.has-custom-bg .chapter-title,
+body.has-custom-bg .chapter-item,
+body.has-custom-bg .status-bar span,
+body.has-custom-bg .status-bar div,
+body.has-custom-bg .title-input,
+body.has-custom-bg .editor-content,
+body.has-custom-bg .sidebar-tool-label,
+body.has-custom-bg .library-book-item div,
+body.has-custom-bg .history-item div {
+    color: #fff !important;
+}
+
+/* 当有自定义背景时，标题输入框文字颜色 */
+body.has-custom-bg .title-input {
+    color: #fff !important;
+}
+
+body.has-custom-bg .title-input::placeholder {
+    color: rgba(255, 255, 255, 0.6) !important;
+}
+
+/* 当有自定义背景时，编辑器占位符 */
+body.has-custom-bg .editor-content {
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* 当有自定义背景时，标签页文字颜色 */
+body.has-custom-bg .tab .tab-title {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+body.has-custom-bg .tab.active .tab-title {
+    color: #fff !important;
+}
+
+/* 当有自定义背景时，工具栏按钮文字颜色 */
+body.has-custom-bg .toolbar-btn {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+body.has-custom-bg .toolbar-btn:hover {
+    color: #fff !important;
+    background: rgba(255, 255, 255, 0.15) !important;
+}
+
+/* ========== 右侧边栏工具按钮 - 两行布局（图标+文字） ========== */
+
+/* 右侧边栏宽度 */
+.right-sidebar {
+    width: 80px !important;
+    min-width: 70px !important;
+    max-width: 100px !important;
+}
+
+/* 右侧边栏内容容器 */
+.right-sidebar .right-sidebar-content {
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 12px 6px !important;
+    gap: 12px !important;  /* 工具之间的间距 */
+}
+
+/* 工具按钮 - 两行布局 */
+.right-sidebar .sidebar-tool-item {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 10px 4px !important;
+    margin: 0 !important;
+    border-radius: 8px !important;
+    gap: 4px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    transition: all 0.2s ease !important;
+    cursor: pointer !important;
+    position: relative !important;
+    min-height: 56px !important;
+}
+
+/* 图标 - 大一点 */
+.right-sidebar .sidebar-tool-icon {
+    font-size: 22px !important;
+    margin-bottom: 0 !important;
+    flex-shrink: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    line-height: 1 !important;
+}
+
+.right-sidebar .sidebar-tool-icon img {
+    width: 22px !important;
+    height: 22px !important;
+}
+
+/* 文字标签 - 在图标下方 */
+.right-sidebar .sidebar-tool-label {
+    font-size: 11px !important;
+    display: block !important;
+    opacity: 0.8 !important;
+    font-weight: normal !important;
+    text-align: center !important;
+    line-height: 1.2 !important;
+    letter-spacing: 0.5px !important;
+}
+
+/* 展开按钮（⤢）- 放在右上角 */
+.right-sidebar .tool-expand-btn {
+    position: absolute !important;
+    top: 2px !important;
+    right: 4px !important;
+    padding: 2px 4px !important;
+    font-size: 10px !important;
+    opacity: 0.2 !important;
+    background: none !important;
+    border: none !important;
+    cursor: pointer !important;
+    transition: opacity 0.2s !important;
+    z-index: 2 !important;
+}
+
+.right-sidebar .tool-expand-btn:hover {
+    opacity: 0.8 !important;
+}
+
+/* 悬停效果 */
+.right-sidebar .sidebar-tool-item:hover {
+    background: rgba(0, 0, 0, 0.06) !important;
+    border-radius: 8px !important;
+}
+
+.right-sidebar .sidebar-tool-item:hover .tool-expand-btn {
+    opacity: 0.8 !important;
+}
+
+/* 激活状态 */
+.right-sidebar .sidebar-tool-item.active {
+    background: rgba(0, 122, 255, 0.12) !important;
+    color: #007aff !important;
+}
+
+/* ========== 暗夜黑主题适配 ========== */
+body.theme-dark .right-sidebar .sidebar-tool-item:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+}
+
+body.theme-dark .right-sidebar .sidebar-tool-item.active {
+    background: rgba(0, 122, 255, 0.2) !important;
+}
+
+/* ========== 护眼绿主题适配 ========== */
+body.theme-eye .right-sidebar .sidebar-tool-item:hover {
+    background: rgba(44, 62, 47, 0.08) !important;
+}
+
+/* ========== 经典黄主题适配 ========== */
+body.theme-warm .right-sidebar .sidebar-tool-item:hover {
+    background: rgba(74, 59, 44, 0.08) !important;
+}
+
+/* ========== Open 主题适配 ========== */
+body.theme-open .right-sidebar {
+    width: 90px !important;
+    min-width: 80px !important;
+}
+
+body.theme-open .right-sidebar .sidebar-tool-item {
+    background: rgba(255, 255, 255, 0.06) !important;
+    border-radius: 10px !important;
+}
+
+body.theme-open .right-sidebar .sidebar-tool-item:hover {
+    background: rgba(255, 255, 255, 0.15) !important;
+}
+
+/* ========== 自定义背景时适配 ========== */
+body.has-custom-bg .right-sidebar .sidebar-tool-item {
+    background: rgba(255, 255, 255, 0.06) !important;
+    backdrop-filter: blur(5px) !important;
+}
+
+body.has-custom-bg .right-sidebar .sidebar-tool-item:hover {
+    background: rgba(255, 255, 255, 0.15) !important;
+}
+
+/* ========== 右侧边栏头部隐藏 ========== */
+.right-sidebar .right-sidebar-header {
+    display: none !important;
+}
