@@ -25,6 +25,12 @@
       "target": "nsis",
       "icon": "icon.ico"
     },
+    "scripts": {
+    "start": "electron .",
+    "build-win": "electron-builder --win --x64",
+    "build-mac": "electron-builder --mac --x64",
+    "build-linux": "electron-builder --linux"
+  },
     "mac": {
       "target": "dmg",
       "icon": "icon.icns"
