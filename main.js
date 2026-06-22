@@ -265,7 +265,7 @@ function createWindow() {
                         dialog.showMessageBox(mainWindow, {
                             type: 'info',
                             title: '关于 写作面板系统 Writingpanelsystem',
-                            message: '写作面板系统 Writingpanelsystem 版本 1.9.0\n\n免费，开源，自由的写作软件n\n开发者@麻昌生',
+                            message: '写作面板系统 Writingpanelsystem 版本 1.9.1\n\n免费，开源，自由的写作软件n\n开发者@麻昌生',
                             detail: 'GitHub: https://github.com/likeweixue/Writingpanelsystem\n\n备份位置：~/Documents/写作面板系统备份/'
                         });
                     }

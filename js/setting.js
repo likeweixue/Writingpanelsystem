@@ -960,83 +960,34 @@ function bindCompactSettingEvents() {
 
 function openSettingInNewWindow() {
     closeSettingFloatingPanel();
-    var html = `<!DOCTYPE html>
-<html>
-<head><meta charset="UTF-8"><title>⚙️ 设定 - 全屏编辑</title>
-<style>
-* { margin:0; padding:0; box-sizing:border-box; }
-body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:#f0f2f5; height:100vh; overflow:hidden; }
-.setting-container { display:flex; height:100vh; width:100%; }
-.setting-sidebar { width:300px; min-width:220px; max-width:450px; background:rgba(255,255,255,0.95); backdrop-filter:blur(8px); border-right:1px solid rgba(0,0,0,0.08); display:flex; flex-direction:column; flex-shrink:0; overflow:hidden; }
-.setting-sidebar-header { display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:rgba(0,0,0,0.03); border-bottom:1px solid rgba(0,0,0,0.08); flex-shrink:0; }
-.setting-sidebar-header span { font-weight:600; font-size:15px; }
-.setting-sidebar-header button { background:none; border:none; cursor:pointer; font-size:16px; padding:0 4px; }
-.setting-search { padding:8px 12px; flex-shrink:0; }
-.setting-search input { width:100%; padding:6px 10px; border:1px solid #ddd; border-radius:6px; font-size:13px; background:#f8f8f8; }
-.setting-add-buttons { display:flex; gap:6px; padding:0 12px 8px 12px; flex-shrink:0; }
-.setting-add-buttons button { flex:1; border:none; border-radius:4px; cursor:pointer; font-size:12px; padding:5px 0; font-weight:500; color:white; }
-.setting-add-buttons .add-setting { background:#28a745; }
-.setting-add-buttons .add-folder { background:#9b784e; }
-#settingTree { flex:1; overflow-y:auto; padding:8px 4px; }
-.setting-status { padding:6px 12px; border-top:1px solid rgba(0,0,0,0.08); font-size:11px; color:#888; display:flex; justify-content:space-between; flex-shrink:0; }
-.setting-editor { flex:1; display:flex; flex-direction:column; background:rgba(255,255,255,0.9); overflow:hidden; }
-.setting-editor-header { display:flex; justify-content:space-between; align-items:center; padding:12px 20px; border-bottom:1px solid rgba(0,0,0,0.08); flex-shrink:0; }
-.setting-editor-header .icon-display { font-size:24px; margin-right:12px; }
-.setting-editor-header input { font-size:18px; font-weight:600; border:none; background:transparent; outline:none; flex:1; color:#333; }
-.setting-editor-header button { padding:6px 16px; border:none; border-radius:6px; cursor:pointer; font-size:13px; }
-.setting-editor-header .save-btn { background:#9b784e; color:white; }
-.setting-editor-header .delete-btn { background:#dc3545; color:white; }
-.setting-editor-content { flex:1; padding:20px; border:none; outline:none; resize:none; font-size:14px; line-height:1.8; background:transparent; color:#333; font-family:inherit; }
-.setting-status-bar { padding:8px 20px; border-top:1px solid rgba(0,0,0,0.08); display:flex; justify-content:space-between; font-size:12px; color:#888; flex-shrink:0; }
-::-webkit-scrollbar { width:6px; height:6px; }
-::-webkit-scrollbar-thumb { background:rgba(136,136,136,0.4); border-radius:3px; }
-::-webkit-scrollbar-track { background:transparent; }
-.setting-tree-node { margin-bottom:2px; }
-.setting-tree-header { display:flex; align-items:center; gap:6px; padding:5px 8px; border-radius:6px; cursor:pointer; transition:background 0.15s; font-size:13px; }
-.setting-tree-header:hover { background:rgba(0,0,0,0.05); }
-.setting-tree-header.active { background:rgba(0,122,255,0.12); font-weight:500; }
-.setting-tree-children { margin-left:16px; }
-.setting-tree-header .toggle { font-size:9px; width:14px; text-align:center; color:#888; flex-shrink:0; cursor:pointer; }
-.setting-tree-header .icon { font-size:14px; flex-shrink:0; }
-.setting-tree-header .name { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#333; }
-</style>
-</head>
-<body>
-<div class="setting-container">
-<div class="setting-sidebar">
-<div class="setting-sidebar-header">
-<span>⚙️ 设定目录</span>
-<div>
-<button id="winAddRoot" title="新增分类">📂</button>
-<button id="winRefresh" title="刷新">🔄</button>
-</div>
-</div>
-<div class="setting-search"><input type="text" id="winSearch" placeholder="🔍 搜索设定..."></div>
-<div class="setting-add-buttons">
-    <button class="add-setting" id="winAddSettingBtn">➕ 设定</button>
-    <button class="add-folder" id="winAddFolderBtn">📁 分类</button>
-</div>
-<div id="settingTree"></div>
-<div class="setting-status"><span>条目: <span id="winNodeCount">0</span></span><span>💡 双击重命名 · 右键菜单</span></div>
-</div>
-<div class="setting-editor">
-<div class="setting-editor-header">
-<span class="icon-display" id="winIconDisplay">📄</span>
-<input type="text" id="winTitle" placeholder="设定名称">
-<div style="display:flex;gap:8px;">
-<button class="save-btn" id="winSave">💾 保存</button>
-<button class="delete-btn" id="winDelete">🗑 删除</button>
-</div>
-</div>
-<textarea id="winContent" class="setting-editor-content" placeholder="在此撰写设定详情..."></textarea>
-<div class="setting-status-bar"><span id="winWordCount">0 字</span><span id="winStatus">已就绪</span></div>
-</div>
-</div>
-<script>
-var settingData = ${JSON.stringify(settingData)};
-var currentBookId = ${currentBookId || 'null'};
-var selectedId = ${settingData.selectedId ? JSON.stringify(settingData.selectedId) : 'null'};
-
+    
+    var currentTheme = localStorage.getItem('app_theme') || 'default';
+    var customBgImage = localStorage.getItem('custom_bg_image') || '';
+    var customBgOpacity = parseInt(localStorage.getItem('custom_bg_opacity') || '30');
+    
+    var themeColors = {
+        'default': { bg: '#f0f2f5', panel: 'rgba(255,255,255,0.95)', border: 'rgba(0,0,0,0.08)', text: '#333', textSecondary: '#888', headerBg: 'rgba(0,0,0,0.03)' },
+        'eye': { bg: '#e8f0e5', panel: 'rgba(200,219,197,0.95)', border: 'rgba(44,62,47,0.12)', text: '#2c3e2f', textSecondary: '#5a7a5a', headerBg: 'rgba(44,62,47,0.06)' },
+        'warm': { bg: '#f5efe5', panel: 'rgba(223,213,189,0.95)', border: 'rgba(74,59,44,0.12)', text: '#4a3b2c', textSecondary: '#8a7a6a', headerBg: 'rgba(74,59,44,0.06)' },
+        'dark': { bg: '#1a1a2e', panel: 'rgba(30,30,46,0.95)', border: 'rgba(255,255,255,0.08)', text: '#e0e0e0', textSecondary: '#8888aa', headerBg: 'rgba(255,255,255,0.05)' },
+        'open': { bg: '#f0f2f5', panel: 'rgba(255,255,255,0.2)', border: 'rgba(255,255,255,0.1)', text: '#333', textSecondary: '#888', headerBg: 'rgba(255,255,255,0.08)' }
+    };
+    var c = themeColors[currentTheme] || themeColors['default'];
+    var isDark = currentTheme === 'dark';
+    var isOpen = currentTheme === 'open';
+    var hasCustomBg = customBgImage && customBgImage.length > 0;
+    
+    var bgStyle = '';
+    if (hasCustomBg) {
+        bgStyle = 'background-image: url(' + JSON.stringify(customBgImage) + '); background-size: cover; background-position: center; background-attachment: fixed; opacity: ' + (customBgOpacity/100) + ';';
+    }
+    
+    getSettingData();
+    var dataJson = JSON.stringify(settingData);
+    var bookId = currentBookId || 'global';
+    var selectedId = settingData.selectedId ? JSON.stringify(settingData.selectedId) : 'null';
+    
+    var jsCode = `
 function getSettingChildren(parentId) {
     return settingData.nodes.filter(function(n) { return n.parentId === parentId; }).sort(function(a,b) { return (a.order||0)-(b.order||0); });
 }
@@ -1096,7 +1047,7 @@ function createNodeElement(node, depth) {
     header.ondblclick = function(e) { e.stopPropagation(); var newName = prompt('重命名：', node.name); if (newName && newName.trim()) { node.name = newName.trim(); saveSettingData(); renderTree(); updateEditor(); } };
     header.oncontextmenu = function(e) { e.preventDefault(); e.stopPropagation();
         var menu = document.createElement('div');
-        menu.style.cssText = 'position:fixed;background:#fff;border-radius:8px;padding:4px 0;box-shadow:0 2px 12px rgba(0,0,0,0.15);z-index:10000;min-width:140px;';
+        menu.style.cssText = 'position:fixed;background:#fff;border-radius:8px;padding:4px 0;box-shadow:0 2px 12px rgba(0,0,0,0.15);z-index:10000;min-width:120px;';
         menu.style.left = Math.min(e.clientX, window.innerWidth - 140) + 'px';
         menu.style.top = Math.min(e.clientY, window.innerHeight - 120) + 'px';
         var isRoot = node.parentId === null;
@@ -1350,9 +1301,125 @@ document.addEventListener('keydown', function(e) {
 renderTree();
 updateEditor();
 console.log('设定窗口已打开');
+`;
+    
+    var html = `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>⚙️ 设定 - 全屏编辑</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; ${hasCustomBg ? bgStyle : 'background:' + c.bg + ';'} height:100vh; overflow:hidden; color:${c.text}; position:relative; }
+        ${hasCustomBg ? `
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.3);
+            z-index: 0;
+            pointer-events: none;
+        }
+        .setting-container { position:relative; z-index:1; }
+        ` : ''}
+        .setting-container { display:flex; height:100vh; width:100%; ${isOpen ? 'gap:12px;padding:12px;' : ''} }
+        .setting-sidebar { width:300px; min-width:220px; max-width:450px; background:${hasCustomBg ? 'rgba(0,0,0,0.5)' : c.panel}; backdrop-filter:blur(20px); border-right:1px solid ${c.border}; display:flex; flex-direction:column; flex-shrink:0; overflow:hidden; ${isOpen ? 'border-radius:20px;border:1px solid rgba(255,255,255,0.15);margin:0;' : ''} }
+        ${hasCustomBg && isDark ? `
+        .setting-sidebar { background:rgba(0,0,0,0.6); }
+        .setting-editor { background:rgba(0,0,0,0.5); }
+        ` : ''}
+        .setting-sidebar-header { display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:${c.headerBg}; border-bottom:1px solid ${c.border}; flex-shrink:0; }
+        .setting-sidebar-header span { font-weight:600; font-size:15px; color:${c.text}; }
+        .setting-sidebar-header button { background:none; border:none; cursor:pointer; font-size:16px; padding:0 4px; color:${c.textSecondary}; }
+        .setting-search { padding:8px 12px; flex-shrink:0; }
+        .setting-search input { width:100%; padding:6px 10px; border:1px solid ${c.border}; border-radius:6px; font-size:13px; background:${hasCustomBg ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.5)'}; color:${c.text}; }
+        .setting-search input::placeholder { color:${hasCustomBg ? 'rgba(255,255,255,0.6)' : c.textSecondary}; }
+        .setting-add-buttons { display:flex; gap:6px; padding:0 12px 8px 12px; flex-shrink:0; }
+        .setting-add-buttons button { flex:1; border:none; border-radius:4px; cursor:pointer; font-size:12px; padding:5px 0; font-weight:500; color:white; }
+        .setting-add-buttons .add-setting { background:#28a745; }
+        .setting-add-buttons .add-folder { background:#9b784e; }
+        #settingTree { flex:1; overflow-y:auto; padding:8px 4px; }
+        .setting-status { padding:6px 12px; border-top:1px solid ${c.border}; font-size:11px; color:${c.textSecondary}; display:flex; justify-content:space-between; flex-shrink:0; }
+        .setting-editor { flex:1; display:flex; flex-direction:column; background:${hasCustomBg ? 'rgba(0,0,0,0.4)' : c.panel}; backdrop-filter:blur(16px); overflow:hidden; ${isOpen ? 'border-radius:20px;border:1px solid rgba(255,255,255,0.15);' : ''} }
+        .setting-editor-header { display:flex; justify-content:space-between; align-items:center; padding:12px 20px; border-bottom:1px solid ${c.border}; flex-shrink:0; }
+        .setting-editor-header .icon-display { font-size:24px; margin-right:12px; }
+        .setting-editor-header input { font-size:18px; font-weight:600; border:none; background:transparent; outline:none; flex:1; color:${c.text}; }
+        .setting-editor-header button { padding:6px 16px; border:none; border-radius:6px; cursor:pointer; font-size:13px; }
+        .setting-editor-header .save-btn { background:#9b784e; color:white; }
+        .setting-editor-header .delete-btn { background:#dc3545; color:white; }
+        .setting-editor-content { flex:1; padding:20px; border:none; outline:none; resize:none; font-size:14px; line-height:1.8; background:transparent; color:${c.text}; font-family:inherit; }
+        .setting-status-bar { padding:8px 20px; border-top:1px solid ${c.border}; display:flex; justify-content:space-between; font-size:12px; color:${c.textSecondary}; flex-shrink:0; }
+        ::-webkit-scrollbar { width:6px; height:6px; }
+        ::-webkit-scrollbar-thumb { background:${isDark ? 'rgba(255,255,255,0.2)' : 'rgba(136,136,136,0.4)'}; border-radius:3px; }
+        ::-webkit-scrollbar-track { background:transparent; }
+        .setting-tree-node { margin-bottom:2px; }
+        .setting-tree-header { display:flex; align-items:center; gap:6px; padding:5px 8px; border-radius:6px; cursor:pointer; transition:background 0.15s; font-size:13px; color:${c.text}; }
+        .setting-tree-header:hover { background:${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)'}; }
+        .setting-tree-header.active { background:rgba(0,122,255,0.2); font-weight:500; }
+        .setting-tree-children { margin-left:16px; }
+        .setting-tree-header .toggle { font-size:9px; width:14px; text-align:center; color:${c.textSecondary}; flex-shrink:0; cursor:pointer; }
+        .setting-tree-header .icon { font-size:14px; flex-shrink:0; }
+        .setting-tree-header .name { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        ${hasCustomBg ? `
+        .setting-tree-header:hover { background:rgba(255,255,255,0.12); }
+        .setting-tree-header.active { background:rgba(0,122,255,0.3); }
+        .setting-sidebar-header { background:rgba(0,0,0,0.2); }
+        .setting-status { color:rgba(255,255,255,0.7); }
+        .setting-status-bar { color:rgba(255,255,255,0.7); }
+        .setting-editor-header input { color:#fff; }
+        .setting-editor-header input::placeholder { color:rgba(255,255,255,0.5); }
+        .setting-editor-content { color:#fff; }
+        .setting-editor-content::placeholder { color:rgba(255,255,255,0.5); }
+        .setting-sidebar-header button { color:rgba(255,255,255,0.7); }
+        .setting-sidebar-header span { color:#fff; }
+        .setting-search input { color:#fff; border-color:rgba(255,255,255,0.2); }
+        .setting-search input::placeholder { color:rgba(255,255,255,0.5); }
+        ` : ''}
+    </style>
+</head>
+<body>
+<div class="setting-container">
+<div class="setting-sidebar">
+<div class="setting-sidebar-header">
+<span>⚙️ 设定目录</span>
+<div>
+<button id="winAddRoot" title="新增分类">📂</button>
+<button id="winRefresh" title="刷新">🔄</button>
+</div>
+</div>
+<div class="setting-search"><input type="text" id="winSearch" placeholder="🔍 搜索设定..."></div>
+<div class="setting-add-buttons">
+    <button class="add-setting" id="winAddSettingBtn">➕ 设定</button>
+    <button class="add-folder" id="winAddFolderBtn">📁 分类</button>
+</div>
+<div id="settingTree"></div>
+<div class="setting-status"><span>条目: <span id="winNodeCount">0</span></span><span>💡 双击重命名 · 右键菜单</span></div>
+</div>
+<div class="setting-editor">
+<div class="setting-editor-header">
+<span class="icon-display" id="winIconDisplay">📄</span>
+<input type="text" id="winTitle" placeholder="设定名称">
+<div style="display:flex;gap:8px;">
+<button class="save-btn" id="winSave">💾 保存</button>
+<button class="delete-btn" id="winDelete">🗑 删除</button>
+</div>
+</div>
+<textarea id="winContent" class="setting-editor-content" placeholder="在此撰写设定详情..."></textarea>
+<div class="setting-status-bar"><span id="winWordCount">0 字</span><span id="winStatus">已就绪</span></div>
+</div>
+</div>
+<script>
+var settingData = ${dataJson};
+var currentBookId = ${bookId};
+var selectedId = ${selectedId};
+${jsCode}
 <\/script>
 </body>
 </html>`;
+    
     var newWindow = window.open('', '_blank', 'width=1200,height=800,menubar=no,toolbar=no,location=no,status=no,scrollbars=no');
     if (newWindow) {
         newWindow.document.write(html);

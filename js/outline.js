@@ -1331,46 +1331,182 @@ function showCompactContextMenu(x, y, nodeId) {
 
 function openOutlineInNewWindow() {
     closeFloatingPanel();
+    
+    // ========== 获取主题和自定义背景 ==========
+    var currentTheme = localStorage.getItem('app_theme') || 'default';
+    var customBgImage = localStorage.getItem('custom_bg_image') || '';
+    var customBgOpacity = parseInt(localStorage.getItem('custom_bg_opacity') || '30');
+    
+    var themeColors = {
+        'default': { bg: '#f0f2f5', panel: 'rgba(255,255,255,0.95)', border: 'rgba(0,0,0,0.08)', text: '#333', textSecondary: '#888', headerBg: 'rgba(0,0,0,0.03)' },
+        'eye': { bg: '#e8f0e5', panel: 'rgba(200,219,197,0.95)', border: 'rgba(44,62,47,0.12)', text: '#2c3e2f', textSecondary: '#5a7a5a', headerBg: 'rgba(44,62,47,0.06)' },
+        'warm': { bg: '#f5efe5', panel: 'rgba(223,213,189,0.95)', border: 'rgba(74,59,44,0.12)', text: '#4a3b2c', textSecondary: '#8a7a6a', headerBg: 'rgba(74,59,44,0.06)' },
+        'dark': { bg: '#1a1a2e', panel: 'rgba(30,30,46,0.95)', border: 'rgba(255,255,255,0.08)', text: '#e0e0e0', textSecondary: '#8888aa', headerBg: 'rgba(255,255,255,0.05)' },
+        'open': { bg: '#f0f2f5', panel: 'rgba(255,255,255,0.2)', border: 'rgba(255,255,255,0.1)', text: '#333', textSecondary: '#888', headerBg: 'rgba(255,255,255,0.08)' }
+    };
+    var c = themeColors[currentTheme] || themeColors['default'];
+    var isDark = currentTheme === 'dark';
+    var isOpen = currentTheme === 'open';
+    var hasCustomBg = customBgImage && customBgImage.length > 0;
+    
+    // 构建背景样式
+    var bgStyle = '';
+    if (hasCustomBg) {
+        bgStyle = 'background-image: url(' + JSON.stringify(customBgImage) + '); background-size: cover; background-position: center; background-attachment: fixed; opacity: ' + (customBgOpacity/100) + ';';
+    }
+    
     var html = `<!DOCTYPE html>
 <html>
-<head><meta charset="UTF-8"><title>📖 大纲 - 全屏编辑</title>
-<style>
-* { margin:0; padding:0; box-sizing:border-box; }
-body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:#f0f2f5; height:100vh; overflow:hidden; }
-.outline-container { display:flex; height:100vh; width:100%; }
-.outline-sidebar { width:300px; min-width:220px; max-width:450px; background:rgba(255,255,255,0.95); backdrop-filter:blur(8px); border-right:1px solid rgba(0,0,0,0.08); display:flex; flex-direction:column; flex-shrink:0; overflow:hidden; }
-.outline-sidebar-header { display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:rgba(0,0,0,0.03); border-bottom:1px solid rgba(0,0,0,0.08); flex-shrink:0; }
-.outline-sidebar-header span { font-weight:600; font-size:15px; }
-.outline-sidebar-header button { background:none; border:none; cursor:pointer; font-size:16px; padding:0 4px; }
-.outline-search { padding:8px 12px; flex-shrink:0; }
-.outline-search input { width:100%; padding:6px 10px; border:1px solid #ddd; border-radius:6px; font-size:13px; background:#f8f8f8; }
-/* 新增：添加按钮行 */
-.outline-add-buttons { display:flex; gap:6px; padding:0 12px 8px 12px; flex-shrink:0; }
-.outline-add-buttons button { flex:1; border:none; border-radius:4px; cursor:pointer; font-size:12px; padding:5px 0; font-weight:500; color:white; }
-.outline-add-buttons .add-chapter { background:#28a745; }
-.outline-add-buttons .add-folder { background:#9b784e; }
-#outlineTree { flex:1; overflow-y:auto; padding:8px 4px; }
-.outline-status { padding:6px 12px; border-top:1px solid rgba(0,0,0,0.08); font-size:11px; color:#888; display:flex; justify-content:space-between; flex-shrink:0; }
-.outline-editor { flex:1; display:flex; flex-direction:column; background:rgba(255,255,255,0.9); overflow:hidden; }
-.outline-editor-header { display:flex; justify-content:space-between; align-items:center; padding:12px 20px; border-bottom:1px solid rgba(0,0,0,0.08); flex-shrink:0; }
-.outline-editor-header input { font-size:18px; font-weight:600; border:none; background:transparent; outline:none; flex:1; color:#333; }
-.outline-editor-header button { padding:6px 16px; border:none; border-radius:6px; cursor:pointer; font-size:13px; }
-.outline-editor-header .save-btn { background:#9b784e; color:white; }
-.outline-editor-header .delete-btn { background:#dc3545; color:white; }
-.outline-editor-content { flex:1; padding:20px; border:none; outline:none; resize:none; font-size:14px; line-height:1.8; background:transparent; color:#333; font-family:inherit; }
-.outline-status-bar { padding:8px 20px; border-top:1px solid rgba(0,0,0,0.08); display:flex; justify-content:space-between; font-size:12px; color:#888; flex-shrink:0; }
-::-webkit-scrollbar { width:6px; height:6px; }
-::-webkit-scrollbar-thumb { background:rgba(136,136,136,0.4); border-radius:3px; }
-::-webkit-scrollbar-track { background:transparent; }
-.outline-tree-node { margin-bottom:2px; }
-.outline-tree-header { display:flex; align-items:center; gap:6px; padding:5px 8px; border-radius:6px; cursor:pointer; transition:background 0.15s; font-size:13px; }
-.outline-tree-header:hover { background:rgba(0,0,0,0.05); }
-.outline-tree-header.active { background:rgba(0,122,255,0.12); font-weight:500; }
-.outline-tree-children { margin-left:16px; }
-.outline-tree-header .toggle { font-size:9px; width:14px; text-align:center; color:#888; flex-shrink:0; cursor:pointer; }
-.outline-tree-header .icon { font-size:14px; flex-shrink:0; }
-.outline-tree-header .name { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#333; }
-</style>
+<head>
+    <meta charset="UTF-8">
+    <title>📖 大纲 - 全屏编辑</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { 
+            font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; 
+            ${hasCustomBg ? bgStyle : 'background:' + c.bg + ';'}
+            height:100vh; 
+            overflow:hidden; 
+            color:${c.text};
+            position:relative;
+        }
+        /* 如果使用自定义背景，加一个半透明遮罩让文字清晰 */
+        ${hasCustomBg ? `
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.3);
+            z-index: 0;
+            pointer-events: none;
+        }
+        .outline-container {
+            position: relative;
+            z-index: 1;
+        }
+        ` : ''}
+        .outline-container { display:flex; height:100vh; width:100%; ${isOpen ? 'gap:12px;padding:12px;' : ''} }
+        .outline-sidebar { 
+            width:300px; min-width:220px; max-width:450px; 
+            background:${hasCustomBg ? 'rgba(0,0,0,0.5)' : c.panel}; 
+            backdrop-filter:blur(20px); 
+            border-right:1px solid ${c.border}; 
+            display:flex; flex-direction:column; flex-shrink:0; overflow:hidden; 
+            ${isOpen ? 'border-radius:20px;border:1px solid rgba(255,255,255,0.15);margin:0;' : ''}
+        }
+        /* 暗色主题且有自定义背景时，面板更透明 */
+        ${hasCustomBg && isDark ? `
+        .outline-sidebar { background:rgba(0,0,0,0.6); }
+        .outline-editor { background:rgba(0,0,0,0.5); }
+        ` : ''}
+        .outline-sidebar-header { 
+            display:flex; justify-content:space-between; align-items:center; 
+            padding:12px 16px; 
+            background:${c.headerBg}; 
+            border-bottom:1px solid ${c.border}; 
+            flex-shrink:0; 
+        }
+        .outline-sidebar-header span { font-weight:600; font-size:15px; color:${c.text}; }
+        .outline-sidebar-header button { background:none; border:none; cursor:pointer; font-size:16px; padding:0 4px; color:${c.textSecondary}; }
+        .outline-search { padding:8px 12px; flex-shrink:0; }
+        .outline-search input { 
+            width:100%; padding:6px 10px; 
+            border:1px solid ${c.border}; 
+            border-radius:6px; font-size:13px; 
+            background:${hasCustomBg ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.5)'}; 
+            color:${c.text};
+        }
+        .outline-search input::placeholder { color:${hasCustomBg ? 'rgba(255,255,255,0.6)' : c.textSecondary}; }
+        .outline-add-buttons { display:flex; gap:6px; padding:0 12px 8px 12px; flex-shrink:0; }
+        .outline-add-buttons button { 
+            flex:1; border:none; border-radius:4px; cursor:pointer; 
+            font-size:12px; padding:5px 0; font-weight:500; color:white; 
+        }
+        .outline-add-buttons .add-chapter { background:#28a745; }
+        .outline-add-buttons .add-folder { background:#9b784e; }
+        #outlineTree { flex:1; overflow-y:auto; padding:8px 4px; }
+        .outline-status { 
+            padding:6px 12px; 
+            border-top:1px solid ${c.border}; 
+            font-size:11px; color:${c.textSecondary}; 
+            display:flex; justify-content:space-between; flex-shrink:0; 
+        }
+        .outline-editor { 
+            flex:1; display:flex; flex-direction:column; 
+            background:${hasCustomBg ? 'rgba(0,0,0,0.4)' : c.panel}; 
+            backdrop-filter:blur(16px);
+            overflow:hidden; 
+            ${isOpen ? 'border-radius:20px;border:1px solid rgba(255,255,255,0.15);' : ''}
+        }
+        .outline-editor-header { 
+            display:flex; justify-content:space-between; align-items:center; 
+            padding:12px 20px; 
+            border-bottom:1px solid ${c.border}; 
+            flex-shrink:0; 
+        }
+        .outline-editor-header input { 
+            font-size:18px; font-weight:600; border:none; 
+            background:transparent; outline:none; flex:1; 
+            color:${c.text}; 
+        }
+        .outline-editor-header button { 
+            padding:6px 16px; border:none; border-radius:6px; 
+            cursor:pointer; font-size:13px; 
+        }
+        .outline-editor-header .save-btn { background:#9b784e; color:white; }
+        .outline-editor-header .delete-btn { background:#dc3545; color:white; }
+        .outline-editor-content { 
+            flex:1; padding:20px; border:none; outline:none; resize:none; 
+            font-size:14px; line-height:1.8; 
+            background:transparent; 
+            color:${c.text}; 
+            font-family:inherit; 
+        }
+        .outline-status-bar { 
+            padding:8px 20px; 
+            border-top:1px solid ${c.border}; 
+            display:flex; justify-content:space-between; 
+            font-size:12px; color:${c.textSecondary}; 
+            flex-shrink:0; 
+        }
+        ::-webkit-scrollbar { width:6px; height:6px; }
+        ::-webkit-scrollbar-thumb { background:${isDark ? 'rgba(255,255,255,0.2)' : 'rgba(136,136,136,0.4)'}; border-radius:3px; }
+        ::-webkit-scrollbar-track { background:transparent; }
+        .outline-tree-node { margin-bottom:2px; }
+        .outline-tree-header { 
+            display:flex; align-items:center; gap:6px; 
+            padding:5px 8px; border-radius:6px; 
+            cursor:pointer; transition:background 0.15s; 
+            font-size:13px; color:${c.text}; 
+        }
+        .outline-tree-header:hover { background:${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)'}; }
+        .outline-tree-header.active { background:rgba(0,122,255,0.2); font-weight:500; }
+        .outline-tree-children { margin-left:16px; }
+        .outline-tree-header .toggle { 
+            font-size:9px; width:14px; text-align:center; 
+            color:${c.textSecondary}; flex-shrink:0; cursor:pointer; 
+        }
+        .outline-tree-header .icon { font-size:14px; flex-shrink:0; }
+        .outline-tree-header .name { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        ${hasCustomBg ? `
+        .outline-tree-header:hover { background:rgba(255,255,255,0.12); }
+        .outline-tree-header.active { background:rgba(0,122,255,0.3); }
+        .outline-sidebar-header { background:rgba(0,0,0,0.2); }
+        .outline-status { color:rgba(255,255,255,0.7); }
+        .outline-status-bar { color:rgba(255,255,255,0.7); }
+        .outline-editor-header input { color:#fff; }
+        .outline-editor-header input::placeholder { color:rgba(255,255,255,0.5); }
+        .outline-editor-content { color:#fff; }
+        .outline-editor-content::placeholder { color:rgba(255,255,255,0.5); }
+        .outline-sidebar-header button { color:rgba(255,255,255,0.7); }
+        .outline-sidebar-header span { color:#fff; }
+        .outline-search input { color:#fff; border-color:rgba(255,255,255,0.2); }
+        .outline-search input::placeholder { color:rgba(255,255,255,0.5); }
+        ` : ''}
+    </style>
 </head>
 <body>
 <div class="outline-container">
@@ -1383,7 +1519,6 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif
 </div>
 </div>
 <div class="outline-search"><input type="text" id="winSearch" placeholder="🔍 搜索大纲..."></div>
-<!-- 新增：添加按钮 - 一左一右 -->
 <div class="outline-add-buttons">
     <button class="add-chapter" id="winAddChapterBtn">➕ 章节</button>
     <button class="add-folder" id="winAddFolderBtn">📁 分卷</button>
@@ -1599,7 +1734,7 @@ function deleteNode() {
         alert('已删除');
     }
 }
-// ========== 新增：独立窗口的章节和分卷按钮 ==========
+// ========== 独立窗口的章节和分卷按钮 ==========
 document.getElementById('winAddChapterBtn').onclick = function() {
     if (selectedId) {
         var node = getOutlineNode(selectedId);
@@ -1700,9 +1835,11 @@ document.addEventListener('keydown', function(e) {
 renderTree();
 updateEditor();
 console.log('大纲窗口已打开');
-<\/script>
+</script>
 </body>
 </html>`;
+    
+    // 打开窗口
     var newWindow = window.open('', '_blank', 'width=1200,height=800,menubar=no,toolbar=no,location=no,status=no,scrollbars=no');
     if (newWindow) {
         newWindow.document.write(html);

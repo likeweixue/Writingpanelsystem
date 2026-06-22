@@ -462,12 +462,34 @@ function openNameGenSidebar() {
 
 function openNameGenInNewWindow() {
     // 关闭浮动面板
-    if (typeof closeFloatingPanel === 'function') {
-        closeFloatingPanel();
+    if (typeof closeNameGenFloatingPanel === 'function') {
+        closeNameGenFloatingPanel();
     }
     
     // 确保设置已加载
     loadNameGenSettings();
+    
+    // ========== 获取主题和自定义背景 ==========
+    var currentTheme = localStorage.getItem('app_theme') || 'default';
+    var customBgImage = localStorage.getItem('custom_bg_image') || '';
+    var customBgOpacity = parseInt(localStorage.getItem('custom_bg_opacity') || '30');
+    
+    var themeColors = {
+        'default': { bg: '#f0f2f5', panel: 'rgba(255,255,255,0.95)', border: 'rgba(0,0,0,0.08)', text: '#333', textSecondary: '#888', headerBg: 'rgba(0,0,0,0.03)' },
+        'eye': { bg: '#e8f0e5', panel: 'rgba(200,219,197,0.95)', border: 'rgba(44,62,47,0.12)', text: '#2c3e2f', textSecondary: '#5a7a5a', headerBg: 'rgba(44,62,47,0.06)' },
+        'warm': { bg: '#f5efe5', panel: 'rgba(223,213,189,0.95)', border: 'rgba(74,59,44,0.12)', text: '#4a3b2c', textSecondary: '#8a7a6a', headerBg: 'rgba(74,59,44,0.06)' },
+        'dark': { bg: '#1a1a2e', panel: 'rgba(30,30,46,0.95)', border: 'rgba(255,255,255,0.08)', text: '#e0e0e0', textSecondary: '#8888aa', headerBg: 'rgba(255,255,255,0.05)' },
+        'open': { bg: '#f0f2f5', panel: 'rgba(255,255,255,0.2)', border: 'rgba(255,255,255,0.1)', text: '#333', textSecondary: '#888', headerBg: 'rgba(255,255,255,0.08)' }
+    };
+    var c = themeColors[currentTheme] || themeColors['default'];
+    var isDark = currentTheme === 'dark';
+    var isOpen = currentTheme === 'open';
+    var hasCustomBg = customBgImage && customBgImage.length > 0;
+    
+    var bgStyle = '';
+    if (hasCustomBg) {
+        bgStyle = 'background-image: url(' + JSON.stringify(customBgImage) + '); background-size: cover; background-position: center; background-attachment: fixed; opacity: ' + (customBgOpacity/100) + ';';
+    }
     
     // 序列化数据
     var dataJson = JSON.stringify(nameGenData);
@@ -475,40 +497,76 @@ function openNameGenInNewWindow() {
     
     var html = `<!DOCTYPE html>
 <html>
-<head><meta charset="UTF-8"><title>✏️ 起名生成器 - 全屏编辑</title>
-<style>
-* { margin:0; padding:0; box-sizing:border-box; }
-body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:#f0f2f5; height:100vh; overflow:hidden; }
-.namegen-container { display:flex; height:100vh; width:100%; }
-.namegen-sidebar { width:320px; min-width:240px; max-width:400px; background:rgba(255,255,255,0.95); backdrop-filter:blur(8px); border-right:1px solid rgba(0,0,0,0.08); display:flex; flex-direction:column; flex-shrink:0; overflow-y:auto; padding:16px; }
-.namegen-sidebar .title { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; font-weight:600; font-size:16px; }
-.namegen-sidebar .title button { background:none; border:none; cursor:pointer; font-size:16px; }
-.namegen-sidebar .section { margin-bottom:12px; }
-.namegen-sidebar .section-label { font-size:12px; color:#888; margin-bottom:4px; }
-.namegen-sidebar .btn-group { display:flex; gap:6px; flex-wrap:wrap; }
-.namegen-sidebar .btn-group button { padding:4px 14px; border:none; border-radius:20px; cursor:pointer; font-size:13px; background:#f0f0f0; }
-.namegen-sidebar .btn-group button.active { background:#9b784e; color:white; }
-.namegen-sidebar input[type="text"] { width:100%; padding:4px 8px; border:1px solid #ddd; border-radius:6px; font-size:12px; background:transparent; color:#333; margin-top:6px; }
-.namegen-sidebar .generate-row { display:flex; gap:8px; margin-top:auto; }
-.namegen-sidebar .generate-row .gen-btn { flex:1; padding:10px; background:#9b784e; color:white; border:none; border-radius:8px; cursor:pointer; font-size:14px; font-weight:600; }
-.namegen-sidebar .generate-row .fav-btn { padding:10px 12px; background:#f0f0f0; border:none; border-radius:8px; cursor:pointer; font-size:16px; }
-.namegen-result { flex:1; display:flex; flex-direction:column; background:rgba(255,255,255,0.9); overflow:hidden; padding:20px; }
-.namegen-result .result-display { text-align:center; padding:20px 0; border-bottom:1px solid rgba(0,0,0,0.08); }
-.namegen-result .result-display .name { font-size:48px; font-weight:800; letter-spacing:4px; color:#333; }
-.namegen-result .result-display .hint { font-size:12px; color:#888; margin-top:8px; }
-.namegen-result .favorites { flex:1; overflow-y:auto; padding:16px 0; }
-.namegen-result .favorites .label { font-size:13px; color:#888; margin-bottom:12px; }
-.namegen-result .favorites .list { display:flex; flex-wrap:wrap; gap:8px; }
-.namegen-result .favorites .list .item { padding:4px 12px; background:rgba(155,120,78,0.15); border-radius:20px; font-size:13px; cursor:pointer; transition:background 0.2s; }
-.namegen-result .favorites .list .item:hover { background:rgba(155,120,78,0.3); }
-.namegen-result .bottom-actions { padding-top:12px; border-top:1px solid rgba(0,0,0,0.08); display:flex; gap:8px; }
-.namegen-result .bottom-actions button { padding:6px 12px; border:none; border-radius:6px; cursor:pointer; font-size:12px; }
-.namegen-result .bottom-actions .clear { background:#dc3545; color:white; }
-.namegen-result .bottom-actions .copy { background:#6c757d; color:white; }
-::-webkit-scrollbar { width:6px; height:6px; }
-::-webkit-scrollbar-thumb { background:rgba(136,136,136,0.4); border-radius:3px; }
-::-webkit-scrollbar-track { background:transparent; }
-</style>
+<head>
+    <meta charset="UTF-8">
+    <title>✏️ 起名生成器 - 全屏编辑</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; ${hasCustomBg ? bgStyle : 'background:' + c.bg + ';'} height:100vh; overflow:hidden; color:${c.text}; position:relative; }
+        ${hasCustomBg ? `
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.3);
+            z-index: 0;
+            pointer-events: none;
+        }
+        .namegen-container { position:relative; z-index:1; }
+        ` : ''}
+        .namegen-container { display:flex; height:100vh; width:100%; ${isOpen ? 'gap:12px;padding:12px;' : ''} }
+        .namegen-sidebar { width:320px; min-width:240px; max-width:400px; background:${hasCustomBg ? 'rgba(0,0,0,0.5)' : c.panel}; backdrop-filter:blur(20px); border-right:1px solid ${c.border}; display:flex; flex-direction:column; flex-shrink:0; overflow-y:auto; padding:16px; ${isOpen ? 'border-radius:20px;border:1px solid rgba(255,255,255,0.15);margin:0;' : ''} }
+        ${hasCustomBg && isDark ? `
+        .namegen-sidebar { background:rgba(0,0,0,0.6); }
+        .namegen-result { background:rgba(0,0,0,0.5); }
+        ` : ''}
+        .namegen-sidebar .title { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; font-weight:600; font-size:16px; color:${c.text}; }
+        .namegen-sidebar .title button { background:none; border:none; cursor:pointer; font-size:16px; color:${c.textSecondary}; }
+        .namegen-sidebar .section { margin-bottom:12px; }
+        .namegen-sidebar .section-label { font-size:12px; color:${c.textSecondary}; margin-bottom:4px; }
+        .namegen-sidebar .btn-group { display:flex; gap:6px; flex-wrap:wrap; }
+        .namegen-sidebar .btn-group button { padding:4px 14px; border:none; border-radius:20px; cursor:pointer; font-size:13px; background:${isDark ? 'rgba(255,255,255,0.08)' : '#f0f0f0'}; color:${c.text}; }
+        .namegen-sidebar .btn-group button.active { background:#9b784e; color:white; }
+        .namegen-sidebar input[type="text"] { width:100%; padding:4px 8px; border:1px solid ${c.border}; border-radius:6px; font-size:12px; background:${hasCustomBg ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.5)'}; color:${c.text}; margin-top:6px; }
+        .namegen-sidebar input[type="text"]::placeholder { color:${hasCustomBg ? 'rgba(255,255,255,0.5)' : c.textSecondary}; }
+        .namegen-sidebar .generate-row { display:flex; gap:8px; margin-top:auto; }
+        .namegen-sidebar .generate-row .gen-btn { flex:1; padding:10px; background:#9b784e; color:white; border:none; border-radius:8px; cursor:pointer; font-size:14px; font-weight:600; }
+        .namegen-sidebar .generate-row .fav-btn { padding:10px 12px; background:${isDark ? 'rgba(255,255,255,0.08)' : '#f0f0f0'}; border:none; border-radius:8px; cursor:pointer; font-size:16px; color:${c.text}; }
+        .namegen-result { flex:1; display:flex; flex-direction:column; background:${hasCustomBg ? 'rgba(0,0,0,0.4)' : c.panel}; backdrop-filter:blur(16px); overflow:hidden; padding:20px; ${isOpen ? 'border-radius:20px;border:1px solid rgba(255,255,255,0.15);' : ''} }
+        .namegen-result .result-display { text-align:center; padding:20px 0; border-bottom:1px solid ${c.border}; }
+        .namegen-result .result-display .name { font-size:48px; font-weight:800; letter-spacing:4px; color:${c.text}; }
+        .namegen-result .result-display .hint { font-size:12px; color:${c.textSecondary}; margin-top:8px; }
+        .namegen-result .favorites { flex:1; overflow-y:auto; padding:16px 0; }
+        .namegen-result .favorites .label { font-size:13px; color:${c.textSecondary}; margin-bottom:12px; }
+        .namegen-result .favorites .list { display:flex; flex-wrap:wrap; gap:8px; }
+        .namegen-result .favorites .list .item { padding:4px 12px; background:rgba(155,120,78,0.15); border-radius:20px; font-size:13px; cursor:pointer; transition:background 0.2s; color:${c.text}; }
+        .namegen-result .favorites .list .item:hover { background:rgba(155,120,78,0.3); }
+        .namegen-result .bottom-actions { padding-top:12px; border-top:1px solid ${c.border}; display:flex; gap:8px; }
+        .namegen-result .bottom-actions button { padding:6px 12px; border:none; border-radius:6px; cursor:pointer; font-size:12px; }
+        .namegen-result .bottom-actions .clear { background:#dc3545; color:white; }
+        .namegen-result .bottom-actions .copy { background:${isDark ? 'rgba(255,255,255,0.15)' : '#6c757d'}; color:white; }
+        ::-webkit-scrollbar { width:6px; height:6px; }
+        ::-webkit-scrollbar-thumb { background:${isDark ? 'rgba(255,255,255,0.2)' : 'rgba(136,136,136,0.4)'}; border-radius:3px; }
+        ::-webkit-scrollbar-track { background:transparent; }
+        ${hasCustomBg ? `
+        .namegen-sidebar .title { color:#fff; }
+        .namegen-sidebar .title button { color:rgba(255,255,255,0.7); }
+        .namegen-result .result-display .name { color:#fff; }
+        .namegen-result .result-display .hint { color:rgba(255,255,255,0.7); }
+        .namegen-result .favorites .label { color:rgba(255,255,255,0.7); }
+        .namegen-result .favorites .list .item { color:#fff; background:rgba(255,255,255,0.1); }
+        .namegen-result .favorites .list .item:hover { background:rgba(255,255,255,0.2); }
+        .namegen-sidebar .section-label { color:rgba(255,255,255,0.7); }
+        .namegen-sidebar .btn-group button { color:#fff; background:rgba(255,255,255,0.1); }
+        .namegen-sidebar .btn-group button.active { background:#9b784e; }
+        .namegen-sidebar input[type="text"] { color:#fff; border-color:rgba(255,255,255,0.2); }
+        .namegen-sidebar input[type="text"]::placeholder { color:rgba(255,255,255,0.5); }
+        .namegen-sidebar .generate-row .fav-btn { color:#fff; background:rgba(255,255,255,0.1); }
+        ` : ''}
+    </style>
 </head>
 <body>
 <div class="namegen-container">
@@ -551,7 +609,7 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif
             <div class="btn-group" style="gap:8px;">
                 ${['道具','装备','怪物'].map(function(t) {
                     var checked = nameGenData.themePrefs[t] ? 'checked' : '';
-                    return '<label style="font-size:12px; display:flex; align-items:center; gap:4px; background:#f0f0f0; padding:2px 10px; border-radius:20px; cursor:pointer;"><input type="checkbox" data-theme="' + t + '" ' + checked + '> ' + t + '</label>';
+                    return '<label style="font-size:12px; display:flex; align-items:center; gap:4px; background:' + (isDark ? 'rgba(255,255,255,0.06)' : '#f0f0f0') + '; padding:2px 10px; border-radius:20px; cursor:pointer; color:${c.text};"><input type="checkbox" data-theme="' + t + '" ' + checked + '> ' + t + '</label>';
                 }).join('')}
             </div>
         </div>
@@ -572,7 +630,7 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif
         <div class="favorites">
             <div class="label">⭐ 收藏列表</div>
             <div class="list" id="nameGenFavoriteList"></div>
-            <div style="font-size:11px; color:#ccc; margin-top:12px;">💡 点击收藏的名字可复制到剪贴板</div>
+            <div style="font-size:11px; color:${c.textSecondary}; margin-top:12px;">💡 点击收藏的名字可复制到剪贴板</div>
         </div>
         <div class="bottom-actions">
             <button class="clear" id="nameGenClearFavoritesBtn">清空收藏</button>
@@ -581,7 +639,6 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif
     </div>
 </div>
 <script>
-// 从父窗口传递的数据
 var nameGenData = ${dataJson};
 var currentBookId = ${bookId};
 
@@ -592,8 +649,6 @@ function saveNameGenSettings() {
         try { window.opener.window.location.reload(); } catch(e) {}
     }
 }
-
-// 词库
 var nameGenChars = {
     person: ["吕斯","龚湛","周峻峰","庄非凡","宫瑜","乔森","杜敬","史宗裕","刘津卫","游京","朱柯礼","涂湛","邹尚","白凛","殷乔","马奔","冯竣","虞归舟","成然","汪昀","纪云霆","叶尘","雪灵儿","墨渊"],
     force: ["青云阁","月影楼","玄天宗","凌霄殿","听雨轩","破军府","百花谷","流云渡","落星宗","冰雪宫","魔渊","天机阁"],
@@ -605,7 +660,6 @@ var nameGenChars = {
 };
 var commonSurnames = ["李","王","张","刘","陈","赵","周","吴","郑","孙","林","郭","马","朱","胡","徐","高","黄","萧","沈"];
 var doubleSurnames = ["欧阳","慕容","上官","诸葛","司徒","令狐","独孤","轩辕","尉迟","长孙","宇文","呼延"];
-
 function generateName() {
     var wordLength = nameGenData.wordLength === '不限' ? Math.floor(Math.random() * 3) + 1 : parseInt(nameGenData.wordLength);
     var pool = [];
@@ -659,7 +713,6 @@ function generateName() {
     }
     return fullName;
 }
-
 function renderFavorites() {
     var container = document.getElementById('nameGenFavoriteList');
     if (!container) return;
@@ -688,10 +741,7 @@ function renderFavorites() {
         container.appendChild(span);
     });
 }
-
-// 绑定事件
 document.getElementById('nameGenCloseBtn').onclick = function() { window.close(); };
-
 document.querySelectorAll('#nameGenLengthGroup button').forEach(function(btn) {
     btn.onclick = function() {
         document.querySelectorAll('#nameGenLengthGroup button').forEach(function(b) { b.classList.remove('active'); b.style.background = '#f0f0f0'; b.style.color = ''; });
@@ -700,7 +750,6 @@ document.querySelectorAll('#nameGenLengthGroup button').forEach(function(btn) {
         saveNameGenSettings();
     };
 });
-
 document.querySelectorAll('#nameGenModeGroup button').forEach(function(btn) {
     btn.onclick = function() {
         document.querySelectorAll('#nameGenModeGroup button').forEach(function(b) { b.classList.remove('active'); b.style.background = '#f0f0f0'; b.style.color = ''; });
@@ -709,7 +758,6 @@ document.querySelectorAll('#nameGenModeGroup button').forEach(function(btn) {
         saveNameGenSettings();
     };
 });
-
 document.querySelectorAll('#nameGenGenderGroup button').forEach(function(btn) {
     btn.onclick = function() {
         document.querySelectorAll('#nameGenGenderGroup button').forEach(function(b) { b.classList.remove('active'); b.style.background = '#f0f0f0'; b.style.color = ''; });
@@ -718,24 +766,20 @@ document.querySelectorAll('#nameGenGenderGroup button').forEach(function(btn) {
         saveNameGenSettings();
     };
 });
-
 document.getElementById('nameGenCustomSurname').oninput = function() {
     nameGenData.customSurname = this.value;
     saveNameGenSettings();
 };
-
 document.querySelectorAll('[data-theme]').forEach(function(cb) {
     cb.onchange = function() {
         nameGenData.themePrefs[this.getAttribute('data-theme')] = this.checked;
         saveNameGenSettings();
     };
 });
-
 document.getElementById('nameGenRequirement').oninput = function() {
     nameGenData.requirement = this.value;
     saveNameGenSettings();
 };
-
 document.getElementById('nameGenGenerateBtn').onclick = function() {
     var name = generateName();
     var resultEl = document.getElementById('nameGenResult');
@@ -744,7 +788,6 @@ document.getElementById('nameGenGenerateBtn').onclick = function() {
     resultEl.style.transform = 'scale(1.1)';
     setTimeout(function() { resultEl.style.transform = 'scale(1)'; }, 200);
 };
-
 document.getElementById('nameGenFavoriteBtn').onclick = function() {
     var name = document.getElementById('nameGenResult').textContent;
     if (name && name !== '妙笔生花' && nameGenData.favoriteChars.indexOf(name) === -1) {
@@ -757,7 +800,6 @@ document.getElementById('nameGenFavoriteBtn').onclick = function() {
         alert('请先生成一个名字');
     }
 };
-
 document.getElementById('nameGenClearFavoritesBtn').onclick = function() {
     if (confirm('确定清空所有收藏吗？')) {
         nameGenData.favoriteChars = [];
@@ -765,7 +807,6 @@ document.getElementById('nameGenClearFavoritesBtn').onclick = function() {
         renderFavorites();
     }
 };
-
 document.getElementById('nameGenCopyResultBtn').onclick = function() {
     var name = document.getElementById('nameGenResult').textContent;
     if (name && name !== '妙笔生花') {
@@ -784,7 +825,6 @@ document.getElementById('nameGenCopyResultBtn').onclick = function() {
         alert('请先生成一个名字');
     }
 };
-
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Enter' && document.activeElement && 
         (document.activeElement.id === 'nameGenRequirement' || 
@@ -792,8 +832,6 @@ document.addEventListener('keydown', function(e) {
         document.getElementById('nameGenGenerateBtn').click();
     }
 });
-
-// 初始化
 renderFavorites();
 console.log('起名生成器独立窗口已打开');
 <\/script>

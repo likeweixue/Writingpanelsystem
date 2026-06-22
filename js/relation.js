@@ -991,30 +991,92 @@ function bindCompactRelationEvents() {
 
 function openRelationInNewWindow() {
     closeRelationFloatingPanel();
+    
+    var currentTheme = localStorage.getItem('app_theme') || 'default';
+    var customBgImage = localStorage.getItem('custom_bg_image') || '';
+    var customBgOpacity = parseInt(localStorage.getItem('custom_bg_opacity') || '30');
+    
+    var themeColors = {
+        'default': { bg: '#f0f2f5', panel: 'rgba(255,255,255,0.95)', border: 'rgba(0,0,0,0.08)', text: '#333', textSecondary: '#888', headerBg: 'rgba(0,0,0,0.03)' },
+        'eye': { bg: '#e8f0e5', panel: 'rgba(200,219,197,0.95)', border: 'rgba(44,62,47,0.12)', text: '#2c3e2f', textSecondary: '#5a7a5a', headerBg: 'rgba(44,62,47,0.06)' },
+        'warm': { bg: '#f5efe5', panel: 'rgba(223,213,189,0.95)', border: 'rgba(74,59,44,0.12)', text: '#4a3b2c', textSecondary: '#8a7a6a', headerBg: 'rgba(74,59,44,0.06)' },
+        'dark': { bg: '#1a1a2e', panel: 'rgba(30,30,46,0.95)', border: 'rgba(255,255,255,0.08)', text: '#e0e0e0', textSecondary: '#8888aa', headerBg: 'rgba(255,255,255,0.05)' },
+        'open': { bg: '#f0f2f5', panel: 'rgba(255,255,255,0.2)', border: 'rgba(255,255,255,0.1)', text: '#333', textSecondary: '#888', headerBg: 'rgba(255,255,255,0.08)' }
+    };
+    var c = themeColors[currentTheme] || themeColors['default'];
+    var isDark = currentTheme === 'dark';
+    var isOpen = currentTheme === 'open';
+    var hasCustomBg = customBgImage && customBgImage.length > 0;
+    
+    var bgStyle = '';
+    if (hasCustomBg) {
+        bgStyle = 'background-image: url(' + JSON.stringify(customBgImage) + '); background-size: cover; background-position: center; background-attachment: fixed; opacity: ' + (customBgOpacity/100) + ';';
+    }
+    
+    getRelationData();
+    var dataJson = JSON.stringify(relationData);
+    var bookId = currentBookId || 'global';
+    var selectedId = relationData.selectedId ? JSON.stringify(relationData.selectedId) : 'null';
+    
     var html = `<!DOCTYPE html>
 <html>
-<head><meta charset="UTF-8"><title>🔗 关系图 - 全屏编辑</title>
-<style>
-* { margin:0; padding:0; box-sizing:border-box; }
-body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:#f0f2f5; height:100vh; overflow:hidden; }
-.relation-container { display:flex; height:100vh; width:100%; }
-.relation-sidebar { width:280px; min-width:200px; max-width:350px; background:rgba(255,255,255,0.95); backdrop-filter:blur(8px); border-right:1px solid rgba(0,0,0,0.08); display:flex; flex-direction:column; flex-shrink:0; overflow:hidden; }
-.relation-sidebar-header { display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:rgba(0,0,0,0.03); border-bottom:1px solid rgba(0,0,0,0.08); flex-shrink:0; }
-.relation-sidebar-header span { font-weight:600; font-size:15px; }
-.relation-sidebar-header button { background:none; border:none; cursor:pointer; font-size:16px; padding:0 4px; }
-.relation-search { padding:8px 12px; flex-shrink:0; }
-.relation-search input { width:100%; padding:6px 10px; border:1px solid #ddd; border-radius:6px; font-size:13px; background:#f8f8f8; }
-.relation-stats { padding:0 12px 6px 12px; font-size:12px; color:#888; display:flex; gap:16px; flex-shrink:0; }
-#winEntityList { flex:1; overflow-y:auto; padding:6px 12px; }
-#winRelationList { max-height:180px; overflow-y:auto; padding:6px 12px; border-top:1px solid rgba(0,0,0,0.08); }
-.relation-entity-item { display:flex; align-items:center; gap:8px; padding:5px 10px; margin:2px 0; border-radius:6px; cursor:pointer; transition:background 0.15s; font-size:13px; }
-.relation-entity-item:hover { background:rgba(0,0,0,0.05); }
-.relation-entity-item.active { background:rgba(0,122,255,0.12); }
-.relation-item { display:flex; align-items:center; gap:8px; padding:4px 10px; margin:2px 0; border-radius:4px; font-size:12px; background:rgba(0,0,0,0.02); }
-.relation-canvas-wrapper { flex:1; background:#f8f8f8; overflow:hidden; position:relative; }
-.relation-canvas-wrapper canvas { width:100%; height:100%; cursor:default; }
-.canvas-tip { position:absolute; bottom:12px; left:50%; transform:translateX(-50%); font-size:11px; color:#888; background:rgba(255,255,255,0.8); padding:4px 14px; border-radius:12px; white-space:nowrap; }
-</style>
+<head>
+    <meta charset="UTF-8">
+    <title>🔗 关系图 - 全屏编辑</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; ${hasCustomBg ? bgStyle : 'background:' + c.bg + ';'} height:100vh; overflow:hidden; color:${c.text}; position:relative; }
+        ${hasCustomBg ? `
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.3);
+            z-index: 0;
+            pointer-events: none;
+        }
+        .relation-container { position:relative; z-index:1; }
+        ` : ''}
+        .relation-container { display:flex; height:100vh; width:100%; ${isOpen ? 'gap:12px;padding:12px;' : ''} }
+        .relation-sidebar { width:280px; min-width:200px; max-width:350px; background:${hasCustomBg ? 'rgba(0,0,0,0.5)' : c.panel}; backdrop-filter:blur(20px); border-right:1px solid ${c.border}; display:flex; flex-direction:column; flex-shrink:0; overflow:hidden; ${isOpen ? 'border-radius:20px;border:1px solid rgba(255,255,255,0.15);margin:0;' : ''} }
+        ${hasCustomBg && isDark ? `
+        .relation-sidebar { background:rgba(0,0,0,0.6); }
+        .relation-canvas-wrapper { background:rgba(0,0,0,0.5); }
+        ` : ''}
+        .relation-sidebar-header { display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:${c.headerBg}; border-bottom:1px solid ${c.border}; flex-shrink:0; }
+        .relation-sidebar-header span { font-weight:600; font-size:15px; color:${c.text}; }
+        .relation-sidebar-header button { background:none; border:none; cursor:pointer; font-size:16px; padding:0 4px; color:${c.textSecondary}; }
+        .relation-search { padding:8px 12px; flex-shrink:0; }
+        .relation-search input { width:100%; padding:6px 10px; border:1px solid ${c.border}; border-radius:6px; font-size:13px; background:${hasCustomBg ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.5)'}; color:${c.text}; }
+        .relation-search input::placeholder { color:${hasCustomBg ? 'rgba(255,255,255,0.6)' : c.textSecondary}; }
+        .relation-stats { padding:0 12px 6px 12px; font-size:12px; color:${c.textSecondary}; display:flex; gap:16px; flex-shrink:0; }
+        #winEntityList { flex:1; overflow-y:auto; padding:6px 12px; }
+        #winRelationList { max-height:180px; overflow-y:auto; padding:6px 12px; border-top:1px solid ${c.border}; }
+        .relation-entity-item { display:flex; align-items:center; gap:8px; padding:5px 10px; margin:2px 0; border-radius:6px; cursor:pointer; transition:background 0.15s; font-size:13px; color:${c.text}; }
+        .relation-entity-item:hover { background:${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)'}; }
+        .relation-entity-item.active { background:rgba(0,122,255,0.2); }
+        .relation-item { display:flex; align-items:center; gap:8px; padding:4px 10px; margin:2px 0; border-radius:4px; font-size:12px; background:${isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)'}; color:${c.text}; }
+        .relation-canvas-wrapper { flex:1; background:${hasCustomBg ? 'rgba(0,0,0,0.4)' : c.panel}; overflow:hidden; position:relative; ${isOpen ? 'border-radius:20px;border:1px solid rgba(255,255,255,0.15);' : ''} }
+        .relation-canvas-wrapper canvas { width:100%; height:100%; cursor:default; }
+        .canvas-tip { position:absolute; bottom:12px; left:50%; transform:translateX(-50%); font-size:11px; color:${c.textSecondary}; background:${c.panel}; padding:4px 14px; border-radius:12px; white-space:nowrap; }
+        ::-webkit-scrollbar { width:6px; height:6px; }
+        ::-webkit-scrollbar-thumb { background:${isDark ? 'rgba(255,255,255,0.2)' : 'rgba(136,136,136,0.4)'}; border-radius:3px; }
+        ::-webkit-scrollbar-track { background:transparent; }
+        ${hasCustomBg ? `
+        .relation-entity-item:hover { background:rgba(255,255,255,0.12); }
+        .relation-entity-item.active { background:rgba(0,122,255,0.3); }
+        .relation-sidebar-header { background:rgba(0,0,0,0.2); }
+        .relation-stats { color:rgba(255,255,255,0.7); }
+        .relation-sidebar-header span { color:#fff; }
+        .relation-sidebar-header button { color:rgba(255,255,255,0.7); }
+        .relation-search input { color:#fff; border-color:rgba(255,255,255,0.2); }
+        .relation-search input::placeholder { color:rgba(255,255,255,0.5); }
+        .canvas-tip { background:rgba(0,0,0,0.5); color:rgba(255,255,255,0.8); }
+        ` : ''}
+    </style>
 </head>
 <body>
 <div class="relation-container">
@@ -1040,20 +1102,25 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif
 </div>
 </div>
 <script>
-var relationData = ${JSON.stringify(relationData)};
-var currentBookId = ${currentBookId || 'null'};
-var selectedId = ${relationData.selectedId ? JSON.stringify(relationData.selectedId) : 'null'};
+var relationData = ${dataJson};
+var currentBookId = ${bookId};
+var selectedId = ${selectedId};
 
-function getRelationEntity(id) { return relationData.entities.find(function(e) { return e.id === id; }); }
-function getRelationsForEntity(id) { return relationData.relations.filter(function(r) { return r.fromId === id || r.toId === id; }); }
+function getRelationEntity(id) {
+    return relationData.entities.find(function(e) { return e.id === id; });
+}
+function getRelationsForEntity(id) {
+    return relationData.relations.filter(function(r) { return r.fromId === id || r.toId === id; });
+}
 function saveRelationData() {
     var key = 'openwrite_relation_' + (currentBookId || 'global');
-    var data = { entities: relationData.entities, relations: relationData.relations, selectedId: selectedId, nextId: relationData.nextId || 100 };
+    var data = { entities: relationData.entities, relations: relationData.relations, selectedId: selectedId, nextId: relationData.nextId || 1 };
     localStorage.setItem(key, JSON.stringify(data));
-    if (window.opener && window.opener.window) { try { window.opener.window.location.reload(); } catch(e) {} }
+    if (window.opener && window.opener.window) {
+        try { window.opener.window.location.reload(); } catch(e) {}
+    }
 }
 function selectEntity(id) { selectedId = id; saveRelationData(); renderEntities(); renderRelations(); renderCanvas(); }
-
 function renderEntities() {
     var container = document.getElementById('winEntityList');
     if (!container) return;
@@ -1063,12 +1130,11 @@ function renderEntities() {
     function renderGroup(items) {
         items.forEach(function(entity) {
             var div = document.createElement('div');
-            div.className = 'relation-entity-item';
-            if (selectedId === entity.id) div.classList.add('active');
+            div.className = 'relation-entity-item' + (selectedId === entity.id ? ' active' : '');
             div.setAttribute('data-id', entity.id);
             div.innerHTML = '<span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:' + entity.color + ';flex-shrink:0;"></span>' +
                 '<span style="flex:1;">' + entity.name + '</span>' +
-                '<span style="font-size:10px;color:#888;">' + getRelationsForEntity(entity.id).length + ' 关系</span>';
+                '<span style="font-size:10px;color:${c.textSecondary};">' + getRelationsForEntity(entity.id).length + ' 关系</span>';
             div.onclick = function() { selectEntity(entity.id); };
             container.appendChild(div);
         });
@@ -1120,7 +1186,14 @@ function updateCounts() {
     document.getElementById('winFactionCount').textContent = factions.length;
     document.getElementById('winRelCount').textContent = relationData.relations.length;
 }
-
+function lightenColor(color, percent) {
+    var num = parseInt(color.replace('#',''),16);
+    var amt = Math.round(2.55 * percent);
+    var R = Math.min(255,(num>>16)+amt);
+    var G = Math.min(255,((num>>8)&0x00FF)+amt);
+    var B = Math.min(255,(num&0x0000FF)+amt);
+    return '#'+(0x1000000+R*0x10000+G*0x100+B).toString(16).slice(1);
+}
 var canvas, ctx, dragId, isDragging, offX, offY;
 function initCanvas() {
     canvas = document.getElementById('winRelationCanvas');
@@ -1189,14 +1262,6 @@ function renderCanvas() {
         ctx.fillText(entity.type === 'character' ? '👤' : '🏛️', entity.x, entity.y - radius - 14);
     });
 }
-function lightenColor(color, percent) {
-    var num = parseInt(color.replace('#',''),16);
-    var amt = Math.round(2.55 * percent);
-    var R = Math.min(255,(num>>16)+amt);
-    var G = Math.min(255,((num>>8)&0x00FF)+amt);
-    var B = Math.min(255,(num&0x0000FF)+amt);
-    return '#'+(0x1000000+R*0x10000+G*0x100+B).toString(16).slice(1);
-}
 function onMouseDown(e) {
     var rect = canvas.getBoundingClientRect();
     var x = e.clientX - rect.left, y = e.clientY - rect.top;
@@ -1238,8 +1303,7 @@ function onDblClick(e) {
         }
     }
 }
-
-function addEntity() {
+document.getElementById('winAddEntity').onclick = function() {
     var type = confirm('点击"确定"添加人物，点击"取消"添加势力') ? 'character' : 'faction';
     var typeName = type === 'character' ? '人物' : '势力';
     var name = prompt('请输入' + typeName + '名称：', type === 'character' ? '新角色' : '新势力');
@@ -1252,8 +1316,8 @@ function addEntity() {
     selectedId = newEntity.id;
     saveRelationData();
     renderEntities(); renderRelations(); renderCanvas();
-}
-function addFolder() {
+};
+document.getElementById('winAddFolder').onclick = function() {
     var name = prompt('请输入分类名称：', '新分类');
     if (!name || !name.trim()) return;
     var colors = ['#4A90D9','#E87A90','#27AE60','#E67E22','#8E44AD','#2ECC71','#E74C3C','#1ABC9C'];
@@ -1264,8 +1328,8 @@ function addFolder() {
     selectedId = newEntity.id;
     saveRelationData();
     renderEntities(); renderRelations(); renderCanvas();
-}
-function addRelation() {
+};
+document.getElementById('winAddRelation').onclick = function() {
     var modal = document.createElement('div');
     modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:20000;display:flex;align-items:center;justify-content:center;';
     var fromOpts = '', toOpts = '';
@@ -1296,8 +1360,8 @@ function addRelation() {
         renderEntities(); renderRelations(); renderCanvas();
         modal.remove();
     };
-}
-function deleteEntity() {
+};
+document.getElementById('winDelete').onclick = function() {
     var entity = getRelationEntity(selectedId);
     if (!entity) return;
     if (relationData.entities.length === 1) { alert('至少保留一个实体'); return; }
@@ -1308,12 +1372,7 @@ function deleteEntity() {
         saveRelationData();
         renderEntities(); renderRelations(); renderCanvas();
     }
-}
-
-document.getElementById('winAddEntity').onclick = addEntity;
-document.getElementById('winAddFolder').onclick = addFolder;
-document.getElementById('winAddRelation').onclick = addRelation;
-document.getElementById('winDelete').onclick = deleteEntity;
+};
 document.getElementById('winRefresh').onclick = function() { renderEntities(); renderRelations(); renderCanvas(); };
 document.getElementById('winSearch').oninput = function() {
     var keyword = this.value.trim().toLowerCase();
@@ -1328,6 +1387,7 @@ console.log('关系图窗口已打开');
 <\/script>
 </body>
 </html>`;
+    
     var newWindow = window.open('', '_blank', 'width=1200,height=800,menubar=no,toolbar=no,location=no,status=no,scrollbars=no');
     if (newWindow) {
         newWindow.document.write(html);

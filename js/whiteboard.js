@@ -491,12 +491,34 @@ function openWhiteboardSidebar() {
 
 function openWhiteboardInNewWindow() {
     // 关闭浮动面板
-    if (typeof closeFloatingPanel === 'function') {
-        closeFloatingPanel();
+    if (typeof closeWhiteboardFloatingPanel === 'function') {
+        closeWhiteboardFloatingPanel();
     }
     
     // 确保数据已加载
     getWhiteboardData();
+    
+    // ========== 获取主题和自定义背景 ==========
+    var currentTheme = localStorage.getItem('app_theme') || 'default';
+    var customBgImage = localStorage.getItem('custom_bg_image') || '';
+    var customBgOpacity = parseInt(localStorage.getItem('custom_bg_opacity') || '30');
+    
+    var themeColors = {
+        'default': { bg: '#f0f2f5', panel: 'rgba(255,255,255,0.95)', border: 'rgba(0,0,0,0.08)', text: '#333', textSecondary: '#888', headerBg: 'rgba(0,0,0,0.03)' },
+        'eye': { bg: '#e8f0e5', panel: 'rgba(200,219,197,0.95)', border: 'rgba(44,62,47,0.12)', text: '#2c3e2f', textSecondary: '#5a7a5a', headerBg: 'rgba(44,62,47,0.06)' },
+        'warm': { bg: '#f5efe5', panel: 'rgba(223,213,189,0.95)', border: 'rgba(74,59,44,0.12)', text: '#4a3b2c', textSecondary: '#8a7a6a', headerBg: 'rgba(74,59,44,0.06)' },
+        'dark': { bg: '#1a1a2e', panel: 'rgba(30,30,46,0.95)', border: 'rgba(255,255,255,0.08)', text: '#e0e0e0', textSecondary: '#8888aa', headerBg: 'rgba(255,255,255,0.05)' },
+        'open': { bg: '#f0f2f5', panel: 'rgba(255,255,255,0.2)', border: 'rgba(255,255,255,0.1)', text: '#333', textSecondary: '#888', headerBg: 'rgba(255,255,255,0.08)' }
+    };
+    var c = themeColors[currentTheme] || themeColors['default'];
+    var isDark = currentTheme === 'dark';
+    var isOpen = currentTheme === 'open';
+    var hasCustomBg = customBgImage && customBgImage.length > 0;
+    
+    var bgStyle = '';
+    if (hasCustomBg) {
+        bgStyle = 'background-image: url(' + JSON.stringify(customBgImage) + '); background-size: cover; background-position: center; background-attachment: fixed; opacity: ' + (customBgOpacity/100) + ';';
+    }
     
     // 序列化数据
     var dataJson = JSON.stringify(whiteboardData);
@@ -504,27 +526,51 @@ function openWhiteboardInNewWindow() {
     
     var html = `<!DOCTYPE html>
 <html>
-<head><meta charset="UTF-8"><title>📝 无边记 - 全屏编辑</title>
-<style>
-* { margin:0; padding:0; box-sizing:border-box; }
-body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:#f0f2f5; height:100vh; overflow:hidden; }
-.whiteboard-wrapper { display:flex; flex-direction:column; height:100%; width:100%; background:#f0f2f5; position:relative; overflow:hidden; }
-.whiteboard-toolbar { display:flex; gap:8px; padding:10px 16px; background:rgba(255,255,255,0.8); backdrop-filter:blur(8px); border-bottom:1px solid rgba(0,0,0,0.08); flex-shrink:0; z-index:10; flex-wrap:wrap; }
-.whiteboard-toolbar button { padding:4px 12px; background:#f0f0f0; border:none; border-radius:6px; cursor:pointer; }
-.whiteboard-toolbar .clear-all { background:#dc3545; color:white; }
-.whiteboard-canvas { flex:1; position:relative; overflow:hidden; cursor:grab; background-image:radial-gradient(circle at 1px 1px, rgba(0,0,0,0.05) 1px, transparent 1px); background-size:24px 24px; }
-.whiteboard-canvas svg { position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:1; }
-.whiteboard-cards { position:absolute; top:0; left:0; width:100%; height:100%; z-index:2; }
-.whiteboard-stats { position:absolute; bottom:12px; right:16px; font-size:11px; color:#888; background:rgba(255,255,255,0.8); padding:4px 12px; border-radius:12px; z-index:5; }
-.wb-card { position:absolute; background:rgba(255,255,245,0.95); border-radius:16px; padding:12px; box-shadow:0 4px 12px rgba(0,0,0,0.1), 0 0 0 0.5px rgba(0,0,0,0.05); cursor:default; z-index:2; display:flex; flex-direction:column; }
-.wb-card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; font-size:11px; color:#888; }
-.wb-card-header .delete { cursor:pointer; opacity:0.5; }
-.wb-card-content { flex:1; font-size:13px; line-height:1.5; outline:none; white-space:pre-wrap; word-break:break-word; cursor:text; user-select:text; min-height:60px; }
-.wb-card-resize { position:absolute; bottom:4px; right:4px; width:12px; height:12px; background:rgba(0,0,0,0.05); border-radius:50%; cursor:se-resize; }
-::-webkit-scrollbar { width:6px; height:6px; }
-::-webkit-scrollbar-thumb { background:rgba(136,136,136,0.4); border-radius:3px; }
-::-webkit-scrollbar-track { background:transparent; }
-</style>
+<head>
+    <meta charset="UTF-8">
+    <title>📝 无边记 - 全屏编辑</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; ${hasCustomBg ? bgStyle : 'background:' + c.bg + ';'} height:100vh; overflow:hidden; color:${c.text}; position:relative; }
+        ${hasCustomBg ? `
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.3);
+            z-index: 0;
+            pointer-events: none;
+        }
+        .whiteboard-wrapper { position:relative; z-index:1; }
+        ` : ''}
+        .whiteboard-wrapper { display:flex; flex-direction:column; height:100%; width:100%; background:${c.bg}; position:relative; overflow:hidden; ${isOpen ? 'padding:12px;' : ''} }
+        .whiteboard-toolbar { display:flex; gap:8px; padding:10px 16px; background:${hasCustomBg ? 'rgba(0,0,0,0.5)' : c.panel}; backdrop-filter:blur(8px); border-bottom:1px solid ${c.border}; flex-shrink:0; z-index:10; flex-wrap:wrap; ${isOpen ? 'border-radius:20px;border:1px solid rgba(255,255,255,0.15);' : ''} }
+        .whiteboard-toolbar button { padding:4px 12px; background:${isDark ? 'rgba(255,255,255,0.08)' : '#f0f0f0'}; border:none; border-radius:6px; cursor:pointer; color:${c.text}; }
+        .whiteboard-toolbar .clear-all { background:#dc3545; color:white; }
+        .whiteboard-canvas { flex:1; position:relative; overflow:hidden; cursor:grab; background-image:radial-gradient(circle at 1px 1px, rgba(0,0,0,0.05) 1px, transparent 1px); background-size:24px 24px; ${isOpen ? 'border-radius:20px;border:1px solid rgba(255,255,255,0.15);margin-top:12px;' : ''} }
+        .whiteboard-canvas svg { position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:1; }
+        .whiteboard-cards { position:absolute; top:0; left:0; width:100%; height:100%; z-index:2; }
+        .whiteboard-stats { position:absolute; bottom:12px; right:16px; font-size:11px; color:${c.textSecondary}; background:${hasCustomBg ? 'rgba(0,0,0,0.5)' : c.panel}; padding:4px 12px; border-radius:12px; z-index:5; backdrop-filter:blur(8px); }
+        .wb-card { position:absolute; background:${c.panel}; border-radius:16px; padding:12px; box-shadow:${isDark ? '0 4px 12px rgba(0,0,0,0.3)' : '0 4px 12px rgba(0,0,0,0.1)'}; cursor:default; z-index:2; display:flex; flex-direction:column; border:1px solid ${c.border}; }
+        .wb-card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; font-size:11px; color:${c.textSecondary}; }
+        .wb-card-header .delete { cursor:pointer; opacity:0.5; }
+        .wb-card-content { flex:1; font-size:13px; line-height:1.5; outline:none; white-space:pre-wrap; word-break:break-word; cursor:text; user-select:text; min-height:60px; color:${c.text}; }
+        .wb-card-resize { position:absolute; bottom:4px; right:4px; width:12px; height:12px; background:rgba(0,0,0,0.05); border-radius:50%; cursor:se-resize; }
+        ::-webkit-scrollbar { width:6px; height:6px; }
+        ::-webkit-scrollbar-thumb { background:${isDark ? 'rgba(255,255,255,0.2)' : 'rgba(136,136,136,0.4)'}; border-radius:3px; }
+        ::-webkit-scrollbar-track { background:transparent; }
+        ${hasCustomBg ? `
+        .whiteboard-toolbar { background:rgba(0,0,0,0.5); }
+        .wb-card { background:rgba(0,0,0,0.6); border-color:rgba(255,255,255,0.1); }
+        .wb-card-header { color:rgba(255,255,255,0.7); }
+        .wb-card-content { color:#fff; }
+        .whiteboard-stats { background:rgba(0,0,0,0.5); color:rgba(255,255,255,0.7); }
+        .whiteboard-toolbar button { color:#fff; }
+        ` : ''}
+    </style>
 </head>
 <body>
 <div class="whiteboard-wrapper">
@@ -535,7 +581,7 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif
         <button id="wbLinkMode">🔗 连线</button>
         <button id="wbClearLines">🗑 清空连线</button>
         <button class="clear-all" id="wbClearAll">清空白板</button>
-        <span style="font-size:12px; color:#888; margin-left:auto;">💡 拖拽卡片移动 · 双击编辑</span>
+        <span style="font-size:12px; color:${c.textSecondary}; margin-left:auto;">💡 拖拽卡片移动 · 双击编辑</span>
     </div>
     <div class="whiteboard-canvas" id="wbCanvas">
         <svg id="wbSvgLayer"></svg>
@@ -544,7 +590,6 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif
     </div>
 </div>
 <script>
-// 从父窗口传递的数据
 var whiteboardData = ${dataJson};
 var currentBookId = ${bookId};
 
@@ -561,7 +606,6 @@ function saveWhiteboardData() {
 function genWhiteboardId(prefix) {
     return prefix + '_' + (whiteboardData.nextId++);
 }
-
 function renderCards() {
     var container = document.getElementById('wbCardsContainer');
     if (!container) return;
@@ -586,7 +630,6 @@ function renderCards() {
     bindCardEvents();
     updateStats();
 }
-
 function bindCardEvents() {
     document.querySelectorAll('.wb-card').forEach(function(cardEl) {
         var isDragging = false, startX, startY, origX, origY;
@@ -668,7 +711,6 @@ function bindCardEvents() {
         });
     });
 }
-
 var linkModePending = null;
 function handleLinkMode(cardId) {
     if (linkModePending === null) {
@@ -685,7 +727,6 @@ function handleLinkMode(cardId) {
         linkModePending = null;
     }
 }
-
 function renderLines() {
     var svg = document.getElementById('wbSvgLayer');
     if (!svg) return;
@@ -706,12 +747,10 @@ function renderLines() {
         svg.appendChild(line);
     });
 }
-
 function updateStats() {
     document.getElementById('wbCardCount').textContent = whiteboardData.cards.length;
     document.getElementById('wbLineCount').textContent = whiteboardData.connections.length;
 }
-
 function addCard(type) {
     var textMap = { note: '双击编辑笔记...', todo: '□ 任务一\\n□ 任务二', quote: '「写下灵感语录」' };
     var newCard = {
@@ -729,8 +768,6 @@ function addCard(type) {
     renderLines();
     updateStats();
 }
-
-// 绑定按钮
 document.getElementById('wbAddNote').onclick = function() { addCard('note'); };
 document.getElementById('wbAddTodo').onclick = function() { addCard('todo'); };
 document.getElementById('wbAddQuote').onclick = function() { addCard('quote'); };
@@ -758,8 +795,6 @@ document.getElementById('wbClearAll').onclick = function() {
         updateStats();
     }
 };
-
-// 键盘快捷键
 document.addEventListener('keydown', function(e) {
     if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
         if (whiteboardData.cards.length > 0) {
@@ -771,8 +806,6 @@ document.addEventListener('keydown', function(e) {
         }
     }
 });
-
-// 初始化
 renderCards();
 renderLines();
 updateStats();

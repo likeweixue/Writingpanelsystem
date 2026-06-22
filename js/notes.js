@@ -935,94 +935,35 @@ document.getElementById('compactNoteExpandBtn').onclick = function() {
 // ========== 新窗口打开 ==========
 
 function openNoteInNewWindow() {
-    // 关闭浮动面板
-    if (typeof closeFloatingPanel === 'function') {
-        closeFloatingPanel();
+    closeNoteFloatingPanel();
+    
+    var currentTheme = localStorage.getItem('app_theme') || 'default';
+    var customBgImage = localStorage.getItem('custom_bg_image') || '';
+    var customBgOpacity = parseInt(localStorage.getItem('custom_bg_opacity') || '30');
+    
+    var themeColors = {
+        'default': { bg: '#f0f2f5', panel: 'rgba(255,255,255,0.95)', border: 'rgba(0,0,0,0.08)', text: '#333', textSecondary: '#888', headerBg: 'rgba(0,0,0,0.03)' },
+        'eye': { bg: '#e8f0e5', panel: 'rgba(200,219,197,0.95)', border: 'rgba(44,62,47,0.12)', text: '#2c3e2f', textSecondary: '#5a7a5a', headerBg: 'rgba(44,62,47,0.06)' },
+        'warm': { bg: '#f5efe5', panel: 'rgba(223,213,189,0.95)', border: 'rgba(74,59,44,0.12)', text: '#4a3b2c', textSecondary: '#8a7a6a', headerBg: 'rgba(74,59,44,0.06)' },
+        'dark': { bg: '#1a1a2e', panel: 'rgba(30,30,46,0.95)', border: 'rgba(255,255,255,0.08)', text: '#e0e0e0', textSecondary: '#8888aa', headerBg: 'rgba(255,255,255,0.05)' },
+        'open': { bg: '#f0f2f5', panel: 'rgba(255,255,255,0.2)', border: 'rgba(255,255,255,0.1)', text: '#333', textSecondary: '#888', headerBg: 'rgba(255,255,255,0.08)' }
+    };
+    var c = themeColors[currentTheme] || themeColors['default'];
+    var isDark = currentTheme === 'dark';
+    var isOpen = currentTheme === 'open';
+    var hasCustomBg = customBgImage && customBgImage.length > 0;
+    
+    var bgStyle = '';
+    if (hasCustomBg) {
+        bgStyle = 'background-image: url(' + JSON.stringify(customBgImage) + '); background-size: cover; background-position: center; background-attachment: fixed; opacity: ' + (customBgOpacity/100) + ';';
     }
     
-    // 确保数据已加载
     getNoteData();
-    
-    // 序列化数据
     var dataJson = JSON.stringify(noteData);
     var bookId = currentBookId || 'global';
+    var selectedId = noteData.selectedId ? JSON.stringify(noteData.selectedId) : 'null';
     
-    var html = `<!DOCTYPE html>
-<html>
-<head><meta charset="UTF-8"><title>📓 笔记 - 全屏编辑</title>
-<style>
-* { margin:0; padding:0; box-sizing:border-box; }
-body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:#f0f2f5; height:100vh; overflow:hidden; }
-.note-container { display:flex; height:100vh; width:100%; }
-.note-sidebar { width:300px; min-width:220px; max-width:450px; background:rgba(255,255,255,0.95); backdrop-filter:blur(8px); border-right:1px solid rgba(0,0,0,0.08); display:flex; flex-direction:column; flex-shrink:0; overflow:hidden; }
-.note-sidebar-header { display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:rgba(0,0,0,0.03); border-bottom:1px solid rgba(0,0,0,0.08); flex-shrink:0; }
-.note-sidebar-header span { font-weight:600; font-size:15px; }
-.note-sidebar-header button { background:none; border:none; cursor:pointer; font-size:16px; padding:0 4px; }
-.note-search { padding:8px 12px; flex-shrink:0; }
-.note-search input { width:100%; padding:6px 10px; border:1px solid #ddd; border-radius:6px; font-size:13px; background:#f8f8f8; }
-.note-add-buttons { display:flex; gap:6px; padding:0 12px 8px 12px; flex-shrink:0; }
-.note-add-buttons button { flex:1; border:none; border-radius:4px; cursor:pointer; font-size:12px; padding:5px 0; font-weight:500; color:white; }
-.note-add-buttons .add-note { background:#28a745; }
-.note-add-buttons .add-folder { background:#9b784e; }
-#noteTree { flex:1; overflow-y:auto; padding:8px 4px; }
-.note-status { padding:6px 12px; border-top:1px solid rgba(0,0,0,0.08); font-size:11px; color:#888; display:flex; justify-content:space-between; flex-shrink:0; }
-.note-editor { flex:1; display:flex; flex-direction:column; background:rgba(255,255,255,0.9); overflow:hidden; }
-.note-editor-header { display:flex; justify-content:space-between; align-items:center; padding:12px 20px; border-bottom:1px solid rgba(0,0,0,0.08); flex-shrink:0; }
-.note-editor-header input { font-size:18px; font-weight:600; border:none; background:transparent; outline:none; flex:1; color:#333; }
-.note-editor-header button { padding:6px 16px; border:none; border-radius:6px; cursor:pointer; font-size:13px; }
-.note-editor-header .save-btn { background:#9b784e; color:white; }
-.note-editor-header .delete-btn { background:#dc3545; color:white; }
-.note-editor-content { flex:1; padding:20px; border:none; outline:none; resize:none; font-size:14px; line-height:1.8; background:transparent; color:#333; font-family:inherit; }
-.note-status-bar { padding:8px 20px; border-top:1px solid rgba(0,0,0,0.08); display:flex; justify-content:space-between; font-size:12px; color:#888; flex-shrink:0; }
-::-webkit-scrollbar { width:6px; height:6px; }
-::-webkit-scrollbar-thumb { background:rgba(136,136,136,0.4); border-radius:3px; }
-::-webkit-scrollbar-track { background:transparent; }
-.note-tree-node { margin-bottom:2px; }
-.note-tree-header { display:flex; align-items:center; gap:6px; padding:5px 8px; border-radius:6px; cursor:pointer; transition:background 0.15s; font-size:13px; }
-.note-tree-header:hover { background:rgba(0,0,0,0.05); }
-.note-tree-header.active { background:rgba(0,122,255,0.12); font-weight:500; }
-.note-tree-children { margin-left:16px; }
-.note-tree-header .toggle { font-size:9px; width:14px; text-align:center; color:#888; flex-shrink:0; cursor:pointer; }
-.note-tree-header .icon { font-size:14px; flex-shrink:0; }
-.note-tree-header .name { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#333; }
-</style>
-</head>
-<body>
-<div class="note-container">
-<div class="note-sidebar">
-<div class="note-sidebar-header">
-<span>📓 笔记目录</span>
-<div>
-<button id="winAddRoot" title="新增分类">📂</button>
-<button id="winRefresh" title="刷新">🔄</button>
-</div>
-</div>
-<div class="note-search"><input type="text" id="winSearch" placeholder="🔍 搜索笔记..."></div>
-<div class="note-add-buttons">
-    <button class="add-note" id="winAddNoteBtn">➕ 笔记</button>
-    <button class="add-folder" id="winAddFolderBtn">📁 分类</button>
-</div>
-<div id="noteTree"></div>
-<div class="note-status"><span>笔记: <span id="winNodeCount">0</span></span><span>💡 双击重命名 · 右键菜单</span></div>
-</div>
-<div class="note-editor">
-<div class="note-editor-header">
-<input type="text" id="winTitle" placeholder="笔记标题">
-<div style="display:flex;gap:8px;">
-<button class="save-btn" id="winSave">💾 保存</button>
-<button class="delete-btn" id="winDelete">🗑 删除</button>
-</div>
-</div>
-<textarea id="winContent" class="note-editor-content" placeholder="在此记录你的灵感..."></textarea>
-<div class="note-status-bar"><span id="winWordCount">0 字</span><span id="winStatus">已就绪</span></div>
-</div>
-</div>
-<script>
-// 从父窗口传递的数据
-var noteData = ${dataJson};
-var currentBookId = ${bookId};
-var selectedId = ${noteData.selectedId ? JSON.stringify(noteData.selectedId) : 'null'};
-
+    var jsCode = `
 function getNoteChildren(parentId) {
     return noteData.nodes.filter(function(n) { return n.parentId === parentId; }).sort(function(a,b) { return (a.order||0)-(b.order||0); });
 }
@@ -1037,28 +978,14 @@ function saveNoteData() {
         try { window.opener.window.location.reload(); } catch(e) {}
     }
 }
-function selectNode(id) { 
-    selectedId = id; 
-    renderTree(); 
-    updateEditor(); 
-    saveNoteData(); 
-}
+function selectNode(id) { selectedId = id; renderTree(); updateEditor(); saveNoteData(); }
 function renderTree() {
     var container = document.getElementById('noteTree');
-    if (!container) {
-        console.warn('noteTree 元素不存在');
-        return;
-    }
+    if (!container) return;
     container.innerHTML = '';
     var roots = noteData.nodes.filter(function(n) { return n.parentId === null; }).sort(function(a,b) { return (a.order||0)-(b.order||0); });
-    if (roots.length === 0) { 
-        container.innerHTML = '<div style="padding:20px;text-align:center;color:#888;font-size:13px;">暂无笔记分类</div>'; 
-        document.getElementById('winNodeCount').textContent = '0';
-        return; 
-    }
-    roots.forEach(function(root) { 
-        container.appendChild(createNodeElement(root, 0)); 
-    });
+    if (roots.length === 0) { container.innerHTML = '<div style="padding:20px;text-align:center;color:#888;font-size:13px;">暂无笔记分类</div>'; return; }
+    roots.forEach(function(root) { container.appendChild(createNodeElement(root, 0)); });
     document.getElementById('winNodeCount').textContent = noteData.nodes.length;
 }
 function createNodeElement(node, depth) {
@@ -1076,17 +1003,13 @@ function createNodeElement(node, depth) {
     if (hasChildren) {
         var isExpanded = localStorage.getItem('note_expanded_' + node.id) !== 'false';
         toggle.textContent = isExpanded ? '▾' : '▸';
-        toggle.onclick = function(e) { 
-            e.stopPropagation();
+        toggle.onclick = function(e) { e.stopPropagation();
             var current = localStorage.getItem('note_expanded_' + node.id);
             var newState = current === 'false' ? 'true' : 'false';
             localStorage.setItem('note_expanded_' + node.id, newState);
             renderTree();
         };
-    } else { 
-        toggle.textContent = '·'; 
-        toggle.style.color = '#ccc'; 
-    }
+    } else { toggle.textContent = '·'; toggle.style.color = '#ccc'; }
     header.appendChild(toggle);
     var icon = document.createElement('span');
     icon.className = 'icon';
@@ -1096,24 +1019,80 @@ function createNodeElement(node, depth) {
     nameSpan.className = 'name';
     nameSpan.textContent = node.name || '未命名';
     header.appendChild(nameSpan);
-    header.onclick = function(e) { 
-        if (e.target === toggle) return; 
-        selectNode(node.id); 
-    };
-    header.ondblclick = function(e) { 
-        e.stopPropagation(); 
-        var newName = prompt('重命名：', node.name); 
-        if (newName && newName.trim()) { 
-            node.name = newName.trim(); 
-            saveNoteData(); 
-            renderTree(); 
-            updateEditor(); 
-        } 
-    };
-    header.oncontextmenu = function(e) { 
-        e.preventDefault(); 
-        e.stopPropagation();
-        showContextMenu(e.clientX, e.clientY, node.id);
+    header.onclick = function(e) { if (e.target === toggle) return; selectNode(node.id); };
+    header.ondblclick = function(e) { e.stopPropagation(); var newName = prompt('重命名：', node.name); if (newName && newName.trim()) { node.name = newName.trim(); saveNoteData(); renderTree(); updateEditor(); } };
+    header.oncontextmenu = function(e) { e.preventDefault(); e.stopPropagation();
+        var menu = document.createElement('div');
+        menu.style.cssText = 'position:fixed;background:#fff;border-radius:8px;padding:4px 0;box-shadow:0 2px 12px rgba(0,0,0,0.15);z-index:10000;min-width:120px;';
+        menu.style.left = Math.min(e.clientX, window.innerWidth - 140) + 'px';
+        menu.style.top = Math.min(e.clientY, window.innerHeight - 120) + 'px';
+        var isRoot = node.parentId === null;
+        menu.innerHTML =
+            '<button data-action="addNote" style="display:block;width:100%;padding:6px 14px;border:none;background:none;cursor:pointer;text-align:left;font-size:12px;">➕ 新增笔记</button>' +
+            '<button data-action="addFolder" style="display:block;width:100%;padding:6px 14px;border:none;background:none;cursor:pointer;text-align:left;font-size:12px;">📁 新增分类</button>' +
+            '<button data-action="rename" style="display:block;width:100%;padding:6px 14px;border:none;background:none;cursor:pointer;text-align:left;font-size:12px;">✏️ 重命名</button>' +
+            (noteData.nodes.filter(function(n) { return n.parentId === null; }).length > 1 || !isRoot ?
+                '<button data-action="delete" style="display:block;width:100%;padding:6px 14px;border:none;background:none;cursor:pointer;text-align:left;font-size:12px;color:#dc3545;">🗑 删除</button>' : '');
+        document.body.appendChild(menu);
+        menu.querySelectorAll('button').forEach(function(btn) {
+            btn.onclick = function() {
+                var action = this.getAttribute('data-action');
+                if (action === 'addNote') {
+                    var name = prompt('请输入笔记标题：', '新笔记');
+                    if (name && name.trim()) {
+                        var children = getNoteChildren(node.id);
+                        var newNode = { id: 'node_' + (noteData.nextId || 100), parentId: node.id, type: 'note', name: name.trim(), order: children.length, content: '✍️ ' + name.trim() + '\\n\\n在此记录你的灵感...' };
+                        noteData.nextId = (noteData.nextId || 100) + 1;
+                        noteData.nodes.push(newNode);
+                        selectedId = newNode.id;
+                        localStorage.setItem('note_expanded_' + node.id, 'true');
+                        saveNoteData();
+                        renderTree();
+                        updateEditor();
+                    }
+                } else if (action === 'addFolder') {
+                    var name = prompt('请输入新分类名称：', '新分类');
+                    if (name && name.trim()) {
+                        var children = getNoteChildren(node.id);
+                        var newNode = { id: 'node_' + (noteData.nextId || 100), parentId: node.id, type: 'folder', name: name.trim(), order: children.length, content: '📂 分类说明' };
+                        noteData.nextId = (noteData.nextId || 100) + 1;
+                        noteData.nodes.push(newNode);
+                        selectedId = newNode.id;
+                        localStorage.setItem('note_expanded_' + node.id, 'true');
+                        saveNoteData();
+                        renderTree();
+                        updateEditor();
+                    }
+                } else if (action === 'rename') {
+                    var newName = prompt('重命名：', node.name);
+                    if (newName && newName.trim()) { node.name = newName.trim(); saveNoteData(); renderTree(); updateEditor(); }
+                } else if (action === 'delete') {
+                    if (confirm('确定删除「' + node.name + '」及其所有子项吗？')) {
+                        var toDelete = [node.id];
+                        function collectChildren(pid) {
+                            noteData.nodes.filter(function(n) { return n.parentId === pid; }).forEach(function(child) {
+                                toDelete.push(child.id);
+                                collectChildren(child.id);
+                            });
+                        }
+                        collectChildren(node.id);
+                        noteData.nodes = noteData.nodes.filter(function(n) { return toDelete.indexOf(n.id) === -1; });
+                        var siblings = getNoteChildren(node.parentId);
+                        siblings.forEach(function(s, idx) { s.order = idx; });
+                        selectedId = noteData.nodes.length > 0 ? noteData.nodes[0].id : null;
+                        saveNoteData();
+                        renderTree();
+                        updateEditor();
+                    }
+                }
+                menu.remove();
+            };
+        });
+        setTimeout(function() {
+            document.addEventListener('click', function closeMenu(e) {
+                if (!menu.contains(e.target)) { menu.remove(); document.removeEventListener('click', closeMenu); }
+            });
+        }, 10);
     };
     div.appendChild(header);
     var children = getNoteChildren(node.id);
@@ -1122,109 +1101,11 @@ function createNodeElement(node, depth) {
         childrenDiv.className = 'note-tree-children';
         var isExpanded = localStorage.getItem('note_expanded_' + node.id) !== 'false';
         childrenDiv.style.display = isExpanded ? 'block' : 'none';
-        children.forEach(function(child) { 
-            childrenDiv.appendChild(createNodeElement(child, depth + 1)); 
-        });
+        children.forEach(function(child) { childrenDiv.appendChild(createNodeElement(child, depth + 1)); });
         div.appendChild(childrenDiv);
     }
     return div;
 }
-
-function showContextMenu(x, y, nodeId) {
-    var node = getNoteNode(nodeId);
-    if (!node) return;
-    var menu = document.createElement('div');
-    menu.style.cssText = 'position:fixed;background:#fff;border-radius:8px;padding:4px 0;box-shadow:0 2px 12px rgba(0,0,0,0.15);z-index:10000;min-width:140px;';
-    menu.style.left = Math.min(x, window.innerWidth - 140) + 'px';
-    menu.style.top = Math.min(y, window.innerHeight - 120) + 'px';
-    var isRoot = node.parentId === null;
-    menu.innerHTML =
-        '<button data-action="addNote" style="display:block;width:100%;padding:6px 14px;border:none;background:none;cursor:pointer;text-align:left;font-size:12px;">➕ 新增笔记</button>' +
-        '<button data-action="addFolder" style="display:block;width:100%;padding:6px 14px;border:none;background:none;cursor:pointer;text-align:left;font-size:12px;">📁 新增分类</button>' +
-        '<button data-action="rename" style="display:block;width:100%;padding:6px 14px;border:none;background:none;cursor:pointer;text-align:left;font-size:12px;">✏️ 重命名</button>' +
-        (noteData.nodes.filter(function(n) { return n.parentId === null; }).length > 1 || !isRoot ?
-            '<button data-action="delete" style="display:block;width:100%;padding:6px 14px;border:none;background:none;cursor:pointer;text-align:left;font-size:12px;color:#dc3545;">🗑 删除</button>' : '');
-    document.body.appendChild(menu);
-    menu.querySelectorAll('button').forEach(function(btn) {
-        btn.onclick = function() {
-            var action = this.getAttribute('data-action');
-            if (action === 'addNote') {
-                var name = prompt('请输入笔记标题：', '新笔记');
-                if (name && name.trim()) {
-                    var children = getNoteChildren(node.id);
-                    var newNode = { 
-                        id: 'node_' + (noteData.nextId || 100), 
-                        parentId: node.id, 
-                        type: 'note', 
-                        name: name.trim(), 
-                        order: children.length, 
-                        content: '✍️ ' + name.trim() + '\\n\\n在此记录你的灵感...' 
-                    };
-                    noteData.nextId = (noteData.nextId || 100) + 1;
-                    noteData.nodes.push(newNode);
-                    selectedId = newNode.id;
-                    localStorage.setItem('note_expanded_' + node.id, 'true');
-                    saveNoteData();
-                    renderTree();
-                    updateEditor();
-                }
-            } else if (action === 'addFolder') {
-                var name = prompt('请输入新分类名称：', '新分类');
-                if (name && name.trim()) {
-                    var children = getNoteChildren(node.id);
-                    var newNode = { 
-                        id: 'node_' + (noteData.nextId || 100), 
-                        parentId: node.id, 
-                        type: 'folder', 
-                        name: name.trim(), 
-                        order: children.length, 
-                        content: '📂 分类说明' 
-                    };
-                    noteData.nextId = (noteData.nextId || 100) + 1;
-                    noteData.nodes.push(newNode);
-                    selectedId = newNode.id;
-                    localStorage.setItem('note_expanded_' + node.id, 'true');
-                    saveNoteData();
-                    renderTree();
-                    updateEditor();
-                }
-            } else if (action === 'rename') {
-                var newName = prompt('重命名：', node.name);
-                if (newName && newName.trim()) { 
-                    node.name = newName.trim(); 
-                    saveNoteData(); 
-                    renderTree(); 
-                    updateEditor(); 
-                }
-            } else if (action === 'delete') {
-                if (confirm('确定删除「' + node.name + '」及其所有子项吗？')) {
-                    var toDelete = [node.id];
-                    function collectChildren(pid) {
-                        noteData.nodes.filter(function(n) { return n.parentId === pid; }).forEach(function(child) {
-                            toDelete.push(child.id);
-                            collectChildren(child.id);
-                        });
-                    }
-                    collectChildren(node.id);
-                    noteData.nodes = noteData.nodes.filter(function(n) { return toDelete.indexOf(n.id) === -1; });
-                    var siblings = getNoteChildren(node.parentId);
-                    siblings.forEach(function(s, idx) { s.order = idx; });
-                    selectedId = noteData.nodes.length > 0 ? noteData.nodes[0].id : null;
-                    saveNoteData();
-                    renderTree();
-                    updateEditor();
-                }
-            }
-            menu.remove();
-        };
-    });
-    setTimeout(function() {
-        document.addEventListener('click', function closeMenu(e) {
-            if (!menu.contains(e.target)) { menu.remove(); document.removeEventListener('click', closeMenu); }
-        });
-    }, 10);
-}
-
 function updateEditor() {
     var node = getNoteNode(selectedId);
     var titleInput = document.getElementById('winTitle');
@@ -1285,20 +1166,11 @@ function deleteNode() {
         alert('已删除');
     }
 }
-
-// 绑定按钮事件
 document.getElementById('winAddRoot').onclick = function() {
     var name = prompt('请输入分类名称：', '新分类');
     if (name && name.trim()) {
         var roots = noteData.nodes.filter(function(n) { return n.parentId === null; });
-        var newNode = { 
-            id: 'node_' + (noteData.nextId || 100), 
-            parentId: null, 
-            type: 'folder', 
-            name: name.trim(), 
-            order: roots.length, 
-            content: '分类描述' 
-        };
+        var newNode = { id: 'node_' + (noteData.nextId || 100), parentId: null, type: 'folder', name: name.trim(), order: roots.length, content: '分类描述' };
         noteData.nextId = (noteData.nextId || 100) + 1;
         noteData.nodes.push(newNode);
         selectedId = newNode.id;
@@ -1314,14 +1186,7 @@ document.getElementById('winAddNoteBtn').onclick = function() {
             var name = prompt('请输入笔记标题：', '新笔记');
             if (name && name.trim()) {
                 var children = getNoteChildren(selectedId);
-                var newNode = { 
-                    id: 'node_' + (noteData.nextId || 100), 
-                    parentId: selectedId, 
-                    type: 'note', 
-                    name: name.trim(), 
-                    order: children.length, 
-                    content: '✍️ ' + name.trim() + '\\n\\n在此记录你的灵感...' 
-                };
+                var newNode = { id: 'node_' + (noteData.nextId || 100), parentId: selectedId, type: 'note', name: name.trim(), order: children.length, content: '✍️ ' + name.trim() + '\\n\\n在此记录你的灵感...' };
                 noteData.nextId = (noteData.nextId || 100) + 1;
                 noteData.nodes.push(newNode);
                 selectedId = newNode.id;
@@ -1340,14 +1205,7 @@ document.getElementById('winAddFolderBtn').onclick = function() {
             var name = prompt('请输入新分类名称：', '新分类');
             if (name && name.trim()) {
                 var children = getNoteChildren(selectedId);
-                var newNode = { 
-                    id: 'node_' + (noteData.nextId || 100), 
-                    parentId: selectedId, 
-                    type: 'folder', 
-                    name: name.trim(), 
-                    order: children.length, 
-                    content: '📂 分类说明' 
-                };
+                var newNode = { id: 'node_' + (noteData.nextId || 100), parentId: selectedId, type: 'folder', name: name.trim(), order: children.length, content: '📂 分类说明' };
                 noteData.nextId = (noteData.nextId || 100) + 1;
                 noteData.nodes.push(newNode);
                 selectedId = newNode.id;
@@ -1359,21 +1217,7 @@ document.getElementById('winAddFolderBtn').onclick = function() {
         }
     } else { alert('请先选择一个节点'); }
 };
-document.getElementById('winRefresh').onclick = function() { 
-    // 重新从 localStorage 加载数据
-    var key = 'openwrite_note_' + (currentBookId || 'global');
-    var saved = localStorage.getItem(key);
-    if (saved) {
-        try {
-            var data = JSON.parse(saved);
-            noteData.nodes = data.nodes || [];
-            noteData.selectedId = data.selectedId || null;
-            noteData.nextId = data.nextId || 1;
-        } catch(e) {}
-    }
-    renderTree(); 
-    updateEditor(); 
-};
+document.getElementById('winRefresh').onclick = function() { renderTree(); updateEditor(); };
 document.getElementById('winSave').onclick = saveNode;
 document.getElementById('winDelete').onclick = deleteNode;
 document.getElementById('winSearch').oninput = function() {
@@ -1418,11 +1262,122 @@ document.getElementById('winTitle').oninput = function() {
 document.addEventListener('keydown', function(e) {
     if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); saveNode(); }
 });
-
-// 初始化
 renderTree();
 updateEditor();
 console.log('笔记窗口已打开');
+`;
+    
+    var html = `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>📓 笔记 - 全屏编辑</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; ${hasCustomBg ? bgStyle : 'background:' + c.bg + ';'} height:100vh; overflow:hidden; color:${c.text}; position:relative; }
+        ${hasCustomBg ? `
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.3);
+            z-index: 0;
+            pointer-events: none;
+        }
+        .note-container { position:relative; z-index:1; }
+        ` : ''}
+        .note-container { display:flex; height:100vh; width:100%; ${isOpen ? 'gap:12px;padding:12px;' : ''} }
+        .note-sidebar { width:300px; min-width:220px; max-width:450px; background:${hasCustomBg ? 'rgba(0,0,0,0.5)' : c.panel}; backdrop-filter:blur(20px); border-right:1px solid ${c.border}; display:flex; flex-direction:column; flex-shrink:0; overflow:hidden; ${isOpen ? 'border-radius:20px;border:1px solid rgba(255,255,255,0.15);margin:0;' : ''} }
+        ${hasCustomBg && isDark ? `
+        .note-sidebar { background:rgba(0,0,0,0.6); }
+        .note-editor { background:rgba(0,0,0,0.5); }
+        ` : ''}
+        .note-sidebar-header { display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:${c.headerBg}; border-bottom:1px solid ${c.border}; flex-shrink:0; }
+        .note-sidebar-header span { font-weight:600; font-size:15px; color:${c.text}; }
+        .note-sidebar-header button { background:none; border:none; cursor:pointer; font-size:16px; padding:0 4px; color:${c.textSecondary}; }
+        .note-search { padding:8px 12px; flex-shrink:0; }
+        .note-search input { width:100%; padding:6px 10px; border:1px solid ${c.border}; border-radius:6px; font-size:13px; background:${hasCustomBg ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.5)'}; color:${c.text}; }
+        .note-search input::placeholder { color:${hasCustomBg ? 'rgba(255,255,255,0.6)' : c.textSecondary}; }
+        .note-add-buttons { display:flex; gap:6px; padding:0 12px 8px 12px; flex-shrink:0; }
+        .note-add-buttons button { flex:1; border:none; border-radius:4px; cursor:pointer; font-size:12px; padding:5px 0; font-weight:500; color:white; }
+        .note-add-buttons .add-note { background:#28a745; }
+        .note-add-buttons .add-folder { background:#9b784e; }
+        #noteTree { flex:1; overflow-y:auto; padding:8px 4px; }
+        .note-status { padding:6px 12px; border-top:1px solid ${c.border}; font-size:11px; color:${c.textSecondary}; display:flex; justify-content:space-between; flex-shrink:0; }
+        .note-editor { flex:1; display:flex; flex-direction:column; background:${hasCustomBg ? 'rgba(0,0,0,0.4)' : c.panel}; backdrop-filter:blur(16px); overflow:hidden; ${isOpen ? 'border-radius:20px;border:1px solid rgba(255,255,255,0.15);' : ''} }
+        .note-editor-header { display:flex; justify-content:space-between; align-items:center; padding:12px 20px; border-bottom:1px solid ${c.border}; flex-shrink:0; }
+        .note-editor-header input { font-size:18px; font-weight:600; border:none; background:transparent; outline:none; flex:1; color:${c.text}; }
+        .note-editor-header button { padding:6px 16px; border:none; border-radius:6px; cursor:pointer; font-size:13px; }
+        .note-editor-header .save-btn { background:#9b784e; color:white; }
+        .note-editor-header .delete-btn { background:#dc3545; color:white; }
+        .note-editor-content { flex:1; padding:20px; border:none; outline:none; resize:none; font-size:14px; line-height:1.8; background:transparent; color:${c.text}; font-family:inherit; }
+        .note-status-bar { padding:8px 20px; border-top:1px solid ${c.border}; display:flex; justify-content:space-between; font-size:12px; color:${c.textSecondary}; flex-shrink:0; }
+        ::-webkit-scrollbar { width:6px; height:6px; }
+        ::-webkit-scrollbar-thumb { background:${isDark ? 'rgba(255,255,255,0.2)' : 'rgba(136,136,136,0.4)'}; border-radius:3px; }
+        ::-webkit-scrollbar-track { background:transparent; }
+        .note-tree-node { margin-bottom:2px; }
+        .note-tree-header { display:flex; align-items:center; gap:6px; padding:5px 8px; border-radius:6px; cursor:pointer; transition:background 0.15s; font-size:13px; color:${c.text}; }
+        .note-tree-header:hover { background:${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)'}; }
+        .note-tree-header.active { background:rgba(0,122,255,0.2); font-weight:500; }
+        .note-tree-children { margin-left:16px; }
+        .note-tree-header .toggle { font-size:9px; width:14px; text-align:center; color:${c.textSecondary}; flex-shrink:0; cursor:pointer; }
+        .note-tree-header .icon { font-size:14px; flex-shrink:0; }
+        .note-tree-header .name { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        ${hasCustomBg ? `
+        .note-tree-header:hover { background:rgba(255,255,255,0.12); }
+        .note-tree-header.active { background:rgba(0,122,255,0.3); }
+        .note-sidebar-header { background:rgba(0,0,0,0.2); }
+        .note-status { color:rgba(255,255,255,0.7); }
+        .note-status-bar { color:rgba(255,255,255,0.7); }
+        .note-editor-header input { color:#fff; }
+        .note-editor-header input::placeholder { color:rgba(255,255,255,0.5); }
+        .note-editor-content { color:#fff; }
+        .note-editor-content::placeholder { color:rgba(255,255,255,0.5); }
+        .note-sidebar-header button { color:rgba(255,255,255,0.7); }
+        .note-sidebar-header span { color:#fff; }
+        .note-search input { color:#fff; border-color:rgba(255,255,255,0.2); }
+        .note-search input::placeholder { color:rgba(255,255,255,0.5); }
+        ` : ''}
+    </style>
+</head>
+<body>
+<div class="note-container">
+<div class="note-sidebar">
+<div class="note-sidebar-header">
+<span>📓 笔记目录</span>
+<div>
+<button id="winAddRoot" title="新增分类">📂</button>
+<button id="winRefresh" title="刷新">🔄</button>
+</div>
+</div>
+<div class="note-search"><input type="text" id="winSearch" placeholder="🔍 搜索笔记..."></div>
+<div class="note-add-buttons">
+    <button class="add-note" id="winAddNoteBtn">➕ 笔记</button>
+    <button class="add-folder" id="winAddFolderBtn">📁 分类</button>
+</div>
+<div id="noteTree"></div>
+<div class="note-status"><span>笔记: <span id="winNodeCount">0</span></span><span>💡 双击重命名 · 右键菜单</span></div>
+</div>
+<div class="note-editor">
+<div class="note-editor-header">
+<input type="text" id="winTitle" placeholder="笔记标题">
+<div style="display:flex;gap:8px;">
+<button class="save-btn" id="winSave">💾 保存</button>
+<button class="delete-btn" id="winDelete">🗑 删除</button>
+</div>
+</div>
+<textarea id="winContent" class="note-editor-content" placeholder="在此记录你的灵感..."></textarea>
+<div class="note-status-bar"><span id="winWordCount">0 字</span><span id="winStatus">已就绪</span></div>
+</div>
+</div>
+<script>
+var noteData = ${dataJson};
+var currentBookId = ${bookId};
+var selectedId = ${selectedId};
+${jsCode}
 <\/script>
 </body>
 </html>`;

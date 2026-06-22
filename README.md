@@ -3,7 +3,7 @@
 > 免费 · 开源 · 自由的写作软件
 
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![GitHub release](https://img.shields.io/badge/release-v1.9.0-brightgreen.svg)](https://github.com/likeweixue/Writingpanelsystem/releases)
+[![GitHub release](https://img.shields.io/badge/release-v1.9.1-brightgreen.svg)](https://github.com/likeweixue/Writingpanelsystem/releases)
 [![Electron](https://img.shields.io/badge/Electron-28.0.0-47848f.svg)](https://electronjs.org)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 

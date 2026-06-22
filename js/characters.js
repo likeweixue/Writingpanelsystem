@@ -927,89 +927,33 @@ function bindCompactCharacterEvents() {
 function openCharacterInNewWindow() {
     closeCharacterFloatingPanel();
     
-    // 确保数据已加载
-    getCharacterData();
+    var currentTheme = localStorage.getItem('app_theme') || 'default';
+    var customBgImage = localStorage.getItem('custom_bg_image') || '';
+    var customBgOpacity = parseInt(localStorage.getItem('custom_bg_opacity') || '30');
     
-    // 序列化数据
+    var themeColors = {
+        'default': { bg: '#f0f2f5', panel: 'rgba(255,255,255,0.95)', border: 'rgba(0,0,0,0.08)', text: '#333', textSecondary: '#888', headerBg: 'rgba(0,0,0,0.03)' },
+        'eye': { bg: '#e8f0e5', panel: 'rgba(200,219,197,0.95)', border: 'rgba(44,62,47,0.12)', text: '#2c3e2f', textSecondary: '#5a7a5a', headerBg: 'rgba(44,62,47,0.06)' },
+        'warm': { bg: '#f5efe5', panel: 'rgba(223,213,189,0.95)', border: 'rgba(74,59,44,0.12)', text: '#4a3b2c', textSecondary: '#8a7a6a', headerBg: 'rgba(74,59,44,0.06)' },
+        'dark': { bg: '#1a1a2e', panel: 'rgba(30,30,46,0.95)', border: 'rgba(255,255,255,0.08)', text: '#e0e0e0', textSecondary: '#8888aa', headerBg: 'rgba(255,255,255,0.05)' },
+        'open': { bg: '#f0f2f5', panel: 'rgba(255,255,255,0.2)', border: 'rgba(255,255,255,0.1)', text: '#333', textSecondary: '#888', headerBg: 'rgba(255,255,255,0.08)' }
+    };
+    var c = themeColors[currentTheme] || themeColors['default'];
+    var isDark = currentTheme === 'dark';
+    var isOpen = currentTheme === 'open';
+    var hasCustomBg = customBgImage && customBgImage.length > 0;
+    
+    var bgStyle = '';
+    if (hasCustomBg) {
+        bgStyle = 'background-image: url(' + JSON.stringify(customBgImage) + '); background-size: cover; background-position: center; background-attachment: fixed; opacity: ' + (customBgOpacity/100) + ';';
+    }
+    
+    getCharacterData();
     var dataJson = JSON.stringify(characterData);
     var bookId = currentBookId || 'global';
+    var selectedId = characterData.selectedId ? JSON.stringify(characterData.selectedId) : 'null';
     
-    var html = `<!DOCTYPE html>
-<html>
-<head><meta charset="UTF-8"><title>👥 角色 - 全屏编辑</title>
-<style>
-* { margin:0; padding:0; box-sizing:border-box; }
-body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:#f0f2f5; height:100vh; overflow:hidden; }
-.character-container { display:flex; height:100vh; width:100%; }
-.character-sidebar { width:300px; min-width:220px; max-width:450px; background:rgba(255,255,255,0.95); backdrop-filter:blur(8px); border-right:1px solid rgba(0,0,0,0.08); display:flex; flex-direction:column; flex-shrink:0; overflow:hidden; }
-.character-sidebar-header { display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:rgba(0,0,0,0.03); border-bottom:1px solid rgba(0,0,0,0.08); flex-shrink:0; }
-.character-sidebar-header span { font-weight:600; font-size:15px; }
-.character-sidebar-header button { background:none; border:none; cursor:pointer; font-size:16px; padding:0 4px; }
-.character-search { padding:8px 12px; flex-shrink:0; }
-.character-search input { width:100%; padding:6px 10px; border:1px solid #ddd; border-radius:6px; font-size:13px; background:#f8f8f8; }
-.character-add-buttons { display:flex; gap:6px; padding:0 12px 8px 12px; flex-shrink:0; }
-.character-add-buttons button { flex:1; border:none; border-radius:4px; cursor:pointer; font-size:12px; padding:5px 0; font-weight:500; color:white; }
-.character-add-buttons .add-character { background:#28a745; }
-.character-add-buttons .add-folder { background:#9b784e; }
-#characterTree { flex:1; overflow-y:auto; padding:8px 4px; }
-.character-status { padding:6px 12px; border-top:1px solid rgba(0,0,0,0.08); font-size:11px; color:#888; display:flex; justify-content:space-between; flex-shrink:0; }
-.character-editor { flex:1; display:flex; flex-direction:column; background:rgba(255,255,255,0.9); overflow:hidden; }
-.character-editor-header { display:flex; justify-content:space-between; align-items:center; padding:12px 20px; border-bottom:1px solid rgba(0,0,0,0.08); flex-shrink:0; }
-.character-editor-header input { font-size:18px; font-weight:600; border:none; background:transparent; outline:none; flex:1; color:#333; }
-.character-editor-header button { padding:6px 16px; border:none; border-radius:6px; cursor:pointer; font-size:13px; }
-.character-editor-header .save-btn { background:#9b784e; color:white; }
-.character-editor-header .delete-btn { background:#dc3545; color:white; }
-.character-editor-content { flex:1; padding:20px; border:none; outline:none; resize:none; font-size:14px; line-height:1.8; background:transparent; color:#333; font-family:inherit; }
-.character-status-bar { padding:8px 20px; border-top:1px solid rgba(0,0,0,0.08); display:flex; justify-content:space-between; font-size:12px; color:#888; flex-shrink:0; }
-::-webkit-scrollbar { width:6px; height:6px; }
-::-webkit-scrollbar-thumb { background:rgba(136,136,136,0.4); border-radius:3px; }
-::-webkit-scrollbar-track { background:transparent; }
-.character-tree-node { margin-bottom:2px; }
-.character-tree-header { display:flex; align-items:center; gap:6px; padding:5px 8px; border-radius:6px; cursor:pointer; transition:background 0.15s; font-size:13px; }
-.character-tree-header:hover { background:rgba(0,0,0,0.05); }
-.character-tree-header.active { background:rgba(0,122,255,0.12); font-weight:500; }
-.character-tree-children { margin-left:16px; }
-.character-tree-header .toggle { font-size:9px; width:14px; text-align:center; color:#888; flex-shrink:0; cursor:pointer; }
-.character-tree-header .icon { font-size:14px; flex-shrink:0; }
-.character-tree-header .name { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#333; }
-</style>
-</head>
-<body>
-<div class="character-container">
-<div class="character-sidebar">
-<div class="character-sidebar-header">
-<span>👥 角色目录</span>
-<div>
-<button id="winAddRoot" title="新增分类">📂</button>
-<button id="winRefresh" title="刷新">🔄</button>
-</div>
-</div>
-<div class="character-search"><input type="text" id="winSearch" placeholder="🔍 搜索角色..."></div>
-<div class="character-add-buttons">
-    <button class="add-character" id="winAddCharacterBtn">➕ 角色</button>
-    <button class="add-folder" id="winAddFolderBtn">📁 分类</button>
-</div>
-<div id="characterTree"></div>
-<div class="character-status"><span>角色: <span id="winNodeCount">0</span></span><span>💡 双击重命名 · 右键菜单</span></div>
-</div>
-<div class="character-editor">
-<div class="character-editor-header">
-<input type="text" id="winTitle" placeholder="角色姓名">
-<div style="display:flex;gap:8px;">
-<button class="save-btn" id="winSave">💾 保存</button>
-<button class="delete-btn" id="winDelete">🗑 删除</button>
-</div>
-</div>
-<textarea id="winContent" class="character-editor-content" placeholder="【姓名】\\n【性别】\\n【年龄】\\n【外貌】\\n【性格】\\n【背景】\\n【势力】\\n【等级】\\n【功法】\\n【其他】"></textarea>
-<div class="character-status-bar"><span id="winWordCount">0 字</span><span id="winStatus">已就绪</span></div>
-</div>
-</div>
-<script>
-// 从父窗口传递的数据
-var characterData = ${dataJson};
-var currentBookId = ${bookId};
-var selectedId = ${characterData.selectedId ? JSON.stringify(characterData.selectedId) : 'null'};
-
+    var jsCode = `
 function getCharacterChildren(parentId) {
     return characterData.nodes.filter(function(n) { return n.parentId === parentId; }).sort(function(a,b) { return (a.order||0)-(b.order||0); });
 }
@@ -1020,36 +964,18 @@ function saveCharacterData() {
     var key = 'openwrite_character_' + (currentBookId || 'global');
     var data = { nodes: characterData.nodes, selectedId: selectedId, nextId: characterData.nextId || 100 };
     localStorage.setItem(key, JSON.stringify(data));
-    // 通知父窗口刷新
     if (window.opener && window.opener.window) {
-        try { 
-            // 刷新父窗口的数据
-            window.opener.window.location.reload(); 
-        } catch(e) {}
+        try { window.opener.window.location.reload(); } catch(e) {}
     }
 }
-function selectNode(id) { 
-    selectedId = id; 
-    renderTree(); 
-    updateEditor(); 
-    saveCharacterData(); 
-}
+function selectNode(id) { selectedId = id; renderTree(); updateEditor(); saveCharacterData(); }
 function renderTree() {
     var container = document.getElementById('characterTree');
-    if (!container) {
-        console.warn('characterTree 元素不存在');
-        return;
-    }
+    if (!container) return;
     container.innerHTML = '';
     var roots = characterData.nodes.filter(function(n) { return n.parentId === null; }).sort(function(a,b) { return (a.order||0)-(b.order||0); });
-    if (roots.length === 0) { 
-        container.innerHTML = '<div style="padding:20px;text-align:center;color:#888;font-size:13px;">暂无角色分类</div>'; 
-        document.getElementById('winNodeCount').textContent = '0';
-        return; 
-    }
-    roots.forEach(function(root) { 
-        container.appendChild(createNodeElement(root, 0)); 
-    });
+    if (roots.length === 0) { container.innerHTML = '<div style="padding:20px;text-align:center;color:#888;font-size:13px;">暂无角色分类</div>'; return; }
+    roots.forEach(function(root) { container.appendChild(createNodeElement(root, 0)); });
     document.getElementById('winNodeCount').textContent = characterData.nodes.length;
 }
 function createNodeElement(node, depth) {
@@ -1067,17 +993,13 @@ function createNodeElement(node, depth) {
     if (hasChildren) {
         var isExpanded = localStorage.getItem('character_expanded_' + node.id) !== 'false';
         toggle.textContent = isExpanded ? '▾' : '▸';
-        toggle.onclick = function(e) { 
-            e.stopPropagation();
+        toggle.onclick = function(e) { e.stopPropagation();
             var current = localStorage.getItem('character_expanded_' + node.id);
             var newState = current === 'false' ? 'true' : 'false';
             localStorage.setItem('character_expanded_' + node.id, newState);
             renderTree();
         };
-    } else { 
-        toggle.textContent = '·'; 
-        toggle.style.color = '#ccc'; 
-    }
+    } else { toggle.textContent = '·'; toggle.style.color = '#ccc'; }
     header.appendChild(toggle);
     var icon = document.createElement('span');
     icon.className = 'icon';
@@ -1087,24 +1009,80 @@ function createNodeElement(node, depth) {
     nameSpan.className = 'name';
     nameSpan.textContent = node.name || '未命名';
     header.appendChild(nameSpan);
-    header.onclick = function(e) { 
-        if (e.target === toggle) return; 
-        selectNode(node.id); 
-    };
-    header.ondblclick = function(e) { 
-        e.stopPropagation(); 
-        var newName = prompt('重命名：', node.name); 
-        if (newName && newName.trim()) { 
-            node.name = newName.trim(); 
-            saveCharacterData(); 
-            renderTree(); 
-            updateEditor(); 
-        } 
-    };
-    header.oncontextmenu = function(e) { 
-        e.preventDefault(); 
-        e.stopPropagation();
-        showContextMenu(e.clientX, e.clientY, node.id);
+    header.onclick = function(e) { if (e.target === toggle) return; selectNode(node.id); };
+    header.ondblclick = function(e) { e.stopPropagation(); var newName = prompt('重命名：', node.name); if (newName && newName.trim()) { node.name = newName.trim(); saveCharacterData(); renderTree(); updateEditor(); } };
+    header.oncontextmenu = function(e) { e.preventDefault(); e.stopPropagation();
+        var menu = document.createElement('div');
+        menu.style.cssText = 'position:fixed;background:#fff;border-radius:8px;padding:4px 0;box-shadow:0 2px 12px rgba(0,0,0,0.15);z-index:10000;min-width:120px;';
+        menu.style.left = Math.min(e.clientX, window.innerWidth - 140) + 'px';
+        menu.style.top = Math.min(e.clientY, window.innerHeight - 120) + 'px';
+        var isRoot = node.parentId === null;
+        menu.innerHTML =
+            '<button data-action="addCharacter" style="display:block;width:100%;padding:6px 14px;border:none;background:none;cursor:pointer;text-align:left;font-size:12px;">➕ 新增角色</button>' +
+            '<button data-action="addFolder" style="display:block;width:100%;padding:6px 14px;border:none;background:none;cursor:pointer;text-align:left;font-size:12px;">📁 新增分类</button>' +
+            '<button data-action="rename" style="display:block;width:100%;padding:6px 14px;border:none;background:none;cursor:pointer;text-align:left;font-size:12px;">✏️ 重命名</button>' +
+            (characterData.nodes.filter(function(n) { return n.parentId === null; }).length > 1 || !isRoot ?
+                '<button data-action="delete" style="display:block;width:100%;padding:6px 14px;border:none;background:none;cursor:pointer;text-align:left;font-size:12px;color:#dc3545;">🗑 删除</button>' : '');
+        document.body.appendChild(menu);
+        menu.querySelectorAll('button').forEach(function(btn) {
+            btn.onclick = function() {
+                var action = this.getAttribute('data-action');
+                if (action === 'addCharacter') {
+                    var name = prompt('请输入角色姓名：', '新角色');
+                    if (name && name.trim()) {
+                        var children = getCharacterChildren(node.id);
+                        var newNode = { id: 'node_' + (characterData.nextId || 100), parentId: node.id, type: 'character', name: name.trim(), order: children.length, content: '【姓名】' + name.trim() + '\\n【性别】\\n【年龄】\\n【外貌】\\n【性格】\\n【背景】\\n【势力】\\n【等级】\\n【功法】\\n【其他】' };
+                        characterData.nextId = (characterData.nextId || 100) + 1;
+                        characterData.nodes.push(newNode);
+                        selectedId = newNode.id;
+                        localStorage.setItem('character_expanded_' + node.id, 'true');
+                        saveCharacterData();
+                        renderTree();
+                        updateEditor();
+                    }
+                } else if (action === 'addFolder') {
+                    var name = prompt('请输入新分类名称：', '新分类');
+                    if (name && name.trim()) {
+                        var children = getCharacterChildren(node.id);
+                        var newNode = { id: 'node_' + (characterData.nextId || 100), parentId: node.id, type: 'folder', name: name.trim(), order: children.length, content: '分类说明' };
+                        characterData.nextId = (characterData.nextId || 100) + 1;
+                        characterData.nodes.push(newNode);
+                        selectedId = newNode.id;
+                        localStorage.setItem('character_expanded_' + node.id, 'true');
+                        saveCharacterData();
+                        renderTree();
+                        updateEditor();
+                    }
+                } else if (action === 'rename') {
+                    var newName = prompt('重命名：', node.name);
+                    if (newName && newName.trim()) { node.name = newName.trim(); saveCharacterData(); renderTree(); updateEditor(); }
+                } else if (action === 'delete') {
+                    if (confirm('确定删除「' + node.name + '」及其所有子项吗？')) {
+                        var toDelete = [node.id];
+                        function collectChildren(pid) {
+                            characterData.nodes.filter(function(n) { return n.parentId === pid; }).forEach(function(child) {
+                                toDelete.push(child.id);
+                                collectChildren(child.id);
+                            });
+                        }
+                        collectChildren(node.id);
+                        characterData.nodes = characterData.nodes.filter(function(n) { return toDelete.indexOf(n.id) === -1; });
+                        var siblings = getCharacterChildren(node.parentId);
+                        siblings.forEach(function(s, idx) { s.order = idx; });
+                        selectedId = characterData.nodes.length > 0 ? characterData.nodes[0].id : null;
+                        saveCharacterData();
+                        renderTree();
+                        updateEditor();
+                    }
+                }
+                menu.remove();
+            };
+        });
+        setTimeout(function() {
+            document.addEventListener('click', function closeMenu(e) {
+                if (!menu.contains(e.target)) { menu.remove(); document.removeEventListener('click', closeMenu); }
+            });
+        }, 10);
     };
     div.appendChild(header);
     var children = getCharacterChildren(node.id);
@@ -1113,109 +1091,11 @@ function createNodeElement(node, depth) {
         childrenDiv.className = 'character-tree-children';
         var isExpanded = localStorage.getItem('character_expanded_' + node.id) !== 'false';
         childrenDiv.style.display = isExpanded ? 'block' : 'none';
-        children.forEach(function(child) { 
-            childrenDiv.appendChild(createNodeElement(child, depth + 1)); 
-        });
+        children.forEach(function(child) { childrenDiv.appendChild(createNodeElement(child, depth + 1)); });
         div.appendChild(childrenDiv);
     }
     return div;
 }
-
-function showContextMenu(x, y, nodeId) {
-    var node = getCharacterNode(nodeId);
-    if (!node) return;
-    var menu = document.createElement('div');
-    menu.style.cssText = 'position:fixed;background:#fff;border-radius:8px;padding:4px 0;box-shadow:0 2px 12px rgba(0,0,0,0.15);z-index:10000;min-width:140px;';
-    menu.style.left = Math.min(x, window.innerWidth - 140) + 'px';
-    menu.style.top = Math.min(y, window.innerHeight - 120) + 'px';
-    var isRoot = node.parentId === null;
-    menu.innerHTML =
-        '<button data-action="addCharacter" style="display:block;width:100%;padding:6px 14px;border:none;background:none;cursor:pointer;text-align:left;font-size:12px;">➕ 新增角色</button>' +
-        '<button data-action="addFolder" style="display:block;width:100%;padding:6px 14px;border:none;background:none;cursor:pointer;text-align:left;font-size:12px;">📁 新增分类</button>' +
-        '<button data-action="rename" style="display:block;width:100%;padding:6px 14px;border:none;background:none;cursor:pointer;text-align:left;font-size:12px;">✏️ 重命名</button>' +
-        (characterData.nodes.filter(function(n) { return n.parentId === null; }).length > 1 || !isRoot ?
-            '<button data-action="delete" style="display:block;width:100%;padding:6px 14px;border:none;background:none;cursor:pointer;text-align:left;font-size:12px;color:#dc3545;">🗑 删除</button>' : '');
-    document.body.appendChild(menu);
-    menu.querySelectorAll('button').forEach(function(btn) {
-        btn.onclick = function() {
-            var action = this.getAttribute('data-action');
-            if (action === 'addCharacter') {
-                var name = prompt('请输入角色姓名：', '新角色');
-                if (name && name.trim()) {
-                    var children = getCharacterChildren(node.id);
-                    var newNode = { 
-                        id: 'node_' + (characterData.nextId || 100), 
-                        parentId: node.id, 
-                        type: 'character', 
-                        name: name.trim(), 
-                        order: children.length, 
-                        content: '【姓名】' + name.trim() + '\\n【性别】\\n【年龄】\\n【外貌】\\n【性格】\\n【背景】\\n【势力】\\n【等级】\\n【功法】\\n【其他】' 
-                    };
-                    characterData.nextId = (characterData.nextId || 100) + 1;
-                    characterData.nodes.push(newNode);
-                    selectedId = newNode.id;
-                    localStorage.setItem('character_expanded_' + node.id, 'true');
-                    saveCharacterData();
-                    renderTree();
-                    updateEditor();
-                }
-            } else if (action === 'addFolder') {
-                var name = prompt('请输入新分类名称：', '新分类');
-                if (name && name.trim()) {
-                    var children = getCharacterChildren(node.id);
-                    var newNode = { 
-                        id: 'node_' + (characterData.nextId || 100), 
-                        parentId: node.id, 
-                        type: 'folder', 
-                        name: name.trim(), 
-                        order: children.length, 
-                        content: '分类说明' 
-                    };
-                    characterData.nextId = (characterData.nextId || 100) + 1;
-                    characterData.nodes.push(newNode);
-                    selectedId = newNode.id;
-                    localStorage.setItem('character_expanded_' + node.id, 'true');
-                    saveCharacterData();
-                    renderTree();
-                    updateEditor();
-                }
-            } else if (action === 'rename') {
-                var newName = prompt('重命名：', node.name);
-                if (newName && newName.trim()) { 
-                    node.name = newName.trim(); 
-                    saveCharacterData(); 
-                    renderTree(); 
-                    updateEditor(); 
-                }
-            } else if (action === 'delete') {
-                if (confirm('确定删除「' + node.name + '」及其所有子项吗？')) {
-                    var toDelete = [node.id];
-                    function collectChildren(pid) {
-                        characterData.nodes.filter(function(n) { return n.parentId === pid; }).forEach(function(child) {
-                            toDelete.push(child.id);
-                            collectChildren(child.id);
-                        });
-                    }
-                    collectChildren(node.id);
-                    characterData.nodes = characterData.nodes.filter(function(n) { return toDelete.indexOf(n.id) === -1; });
-                    var siblings = getCharacterChildren(node.parentId);
-                    siblings.forEach(function(s, idx) { s.order = idx; });
-                    selectedId = characterData.nodes.length > 0 ? characterData.nodes[0].id : null;
-                    saveCharacterData();
-                    renderTree();
-                    updateEditor();
-                }
-            }
-            menu.remove();
-        };
-    });
-    setTimeout(function() {
-        document.addEventListener('click', function closeMenu(e) {
-            if (!menu.contains(e.target)) { menu.remove(); document.removeEventListener('click', closeMenu); }
-        });
-    }, 10);
-}
-
 function updateEditor() {
     var node = getCharacterNode(selectedId);
     var titleInput = document.getElementById('winTitle');
@@ -1276,20 +1156,11 @@ function deleteNode() {
         alert('已删除');
     }
 }
-
-// 绑定按钮事件
 document.getElementById('winAddRoot').onclick = function() {
     var name = prompt('请输入分类名称：', '新分类');
     if (name && name.trim()) {
         var roots = characterData.nodes.filter(function(n) { return n.parentId === null; });
-        var newNode = { 
-            id: 'node_' + (characterData.nextId || 100), 
-            parentId: null, 
-            type: 'folder', 
-            name: name.trim(), 
-            order: roots.length, 
-            content: '分类描述' 
-        };
+        var newNode = { id: 'node_' + (characterData.nextId || 100), parentId: null, type: 'folder', name: name.trim(), order: roots.length, content: '分类描述' };
         characterData.nextId = (characterData.nextId || 100) + 1;
         characterData.nodes.push(newNode);
         selectedId = newNode.id;
@@ -1305,14 +1176,7 @@ document.getElementById('winAddCharacterBtn').onclick = function() {
             var name = prompt('请输入角色姓名：', '新角色');
             if (name && name.trim()) {
                 var children = getCharacterChildren(selectedId);
-                var newNode = { 
-                    id: 'node_' + (characterData.nextId || 100), 
-                    parentId: selectedId, 
-                    type: 'character', 
-                    name: name.trim(), 
-                    order: children.length, 
-                    content: '【姓名】' + name.trim() + '\\n【性别】\\n【年龄】\\n【外貌】\\n【性格】\\n【背景】\\n【势力】\\n【等级】\\n【功法】\\n【其他】' 
-                };
+                var newNode = { id: 'node_' + (characterData.nextId || 100), parentId: selectedId, type: 'character', name: name.trim(), order: children.length, content: '【姓名】' + name.trim() + '\\n【性别】\\n【年龄】\\n【外貌】\\n【性格】\\n【背景】\\n【势力】\\n【等级】\\n【功法】\\n【其他】' };
                 characterData.nextId = (characterData.nextId || 100) + 1;
                 characterData.nodes.push(newNode);
                 selectedId = newNode.id;
@@ -1331,14 +1195,7 @@ document.getElementById('winAddFolderBtn').onclick = function() {
             var name = prompt('请输入新分类名称：', '新分类');
             if (name && name.trim()) {
                 var children = getCharacterChildren(selectedId);
-                var newNode = { 
-                    id: 'node_' + (characterData.nextId || 100), 
-                    parentId: selectedId, 
-                    type: 'folder', 
-                    name: name.trim(), 
-                    order: children.length, 
-                    content: '分类说明' 
-                };
+                var newNode = { id: 'node_' + (characterData.nextId || 100), parentId: selectedId, type: 'folder', name: name.trim(), order: children.length, content: '分类说明' };
                 characterData.nextId = (characterData.nextId || 100) + 1;
                 characterData.nodes.push(newNode);
                 selectedId = newNode.id;
@@ -1350,21 +1207,7 @@ document.getElementById('winAddFolderBtn').onclick = function() {
         }
     } else { alert('请先选择一个节点'); }
 };
-document.getElementById('winRefresh').onclick = function() { 
-    // 重新从 localStorage 加载数据
-    var key = 'openwrite_character_' + (currentBookId || 'global');
-    var saved = localStorage.getItem(key);
-    if (saved) {
-        try {
-            var data = JSON.parse(saved);
-            characterData.nodes = data.nodes || [];
-            characterData.selectedId = data.selectedId || null;
-            characterData.nextId = data.nextId || 1;
-        } catch(e) {}
-    }
-    renderTree(); 
-    updateEditor(); 
-};
+document.getElementById('winRefresh').onclick = function() { renderTree(); updateEditor(); };
 document.getElementById('winSave').onclick = saveNode;
 document.getElementById('winDelete').onclick = deleteNode;
 document.getElementById('winSearch').oninput = function() {
@@ -1409,11 +1252,122 @@ document.getElementById('winTitle').oninput = function() {
 document.addEventListener('keydown', function(e) {
     if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); saveNode(); }
 });
-
-// 初始化
 renderTree();
 updateEditor();
 console.log('角色窗口已打开');
+`;
+    
+    var html = `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>👥 角色 - 全屏编辑</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; ${hasCustomBg ? bgStyle : 'background:' + c.bg + ';'} height:100vh; overflow:hidden; color:${c.text}; position:relative; }
+        ${hasCustomBg ? `
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.3);
+            z-index: 0;
+            pointer-events: none;
+        }
+        .character-container { position:relative; z-index:1; }
+        ` : ''}
+        .character-container { display:flex; height:100vh; width:100%; ${isOpen ? 'gap:12px;padding:12px;' : ''} }
+        .character-sidebar { width:300px; min-width:220px; max-width:450px; background:${hasCustomBg ? 'rgba(0,0,0,0.5)' : c.panel}; backdrop-filter:blur(20px); border-right:1px solid ${c.border}; display:flex; flex-direction:column; flex-shrink:0; overflow:hidden; ${isOpen ? 'border-radius:20px;border:1px solid rgba(255,255,255,0.15);margin:0;' : ''} }
+        ${hasCustomBg && isDark ? `
+        .character-sidebar { background:rgba(0,0,0,0.6); }
+        .character-editor { background:rgba(0,0,0,0.5); }
+        ` : ''}
+        .character-sidebar-header { display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:${c.headerBg}; border-bottom:1px solid ${c.border}; flex-shrink:0; }
+        .character-sidebar-header span { font-weight:600; font-size:15px; color:${c.text}; }
+        .character-sidebar-header button { background:none; border:none; cursor:pointer; font-size:16px; padding:0 4px; color:${c.textSecondary}; }
+        .character-search { padding:8px 12px; flex-shrink:0; }
+        .character-search input { width:100%; padding:6px 10px; border:1px solid ${c.border}; border-radius:6px; font-size:13px; background:${hasCustomBg ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.5)'}; color:${c.text}; }
+        .character-search input::placeholder { color:${hasCustomBg ? 'rgba(255,255,255,0.6)' : c.textSecondary}; }
+        .character-add-buttons { display:flex; gap:6px; padding:0 12px 8px 12px; flex-shrink:0; }
+        .character-add-buttons button { flex:1; border:none; border-radius:4px; cursor:pointer; font-size:12px; padding:5px 0; font-weight:500; color:white; }
+        .character-add-buttons .add-character { background:#28a745; }
+        .character-add-buttons .add-folder { background:#9b784e; }
+        #characterTree { flex:1; overflow-y:auto; padding:8px 4px; }
+        .character-status { padding:6px 12px; border-top:1px solid ${c.border}; font-size:11px; color:${c.textSecondary}; display:flex; justify-content:space-between; flex-shrink:0; }
+        .character-editor { flex:1; display:flex; flex-direction:column; background:${hasCustomBg ? 'rgba(0,0,0,0.4)' : c.panel}; backdrop-filter:blur(16px); overflow:hidden; ${isOpen ? 'border-radius:20px;border:1px solid rgba(255,255,255,0.15);' : ''} }
+        .character-editor-header { display:flex; justify-content:space-between; align-items:center; padding:12px 20px; border-bottom:1px solid ${c.border}; flex-shrink:0; }
+        .character-editor-header input { font-size:18px; font-weight:600; border:none; background:transparent; outline:none; flex:1; color:${c.text}; }
+        .character-editor-header button { padding:6px 16px; border:none; border-radius:6px; cursor:pointer; font-size:13px; }
+        .character-editor-header .save-btn { background:#9b784e; color:white; }
+        .character-editor-header .delete-btn { background:#dc3545; color:white; }
+        .character-editor-content { flex:1; padding:20px; border:none; outline:none; resize:none; font-size:14px; line-height:1.8; background:transparent; color:${c.text}; font-family:inherit; }
+        .character-status-bar { padding:8px 20px; border-top:1px solid ${c.border}; display:flex; justify-content:space-between; font-size:12px; color:${c.textSecondary}; flex-shrink:0; }
+        ::-webkit-scrollbar { width:6px; height:6px; }
+        ::-webkit-scrollbar-thumb { background:${isDark ? 'rgba(255,255,255,0.2)' : 'rgba(136,136,136,0.4)'}; border-radius:3px; }
+        ::-webkit-scrollbar-track { background:transparent; }
+        .character-tree-node { margin-bottom:2px; }
+        .character-tree-header { display:flex; align-items:center; gap:6px; padding:5px 8px; border-radius:6px; cursor:pointer; transition:background 0.15s; font-size:13px; color:${c.text}; }
+        .character-tree-header:hover { background:${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)'}; }
+        .character-tree-header.active { background:rgba(0,122,255,0.2); font-weight:500; }
+        .character-tree-children { margin-left:16px; }
+        .character-tree-header .toggle { font-size:9px; width:14px; text-align:center; color:${c.textSecondary}; flex-shrink:0; cursor:pointer; }
+        .character-tree-header .icon { font-size:14px; flex-shrink:0; }
+        .character-tree-header .name { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        ${hasCustomBg ? `
+        .character-tree-header:hover { background:rgba(255,255,255,0.12); }
+        .character-tree-header.active { background:rgba(0,122,255,0.3); }
+        .character-sidebar-header { background:rgba(0,0,0,0.2); }
+        .character-status { color:rgba(255,255,255,0.7); }
+        .character-status-bar { color:rgba(255,255,255,0.7); }
+        .character-editor-header input { color:#fff; }
+        .character-editor-header input::placeholder { color:rgba(255,255,255,0.5); }
+        .character-editor-content { color:#fff; }
+        .character-editor-content::placeholder { color:rgba(255,255,255,0.5); }
+        .character-sidebar-header button { color:rgba(255,255,255,0.7); }
+        .character-sidebar-header span { color:#fff; }
+        .character-search input { color:#fff; border-color:rgba(255,255,255,0.2); }
+        .character-search input::placeholder { color:rgba(255,255,255,0.5); }
+        ` : ''}
+    </style>
+</head>
+<body>
+<div class="character-container">
+<div class="character-sidebar">
+<div class="character-sidebar-header">
+<span>👥 角色目录</span>
+<div>
+<button id="winAddRoot" title="新增分类">📂</button>
+<button id="winRefresh" title="刷新">🔄</button>
+</div>
+</div>
+<div class="character-search"><input type="text" id="winSearch" placeholder="🔍 搜索角色..."></div>
+<div class="character-add-buttons">
+    <button class="add-character" id="winAddCharacterBtn">➕ 角色</button>
+    <button class="add-folder" id="winAddFolderBtn">📁 分类</button>
+</div>
+<div id="characterTree"></div>
+<div class="character-status"><span>角色: <span id="winNodeCount">0</span></span><span>💡 双击重命名 · 右键菜单</span></div>
+</div>
+<div class="character-editor">
+<div class="character-editor-header">
+<input type="text" id="winTitle" placeholder="角色姓名">
+<div style="display:flex;gap:8px;">
+<button class="save-btn" id="winSave">💾 保存</button>
+<button class="delete-btn" id="winDelete">🗑 删除</button>
+</div>
+</div>
+<textarea id="winContent" class="character-editor-content" placeholder="【姓名】\n【性别】\n【年龄】\n【外貌】\n【性格】\n【背景】\n【势力】\n【等级】\n【功法】\n【其他】"></textarea>
+<div class="character-status-bar"><span id="winWordCount">0 字</span><span id="winStatus">已就绪</span></div>
+</div>
+</div>
+<script>
+var characterData = ${dataJson};
+var currentBookId = ${bookId};
+var selectedId = ${selectedId};
+${jsCode}
 <\/script>
 </body>
 </html>`;
