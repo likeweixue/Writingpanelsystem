@@ -1,7 +1,7 @@
 {
   "name": "WritingPanelSystem",
-  "version": "v 1.9.3",
-  "description": "写作帮手 - 免费的写作软件",
+  "version": "v 1.9.0",
+  "description": "写作面板系统 - 免费的写作软件",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
@@ -22,10 +22,12 @@
       "output": "dist"
     },
     "win": {
-      "target": "nsis"
+      "target": "nsis",
+      "icon": "icon.ico"
     },
     "mac": {
-      "target": "dmg"
+      "target": "dmg",
+      "icon": "icon.icns"
     },
     "files": [
       "**/*",
