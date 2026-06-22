@@ -9,7 +9,14 @@ function init() {
     switchToTab('home');
     loadSettings();
     initEditorToolbar();
+    // 如果当前在数据页面，渲染数据
+    if (document.querySelector('.page[data-page="stats"]')) {
+        if (typeof renderStatsPage === 'function') {
+            renderStatsPage();
+        }
+    }
 }
+
 
 function loadAllData() {
     var raw = localStorage.getItem('wps_data');
@@ -43,7 +50,13 @@ function bindMenuEvents() {
     for (var i = 0; i < menuItems.length; i++) {
         menuItems[i].onclick = (function(page) {
             return function() {
-                if (page === 'books') {
+                if (page === 'stats') {
+                    if (typeof openStatsPanel === 'function') {
+                        openStatsPanel();
+                    } else {
+                        switchPage('stats');
+                    }
+                } else if (page === 'books') {
                     switchToTab('home');
                 } else {
                     switchPage(page);

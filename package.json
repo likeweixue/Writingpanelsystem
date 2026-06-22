@@ -1,6 +1,6 @@
 {
   "name": "WritingPanelSystem",
-  "version": "v 1.9.1",
+  "version": "v 1.10.0",
   "description": "写作面板系统 - 免费的写作软件",
   "main": "main.js",
   "scripts": {
