@@ -7,7 +7,7 @@
 [![Electron](https://img.shields.io/badge/Electron-28.0.0-47848f.svg)](https://electronjs.org)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-**写作帮手** 是一款专为小说作者打造的桌面写作软件，基于 Electron + HTML/CSS/JS 构建。内置大纲、角色、设定、时间线、关系图、词典、超链接、右键菜单等小说创作全流程工具，助力作者高效写作。
+**写作面板系统** 是一款专为小说作者打造的桌面写作软件，基于 Electron + HTML/CSS/JS 构建。内置大纲、角色、设定、时间线、关系图、词典、超链接、右键菜单等小说创作全流程工具，助力作者高效写作。
 
 ---
 

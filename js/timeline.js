@@ -443,25 +443,25 @@ function renderTimelinePage() {
                 <div class="timeline-sidebar-header" style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:rgba(0,0,0,0.03);border-bottom:1px solid var(--border-color, rgba(0,0,0,0.08));flex-shrink:0;">
                     <span style="font-weight:600;">⏱️ 时间线目录</span>
                     <div style="display:flex;gap:6px;">
-    <button id="outlineAddRootBtn" title="新增根节点" style="background:none;border:none;cursor:pointer;font-size:16px;">
-        <img src="icons/folder.svg" width="16" height="16" alt="新增根节点">
-    </button>
-    <button id="outlineRefreshBtn" title="刷新" style="background:none;border:none;cursor:pointer;font-size:16px;">
-        <img src="icons/refresh.svg" width="16" height="16" alt="刷新">
-    </button>
-    <button id="outlineCloseBtn" title="关闭" style="background:none;border:none;cursor:pointer;font-size:16px;">
-        <img src="icons/close.svg" width="16" height="16" alt="关闭">
-    </button>
-</div>
+                        <button id="timelineAddRootBtn" title="新增根节点" style="background:none;border:none;cursor:pointer;font-size:16px;">
+                            <img src="icons/folder.svg" width="16" height="16" alt="新增根节点">
+                        </button>
+                        <button id="timelineRefreshBtn" title="刷新" style="background:none;border:none;cursor:pointer;font-size:16px;">
+                            <img src="icons/refresh.svg" width="16" height="16" alt="刷新">
+                        </button>
+                        <button id="timelineCloseBtn" title="关闭" style="background:none;border:none;cursor:pointer;font-size:16px;">
+                            <img src="icons/close.svg" width="16" height="16" alt="关闭">
+                        </button>
+                    </div>
                 </div>
                 <div style="padding:8px 12px;flex-shrink:0;">
-                    <input type="text" id="outlineSearchInput" placeholder="搜索时间线..." style="width:100%;padding:6px 10px 6px 32px;border:1px solid var(--border-color, #ddd);border-radius:6px;font-size:12px;background:var(--input-bg, #f8f8f8) url('icons/search.svg') no-repeat 8px center;background-size:16px 16px;color:var(--text-color, #333);">
+                    <input type="text" id="timelineSearchInput" placeholder="搜索时间线..." style="width:100%;padding:6px 10px 6px 32px;border:1px solid var(--border-color, #ddd);border-radius:6px;font-size:12px;background:var(--input-bg, #f8f8f8) url('icons/search.svg') no-repeat 8px center;background-size:16px 16px;color:var(--text-color, #333);">
                 </div>
                 <div style="display:flex;gap:6px;padding:0 12px 8px 12px;flex-shrink:0;">
                     <button id="timelineAddEventBtn" title="新增事件" style="flex:1;background:#28a745;color:white;border:none;border-radius:4px;cursor:pointer;font-size:12px;padding:5px 0;font-weight:500;">+ 事件</button>
-                     <button id="outlineAddFolderBtn" title="新增文件夹" style="flex:1;background:#9b784e;color:white;border:none;border-radius:4px;cursor:pointer;font-size:12px;padding:5px 0;font-weight:500;">
-        <img src="icons/folder.svg" width="14" height="14" alt="分类" style="vertical-align:middle; margin-right:4px;"> 分类
-    </button>
+                    <button id="timelineAddFolderBtn" title="新增分类" style="flex:1;background:#9b784e;color:white;border:none;border-radius:4px;cursor:pointer;font-size:12px;padding:5px 0;font-weight:500;">
+                        <img src="icons/folder.svg" width="14" height="14" alt="分类" style="vertical-align:middle; margin-right:4px;"> 分类
+                    </button>
                 </div>
                 <div id="timelineTree" style="flex:1;overflow-y:auto;padding:8px 4px;"></div>
                 <div style="padding:8px 12px;border-top:1px solid var(--border-color, rgba(0,0,0,0.08));font-size:11px;color:#888;display:flex;justify-content:space-between;flex-shrink:0;">
@@ -477,15 +477,15 @@ function renderTimelinePage() {
                         <input type="text" id="timelineEditorTitle" placeholder="事件名称" style="font-size:18px;font-weight:600;border:none;background:transparent;outline:none;flex:1;color:var(--text-color, #333);">
                     </div>
                     <div style="display:flex;gap:8px;">
-    <button id="outlinePinBtn" title="收起为侧边栏" style="padding:6px 12px;background:#6c757d;color:white;border:none;border-radius:6px;cursor:pointer;font-size:13px;">
-        <img src="icons/label.svg" width="14" height="14" alt="缩起" style="vertical-align:middle; margin-right:4px;"> 缩起
-    </button>
-    <button id="outlineSaveBtn" style="padding:6px 16px;background:#9b784e;color:white;border:none;border-radius:6px;cursor:pointer;">
-        <img src="icons/toolbar.svg" width="14" height="14" alt="保存" style="vertical-align:middle; margin-right:4px;"> 保存
-    </button>
-    <button id="outlineDeleteBtn" style="padding:6px 16px;background:#dc3545;color:white;border:none;border-radius:6px;cursor:pointer;">
-        <img src="icons/trash.svg" width="14" height="14" alt="删除" style="vertical-align:middle; margin-right:4px;"> 删除
-    </button>
+                        <button id="timelinePinBtn" title="收起为侧边栏" style="padding:6px 12px;background:#6c757d;color:white;border:none;border-radius:6px;cursor:pointer;font-size:13px;">
+                            <img src="icons/label.svg" width="14" height="14" alt="缩起" style="vertical-align:middle; margin-right:4px;"> 缩起
+                        </button>
+                        <button id="timelineSaveBtn" style="padding:6px 16px;background:#9b784e;color:white;border:none;border-radius:6px;cursor:pointer;">
+                            <img src="icons/toolbar.svg" width="14" height="14" alt="保存" style="vertical-align:middle; margin-right:4px;"> 保存
+                        </button>
+                        <button id="timelineDeleteBtn" style="padding:6px 16px;background:#dc3545;color:white;border:none;border-radius:6px;cursor:pointer;">
+                            <img src="icons/trash.svg" width="14" height="14" alt="删除" style="vertical-align:middle; margin-right:4px;"> 删除
+                        </button>
                     </div>
                 </div>
                 <div id="timelineDateRow" style="display:flex;align-items:center;gap:8px;padding:8px 20px;border-bottom:1px solid var(--border-color, rgba(0,0,0,0.05));flex-shrink:0;">
@@ -556,9 +556,49 @@ function initTimelineEvents() {
     if (addEventBtn) {
         addEventBtn.onclick = function() {
             if (timelineData.selectedId) {
-                addTimelineChild(timelineData.selectedId);
+                var parent = getTimelineNode(timelineData.selectedId);
+                if (parent) {
+                    var children = getTimelineChildren(timelineData.selectedId);
+                    var newNumber = children.length + 1;
+                    var defaultName = '事件 ' + newNumber;
+                    var newNode = {
+                        id: genTimelineId(),
+                        parentId: timelineData.selectedId,
+                        type: 'event',
+                        name: defaultName,
+                        date: '',
+                        order: children.length,
+                        content: '事件描述...'
+                    };
+                    timelineData.nodes.push(newNode);
+                    timelineData.selectedId = newNode.id;
+                    localStorage.setItem('timeline_expanded_' + timelineData.selectedId, 'true');
+                    saveTimelineData();
+                    renderTimelineTree();
+                    updateTimelineEditor();
+                    renderCompactTimelineTree();
+                    updateCompactTimelineEditor();
+                }
             } else {
-                alert('请先选择一个节点');
+                var roots = timelineData.nodes.filter(function(n) { return n.parentId === null; });
+                var newNumber = roots.length + 1;
+                var defaultName = '📜 时代 ' + newNumber;
+                var newNode = {
+                    id: genTimelineId(),
+                    parentId: null,
+                    type: 'folder',
+                    name: defaultName,
+                    date: '',
+                    order: roots.length,
+                    content: '时代描述...'
+                };
+                timelineData.nodes.push(newNode);
+                timelineData.selectedId = newNode.id;
+                saveTimelineData();
+                renderTimelineTree();
+                updateTimelineEditor();
+                renderCompactTimelineTree();
+                updateCompactTimelineEditor();
             }
         };
     }
@@ -566,9 +606,49 @@ function initTimelineEvents() {
     if (addFolderBtn) {
         addFolderBtn.onclick = function() {
             if (timelineData.selectedId) {
-                addTimelineFolder(timelineData.selectedId);
+                var parent = getTimelineNode(timelineData.selectedId);
+                if (parent) {
+                    var children = getTimelineChildren(timelineData.selectedId);
+                    var newNumber = children.length + 1;
+                    var defaultName = '📁 分类 ' + newNumber;
+                    var newNode = {
+                        id: genTimelineId(),
+                        parentId: timelineData.selectedId,
+                        type: 'folder',
+                        name: defaultName,
+                        date: '',
+                        order: children.length,
+                        content: '分类说明'
+                    };
+                    timelineData.nodes.push(newNode);
+                    timelineData.selectedId = newNode.id;
+                    localStorage.setItem('timeline_expanded_' + timelineData.selectedId, 'true');
+                    saveTimelineData();
+                    renderTimelineTree();
+                    updateTimelineEditor();
+                    renderCompactTimelineTree();
+                    updateCompactTimelineEditor();
+                }
             } else {
-                alert('请先选择一个节点');
+                var roots = timelineData.nodes.filter(function(n) { return n.parentId === null; });
+                var newNumber = roots.length + 1;
+                var defaultName = '📁 分类 ' + newNumber;
+                var newNode = {
+                    id: genTimelineId(),
+                    parentId: null,
+                    type: 'folder',
+                    name: defaultName,
+                    date: '',
+                    order: roots.length,
+                    content: '分类说明'
+                };
+                timelineData.nodes.push(newNode);
+                timelineData.selectedId = newNode.id;
+                saveTimelineData();
+                renderTimelineTree();
+                updateTimelineEditor();
+                renderCompactTimelineTree();
+                updateCompactTimelineEditor();
             }
         };
     }
@@ -660,7 +740,6 @@ function updateTimelineNodeCount() {
 // ====================================================================
 
 function openTimelineSidebar(tool) {
-    console.log('openTimelineSidebar 被调用，工具:', tool);
     var sidebar = document.querySelector('.sidebar-menu');
     if (sidebar) { sidebar.style.display = 'none'; }
     var existingPanel = document.getElementById('floatingToolPanel');
@@ -727,7 +806,7 @@ function renderCompactTimelinePanel() {
             <div style="display:flex;flex:1;overflow:hidden;">
                 <div style="width:38%;min-width:120px;max-width:180px;border-right:1px solid var(--border-color, rgba(0,0,0,0.08));display:flex;flex-direction:column;overflow:hidden;">
                     <div style="padding:4px 8px;flex-shrink:0;">
-                        <input type="text" id="outlineSearchInput" placeholder="搜索..." style="width:100%;padding:6px 10px 6px 32px;border:1px solid var(--border-color, #ddd);border-radius:6px;font-size:12px;background:var(--input-bg, #f8f8f8) url('icons/search.svg') no-repeat 8px center;background-size:16px 16px;color:var(--text-color, #333);">
+                        <input type="text" id="compactTimelineSearch" placeholder="搜索..." style="width:100%;padding:6px 10px 6px 32px;border:1px solid var(--border-color, #ddd);border-radius:6px;font-size:12px;background:var(--input-bg, #f8f8f8) url('icons/search.svg') no-repeat 8px center;background-size:16px 16px;color:var(--text-color, #333);">
                     </div>
                     <div style="display:flex;gap:6px;padding:4px 8px 6px 8px;flex-shrink:0;">
                         <button id="compactTimelineAddBtn" title="新增事件" style="flex:1;background:#28a745;color:white;border:none;border-radius:4px;cursor:pointer;font-size:12px;padding:4px 0;font-weight:500;">➕ 事件</button>
@@ -874,24 +953,100 @@ function bindCompactTimelineEvents() {
     if (addBtn) {
         addBtn.onclick = function() {
             if (timelineData.selectedId) {
-                addTimelineChild(timelineData.selectedId);
+                var parent = getTimelineNode(timelineData.selectedId);
+                if (parent) {
+                    var children = getTimelineChildren(timelineData.selectedId);
+                    var newNumber = children.length + 1;
+                    var defaultName = '事件 ' + newNumber;
+                    var newNode = {
+                        id: genTimelineId(),
+                        parentId: timelineData.selectedId,
+                        type: 'event',
+                        name: defaultName,
+                        date: '',
+                        order: children.length,
+                        content: '事件描述...'
+                    };
+                    timelineData.nodes.push(newNode);
+                    timelineData.selectedId = newNode.id;
+                    localStorage.setItem('timeline_expanded_' + timelineData.selectedId, 'true');
+                    saveTimelineData();
+                    renderTimelineTree();
+                    updateTimelineEditor();
+                    renderCompactTimelineTree();
+                    updateCompactTimelineEditor();
+                }
             } else {
-                alert('请先选择一个节点');
+                var roots = timelineData.nodes.filter(function(n) { return n.parentId === null; });
+                var newNumber = roots.length + 1;
+                var defaultName = '📜 时代 ' + newNumber;
+                var newNode = {
+                    id: genTimelineId(),
+                    parentId: null,
+                    type: 'folder',
+                    name: defaultName,
+                    date: '',
+                    order: roots.length,
+                    content: '时代描述...'
+                };
+                timelineData.nodes.push(newNode);
+                timelineData.selectedId = newNode.id;
+                saveTimelineData();
+                renderTimelineTree();
+                updateTimelineEditor();
+                renderCompactTimelineTree();
+                updateCompactTimelineEditor();
             }
-            renderCompactTimelineTree();
-            updateCompactTimelineEditor();
         };
     }
     var addFolderBtn = document.getElementById('compactTimelineAddFolderBtn');
     if (addFolderBtn) {
         addFolderBtn.onclick = function() {
             if (timelineData.selectedId) {
-                addTimelineFolder(timelineData.selectedId);
+                var parent = getTimelineNode(timelineData.selectedId);
+                if (parent) {
+                    var children = getTimelineChildren(timelineData.selectedId);
+                    var newNumber = children.length + 1;
+                    var defaultName = '📁 分类 ' + newNumber;
+                    var newNode = {
+                        id: genTimelineId(),
+                        parentId: timelineData.selectedId,
+                        type: 'folder',
+                        name: defaultName,
+                        date: '',
+                        order: children.length,
+                        content: '分类说明'
+                    };
+                    timelineData.nodes.push(newNode);
+                    timelineData.selectedId = newNode.id;
+                    localStorage.setItem('timeline_expanded_' + timelineData.selectedId, 'true');
+                    saveTimelineData();
+                    renderTimelineTree();
+                    updateTimelineEditor();
+                    renderCompactTimelineTree();
+                    updateCompactTimelineEditor();
+                }
             } else {
-                alert('请先选择一个节点');
+                var roots = timelineData.nodes.filter(function(n) { return n.parentId === null; });
+                var newNumber = roots.length + 1;
+                var defaultName = '📁 分类 ' + newNumber;
+                var newNode = {
+                    id: genTimelineId(),
+                    parentId: null,
+                    type: 'folder',
+                    name: defaultName,
+                    date: '',
+                    order: roots.length,
+                    content: '分类说明'
+                };
+                timelineData.nodes.push(newNode);
+                timelineData.selectedId = newNode.id;
+                saveTimelineData();
+                renderTimelineTree();
+                updateTimelineEditor();
+                renderCompactTimelineTree();
+                updateCompactTimelineEditor();
             }
-            renderCompactTimelineTree();
-            updateCompactTimelineEditor();
         };
     }
     var expandBtn = document.getElementById('compactTimelineExpandBtn');
@@ -1004,7 +1159,6 @@ function bindCompactTimelineEvents() {
 function openTimelineInNewWindow() {
     closeTimelineFloatingPanel();
     
-    // ========== 获取主题和自定义背景 ==========
     var currentTheme = localStorage.getItem('app_theme') || 'default';
     var customBgImage = localStorage.getItem('custom_bg_image') || '';
     var customBgOpacity = parseInt(localStorage.getItem('custom_bg_opacity') || '30');
@@ -1031,7 +1185,6 @@ function openTimelineInNewWindow() {
     var bookId = currentBookId || 'global';
     var selectedId = timelineData.selectedId ? JSON.stringify(timelineData.selectedId) : 'null';
     
-    // 原有的 JS 代码（保持不变）
     var jsCode = `
 function getTimelineChildren(parentId) {
     return timelineData.nodes.filter(function(n) { return n.parentId === parentId; }).sort(function(a,b) { return (a.order||0)-(b.order||0); });
@@ -1118,7 +1271,7 @@ function createNodeElement(node, depth) {
                     if (name && name.trim()) {
                         var date = prompt('请输入事件日期：', '');
                         var children = getTimelineChildren(node.id);
-                        var newNode = { id: 'node_' + (timelineData.nextId || 100), parentId: node.id, type: 'event', name: name.trim(), date: date || '', order: children.length, content: '事件描述...' };
+                        var newNode = { id: 'evt_' + (timelineData.nextId || 100), parentId: node.id, type: 'event', name: name.trim(), date: date || '', order: children.length, content: '事件描述...' };
                         timelineData.nextId = (timelineData.nextId || 100) + 1;
                         timelineData.nodes.push(newNode);
                         selectedId = newNode.id;
@@ -1132,7 +1285,7 @@ function createNodeElement(node, depth) {
                     if (name && name.trim()) {
                         var date = prompt('请输入时间范围：', '');
                         var children = getTimelineChildren(node.id);
-                        var newNode = { id: 'node_' + (timelineData.nextId || 100), parentId: node.id, type: 'folder', name: name.trim(), date: date || '', order: children.length, content: '分类说明' };
+                        var newNode = { id: 'evt_' + (timelineData.nextId || 100), parentId: node.id, type: 'folder', name: name.trim(), date: date || '', order: children.length, content: '分类说明' };
                         timelineData.nextId = (timelineData.nextId || 100) + 1;
                         timelineData.nodes.push(newNode);
                         selectedId = newNode.id;
@@ -1260,7 +1413,7 @@ document.getElementById('winAddRoot').onclick = function() {
     if (name && name.trim()) {
         var date = prompt('请输入时间范围：', '');
         var roots = timelineData.nodes.filter(function(n) { return n.parentId === null; });
-        var newNode = { id: 'node_' + (timelineData.nextId || 100), parentId: null, type: 'folder', name: name.trim(), date: date || '', order: roots.length, content: '时代描述...' };
+        var newNode = { id: 'evt_' + (timelineData.nextId || 100), parentId: null, type: 'folder', name: name.trim(), date: date || '', order: roots.length, content: '时代描述...' };
         timelineData.nextId = (timelineData.nextId || 100) + 1;
         timelineData.nodes.push(newNode);
         selectedId = newNode.id;
@@ -1269,45 +1422,96 @@ document.getElementById('winAddRoot').onclick = function() {
         updateEditor();
     }
 };
+// ========== 独立窗口的事件和分类按钮（直接创建，无需输入） ==========
 document.getElementById('winAddEventBtn').onclick = function() {
     if (selectedId) {
         var node = getTimelineNode(selectedId);
         if (node) {
-            var name = prompt('请输入事件名称：', '新事件');
-            if (name && name.trim()) {
-                var date = prompt('请输入事件日期：', '');
-                var children = getTimelineChildren(selectedId);
-                var newNode = { id: 'node_' + (timelineData.nextId || 100), parentId: selectedId, type: 'event', name: name.trim(), date: date || '', order: children.length, content: '事件描述...' };
-                timelineData.nextId = (timelineData.nextId || 100) + 1;
-                timelineData.nodes.push(newNode);
-                selectedId = newNode.id;
-                localStorage.setItem('timeline_expanded_' + selectedId, 'true');
-                saveTimelineData();
-                renderTree();
-                updateEditor();
-            }
+            var children = getTimelineChildren(selectedId);
+            var newNumber = children.length + 1;
+            var defaultName = '事件 ' + newNumber;
+            var newNode = {
+                id: 'evt_' + (timelineData.nextId || 100),
+                parentId: selectedId,
+                type: 'event',
+                name: defaultName,
+                date: '',
+                order: children.length,
+                content: '事件描述...'
+            };
+            timelineData.nextId = (timelineData.nextId || 100) + 1;
+            timelineData.nodes.push(newNode);
+            selectedId = newNode.id;
+            localStorage.setItem('timeline_expanded_' + selectedId, 'true');
+            saveTimelineData();
+            renderTree();
+            updateEditor();
         }
-    } else { alert('请先选择一个节点'); }
+    } else {
+        var roots = timelineData.nodes.filter(function(n) { return n.parentId === null; });
+        var newNumber = roots.length + 1;
+        var defaultName = '📜 时代 ' + newNumber;
+        var newNode = {
+            id: 'evt_' + (timelineData.nextId || 100),
+            parentId: null,
+            type: 'folder',
+            name: defaultName,
+            date: '',
+            order: roots.length,
+            content: '时代描述...'
+        };
+        timelineData.nextId = (timelineData.nextId || 100) + 1;
+        timelineData.nodes.push(newNode);
+        selectedId = newNode.id;
+        saveTimelineData();
+        renderTree();
+        updateEditor();
+    }
 };
 document.getElementById('winAddFolderBtn').onclick = function() {
     if (selectedId) {
         var node = getTimelineNode(selectedId);
         if (node) {
-            var name = prompt('请输入新分类名称：', '新分类');
-            if (name && name.trim()) {
-                var date = prompt('请输入时间范围：', '');
-                var children = getTimelineChildren(selectedId);
-                var newNode = { id: 'node_' + (timelineData.nextId || 100), parentId: selectedId, type: 'folder', name: name.trim(), date: date || '', order: children.length, content: '分类说明' };
-                timelineData.nextId = (timelineData.nextId || 100) + 1;
-                timelineData.nodes.push(newNode);
-                selectedId = newNode.id;
-                localStorage.setItem('timeline_expanded_' + selectedId, 'true');
-                saveTimelineData();
-                renderTree();
-                updateEditor();
-            }
+            var children = getTimelineChildren(selectedId);
+            var newNumber = children.length + 1;
+            var defaultName = '📁 分类 ' + newNumber;
+            var newNode = {
+                id: 'evt_' + (timelineData.nextId || 100),
+                parentId: selectedId,
+                type: 'folder',
+                name: defaultName,
+                date: '',
+                order: children.length,
+                content: '分类说明'
+            };
+            timelineData.nextId = (timelineData.nextId || 100) + 1;
+            timelineData.nodes.push(newNode);
+            selectedId = newNode.id;
+            localStorage.setItem('timeline_expanded_' + selectedId, 'true');
+            saveTimelineData();
+            renderTree();
+            updateEditor();
         }
-    } else { alert('请先选择一个节点'); }
+    } else {
+        var roots = timelineData.nodes.filter(function(n) { return n.parentId === null; });
+        var newNumber = roots.length + 1;
+        var defaultName = '📁 分类 ' + newNumber;
+        var newNode = {
+            id: 'evt_' + (timelineData.nextId || 100),
+            parentId: null,
+            type: 'folder',
+            name: defaultName,
+            date: '',
+            order: roots.length,
+            content: '分类说明'
+        };
+        timelineData.nextId = (timelineData.nextId || 100) + 1;
+        timelineData.nodes.push(newNode);
+        selectedId = newNode.id;
+        saveTimelineData();
+        renderTree();
+        updateEditor();
+    }
 };
 document.getElementById('winRefresh').onclick = function() { renderTree(); updateEditor(); };
 document.getElementById('winSave').onclick = saveNode;

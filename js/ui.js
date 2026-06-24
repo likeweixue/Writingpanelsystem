@@ -57,13 +57,39 @@ function switchToTab(tabId) {
         var bookPage = document.querySelector('.page[data-page="' + tabId + '"]');
         if (bookPage) bookPage.classList.add('active');
     }
+    
+    // ===== 关键修复：切换到首页时，隐藏其他页面 =====
+    if (tabId === 'home') {
+        // 隐藏所有 page 元素，只显示 home
+        var allPages = document.querySelectorAll('.page');
+        for (var i = 0; i < allPages.length; i++) {
+            var page = allPages[i];
+            if (page.getAttribute('data-page') !== 'home') {
+                page.style.display = 'none';
+            } else {
+                page.style.display = 'block';
+            }
+        }
+        // 确保 home 页面激活
+        var homePage = document.querySelector('.page[data-page="home"]');
+        if (homePage) {
+            homePage.classList.add('active');
+            homePage.style.display = 'block';
+        }
+    } else {
+        // 切换到其他页面时，显示所有页面（让 active 控制显示）
+        var allPages = document.querySelectorAll('.page');
+        for (var i = 0; i < allPages.length; i++) {
+            allPages[i].style.display = '';
+        }
+    }
+    
     var sidebar = document.querySelector('.sidebar-menu');
     if (sidebar) {
         sidebar.style.display = (tabId === 'home') ? 'flex' : 'none';
     }
     closeAllRightPanels();
 }
-
 function closeTab(tabId) {
     for (var i = 0; i < openTabs.length; i++) {
         if (openTabs[i].id === tabId) { openTabs.splice(i, 1); break; }
@@ -84,7 +110,7 @@ function closeTab(tabId) {
 }
 
 function switchPage(pageId) {
-    var titles = { stats: '数据', settings: '设置', about: '关于', jianghu: '江湖', xuefu: '学府' };
+    var titles = { stats: '📊 数据', settings: '⚙️ 设置', about: '关于', jianghu: '江湖', xuefu: '学府' };
     var title = titles[pageId] || pageId;
     var tabId = 'page_' + pageId;
     
@@ -92,6 +118,21 @@ function switchPage(pageId) {
     for (var i = 0; i < openTabs.length; i++) {
         if (openTabs[i].id === tabId) { 
             switchToTab(tabId); 
+            // 如果已经打开，刷新内容
+            if (pageId === 'stats') {
+                setTimeout(function() {
+                    if (typeof renderStatsPage === 'function') {
+                        renderStatsPage();
+                    }
+                }, 100);
+            } else if (pageId === 'settings') {
+                setTimeout(function() {
+                    settingsInitialized = false;
+                    if (typeof renderSettingsPage === 'function') {
+                        renderSettingsPage();
+                    }
+                }, 100);
+            }
             return; 
         }
     }
@@ -99,82 +140,140 @@ function switchPage(pageId) {
     openTabs.push({ id: tabId, title: title, type: 'page', pageId: pageId });
     renderTabs();
     
-    // 直接使用 index.html 中已存在的页面，而不是重新创建
-    var existingPage = document.querySelector('.page[data-page="' + pageId + '"]');
+    var pagesContainer = document.getElementById('pagesContainer');
+    
+    // ===== 检查是否已存在对应的页面元素 =====
+    var existingPage = pagesContainer.querySelector('.page[data-page="' + tabId + '"]');
     if (existingPage) {
-        // 复制现有的页面并赋予新的 data-page 属性
-        var clonedPage = existingPage.cloneNode(true);
-        clonedPage.setAttribute('data-page', tabId);
-        document.getElementById('pagesContainer').appendChild(clonedPage);
         switchToTab(tabId);
-        
-        // 如果是设置页面，重新渲染设置内容
-        if (pageId === 'settings') {
-            setTimeout(function() {
-                if (typeof renderSettingsPage === 'function') {
-                    renderSettingsPage();
-                }
-            }, 100);
-        }
-        // 如果是江湖页面，重新加载
-        else if (pageId === 'jianghu' && typeof loadJianghuPageContent === 'function') {
-            setTimeout(loadJianghuPageContent, 100);
-        }
-        // 如果是学府页面，重新加载
-        else if (pageId === 'xuefu' && typeof loadXuefuPage === 'function') {
-            setTimeout(loadXuefuPage, 100);
-        }
         return;
     }
     
-    // 如果没有现有页面，则创建
-    var pagesContainer = document.getElementById('pagesContainer');
     var pageDiv = document.createElement('div');
     pageDiv.className = 'page';
     pageDiv.setAttribute('data-page', tabId);
+    pageDiv.style.display = 'none'; // 默认隐藏，由 switchToTab 控制
     
-    if (pageId === 'stats') {
-    pageDiv.innerHTML = '<iframe src="html/html/stats.html" style="width:100%; height:100%; border:none; background:#e9e3d7;"></iframe>';
-    } 
-    else if (pageId === 'settings') {
-    pageDiv.innerHTML = '<div class="settings-container" id="settingsContainer" style="height:100%; overflow:auto;"></div>';
-    setTimeout(function() {
-        if (typeof renderSettingsPage === 'function') {
-            renderSettingsPage();
+    // ===== 数据页面 - 使用 statsContainer =====
+if (pageId === 'stats') {
+    // 检查是否已经存在 statsContainer
+    var existingContainer = document.getElementById('statsContainer');
+    if (existingContainer) {
+        // 如果已存在，直接使用
+        pageDiv = existingContainer.closest('.page');
+        if (pageDiv) {
+            pageDiv.setAttribute('data-page', tabId);
+            // 确保容器有内容
+            if (existingContainer.innerHTML.trim() === '') {
+                if (typeof renderStatsPage === 'function') {
+                    renderStatsPage();
+                }
+            }
         }
-    }, 100);
-}
-    else if (pageId === 'about') {
-        pageDiv.innerHTML = '<div class="about-content"></div>';
+        switchToTab(tabId);
         setTimeout(function() {
-            var aboutContent = pageDiv.querySelector('.about-content');
-            if (aboutContent) {
-                aboutContent.innerHTML = '<h2>📝 写作帮手 OpenWrite</h2><p>免费，开源，自由的写作软件</p><p>软件官网 openwrite.team</p><p>版本 0.3.7 发布前瞻版</p><p>GitHub: <a href="https://github.com/likeweixue/openwrite" target="_blank">https://github.com/likeweixue/openwrite</a></p>';
+            if (typeof renderStatsPage === 'function') {
+                renderStatsPage();
             }
         }, 100);
-    } 
+        return;
+    }
+    
+    // 如果不存在，创建新的
+    pageDiv.innerHTML = '<div id="statsContainer" style="height:100%; overflow:auto; padding:0;"></div>';
+    pagesContainer.appendChild(pageDiv);
+    switchToTab(tabId);
+    setTimeout(function() {
+        if (typeof renderStatsPage === 'function') {
+            renderStatsPage();
+        }
+    }, 100);
+    return;
+}
+    // ===== 设置页面 - 使用 settingsContainer =====
+    else if (pageId === 'settings') {
+        pageDiv.innerHTML = '<div id="settingsContainer" style="height:100%; min-height:400px; overflow:auto; background:var(--panel-bg, rgba(255,255,255,0.95));"></div>';
+        pagesContainer.appendChild(pageDiv);
+        switchToTab(tabId);
+        setTimeout(function() {
+            var container = document.getElementById('settingsContainer');
+            if (container) {
+                var parentPage = container.closest('.page');
+                if (parentPage) {
+                    parentPage.style.height = '100%';
+                    parentPage.style.display = 'block';
+                    parentPage.style.position = 'absolute';
+                    parentPage.style.top = '0';
+                    parentPage.style.left = '0';
+                    parentPage.style.right = '0';
+                    parentPage.style.bottom = '0';
+                    parentPage.style.overflow = 'hidden';
+                    parentPage.style.padding = '0';
+                }
+                container.style.height = '100%';
+                container.style.minHeight = '400px';
+                container.style.display = 'block';
+                
+                settingsInitialized = false;
+                if (typeof renderSettingsPage === 'function') {
+                    renderSettingsPage();
+                }
+            }
+        }, 200);
+        return;
+    }
+    else if (pageId === 'about') {
+    pageDiv.innerHTML = `
+        <div class="about-content" style="padding:40px; max-width:600px; margin:0 auto;">
+            <h2 style="font-size:24px; margin-bottom:8px;">写作面板系统 WritingPanelSystem</h2>
+            <p style="color:#888; margin-bottom:4px;">免费，开源，自由的写作软件</p>
+            <p style="color:#888; margin-bottom:4px;">软件官网 WritingPanelSystem.com</p>
+            <p style="color:#888; margin-bottom:4px;">版本 v 1.11.0 正式版</p>
+            <p style="color:#888; margin-bottom:20px;">GitHub: <a href="https://github.com/likeweixue/Writingpanelsystem" target="_blank" style="color:#007aff; text-decoration:none;">https://github.com/likeweixue/Writingpanelsystem</a></p>
+            
+            <div style="margin-top:30px; padding-top:20px; border-top:1px solid rgba(0,0,0,0.1);">
+                <h3 style="font-size:16px; margin-bottom:8px;">感谢以下作者</h3>
+                <p style="font-size:14px; line-height:1.8; color:#555;">风吹屁屁凉，泽墨川，【女频写手】长兮常相忆，读者读者读者读者读者读者读者读者作者男生，岚音</p>
+            </div>
+            
+            <div style="margin-top:20px; padding-top:20px; border-top:1px solid rgba(0,0,0,0.1);">
+                <h3 style="font-size:16px; margin-bottom:8px;">写作面板系统寄语</h3>
+                <p style="font-size:14px; line-height:1.8; text-align:left; color:#555;">这里借用马克·扎克伯格（Facebook 创始人）的话，想法一开始并不是完美的，没有人一开始就会，都是在做的过程中不断遇到与解决问题，我们要做的是迈出第一步，所以，开始书写故事吧！</p>
+            </div>
+        </div>
+    `;
+    pagesContainer.appendChild(pageDiv);
+    switchToTab(tabId);
+    return;
+} 
     else if (pageId === 'jianghu') {
         pageDiv.innerHTML = '<div id="jianghuContainer" style="height:100%; overflow:auto;"></div>';
+        pagesContainer.appendChild(pageDiv);
+        switchToTab(tabId);
         setTimeout(function() {
             if (typeof loadJianghuPageContent === 'function') {
                 loadJianghuPageContent();
             }
         }, 100);
+        return;
     } 
     else if (pageId === 'xuefu') {
         pageDiv.innerHTML = '<div id="xuefuContainer" style="height:100%; overflow:auto;"></div>';
+        pagesContainer.appendChild(pageDiv);
+        switchToTab(tabId);
         setTimeout(function() {
             if (typeof loadXuefuPage === 'function') {
                 loadXuefuPage();
             }
         }, 100);
+        return;
     } 
     else {
-        pageDiv.innerHTML = '<div style="padding:20px;">页面加载中...</div>';
+        pageDiv.innerHTML = '<div style="padding:40px; text-align:center; color:#888;">页面加载中...</div>';
+        pagesContainer.appendChild(pageDiv);
+        switchToTab(tabId);
+        return;
     }
-    
-    pagesContainer.appendChild(pageDiv);
-    switchToTab(tabId);
 }
 
 function closeAllRightPanels() {

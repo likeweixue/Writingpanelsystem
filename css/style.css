@@ -209,7 +209,7 @@ body {
 }
 
 .btn-primary {
-    background: #9b784e;
+    background: #2a8de8;
     color: white;
     border: none;
     padding: 6px 14px;
@@ -217,7 +217,7 @@ body {
     cursor: pointer;
 }
 .btn-secondary {
-    background: #6c757d;
+    background: #81b7e6;
     color: white;
     border: none;
     padding: 6px 14px;
@@ -225,7 +225,7 @@ body {
     cursor: pointer;
 }
 .btn-danger {
-    background: #dc3545;
+    background: #959595;
     color: white;
     border: none;
     padding: 6px 14px;

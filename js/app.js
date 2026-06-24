@@ -7,13 +7,22 @@ function init() {
     renderTabs();
     renderBooks();
     switchToTab('home');
-    loadSettings();
+    // loadSettings();  // 注释掉
     initEditorToolbar();
-    // 如果当前在数据页面，渲染数据
-    if (document.querySelector('.page[data-page="stats"]')) {
-        if (typeof renderStatsPage === 'function') {
-            renderStatsPage();
-        }
+    
+    // ===== 检查数据页面是否需要渲染 =====
+    // 如果数据页面已经存在（在 index.html 中），渲染它
+    var statsPage = document.querySelector('.page[data-page="stats"]');
+    if (statsPage) {
+        // 但 stats 页面默认不是 active，我们不需要立即渲染
+        console.log('📊 数据页面已存在');
+    }
+    
+    // ===== 检查 statsContainer 是否已经有内容 =====
+    var statsContainer = document.getElementById('statsContainer');
+    if (statsContainer && statsContainer.innerHTML.trim() === '') {
+        // 如果 statsContainer 存在但为空，但页面不是 active，先不渲染
+        console.log('📊 statsContainer 为空，等待用户点击');
     }
 }
 
@@ -51,13 +60,29 @@ function bindMenuEvents() {
         menuItems[i].onclick = (function(page) {
             return function() {
                 if (page === 'stats') {
-                    if (typeof openStatsPanel === 'function') {
-                        openStatsPanel();
-                    } else {
+                    // 数据页面
+                    if (typeof switchPage === 'function') {
                         switchPage('stats');
                     }
+                } else if (page === 'settings') {
+                    // 设置页面
+                    if (typeof switchPage === 'function') {
+                        switchPage('settings');
+                    }
                 } else if (page === 'books') {
+                    // ===== 关键修复：切换到首页时，确保关闭其他页面 =====
                     switchToTab('home');
+                    // 隐藏所有其他页面
+                    var allPages = document.querySelectorAll('.page');
+                    for (var j = 0; j < allPages.length; j++) {
+                        var p = allPages[j];
+                        if (p.getAttribute('data-page') !== 'home') {
+                            p.style.display = 'none';
+                        } else {
+                            p.style.display = 'block';
+                            p.classList.add('active');
+                        }
+                    }
                 } else {
                     switchPage(page);
                 }
@@ -70,6 +95,37 @@ function bindMenuEvents() {
             };
         })(menuItems[i].getAttribute('data-page'));
     }
+}
+
+// 新增：手动打开设置标签页（备用方案）
+function openSettingsTab() {
+    // 检查是否已经打开
+    var existingPage = document.querySelector('.page[data-page="settings"]');
+    if (existingPage) {
+        switchToTab('page_settings');
+        return;
+    }
+    
+    var tabId = 'page_settings';
+    openTabs.push({ id: tabId, title: '⚙️ 设置', type: 'page', pageId: 'settings' });
+    renderTabs();
+    
+    var pagesContainer = document.getElementById('pagesContainer');
+    var pageDiv = document.createElement('div');
+    pageDiv.className = 'page';
+    pageDiv.setAttribute('data-page', tabId);
+    pageDiv.innerHTML = '<div class="settings-container" id="settingsContainer" style="height:100%; overflow:auto;"></div>';
+    pagesContainer.appendChild(pageDiv);
+    
+    setTimeout(function() {
+        if (typeof renderSettingsPage === 'function') {
+            renderSettingsPage();
+        }
+    }, 100);
+    
+    switchToTab(tabId);
+    var sidebar = document.querySelector('.sidebar-menu');
+    if (sidebar) sidebar.style.display = 'none';
 }
 
 function updateSidebarVisibility() {

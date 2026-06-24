@@ -438,25 +438,25 @@ function renderSettingPage() {
                 <div class="setting-sidebar-header" style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:rgba(0,0,0,0.03);border-bottom:1px solid var(--border-color, rgba(0,0,0,0.08));flex-shrink:0;">
                     <span style="font-weight:600;">⚙️ 设定目录</span>
                     <div style="display:flex;gap:6px;">
-    <button id="outlineAddRootBtn" title="新增根节点" style="background:none;border:none;cursor:pointer;font-size:16px;">
-        <img src="icons/folder.svg" width="16" height="16" alt="新增根节点">
-    </button>
-    <button id="outlineRefreshBtn" title="刷新" style="background:none;border:none;cursor:pointer;font-size:16px;">
-        <img src="icons/refresh.svg" width="16" height="16" alt="刷新">
-    </button>
-    <button id="outlineCloseBtn" title="关闭" style="background:none;border:none;cursor:pointer;font-size:16px;">
-        <img src="icons/close.svg" width="16" height="16" alt="关闭">
-    </button>
-</div>
+                        <button id="settingAddRootBtn" title="新增根节点" style="background:none;border:none;cursor:pointer;font-size:16px;">
+                            <img src="icons/folder.svg" width="16" height="16" alt="新增根节点">
+                        </button>
+                        <button id="settingRefreshBtn" title="刷新" style="background:none;border:none;cursor:pointer;font-size:16px;">
+                            <img src="icons/refresh.svg" width="16" height="16" alt="刷新">
+                        </button>
+                        <button id="settingCloseBtn" title="关闭" style="background:none;border:none;cursor:pointer;font-size:16px;">
+                            <img src="icons/close.svg" width="16" height="16" alt="关闭">
+                        </button>
+                    </div>
                 </div>
                 <div style="padding:8px 12px;flex-shrink:0;">
-                    <input type="text" id="outlineSearchInput" placeholder="搜索..." style="width:100%;padding:6px 10px 6px 32px;border:1px solid var(--border-color, #ddd);border-radius:6px;font-size:12px;background:var(--input-bg, #f8f8f8) url('icons/search.svg') no-repeat 8px center;background-size:16px 16px;color:var(--text-color, #333);">
+                    <input type="text" id="settingSearchInput" placeholder="搜索..." style="width:100%;padding:6px 10px 6px 32px;border:1px solid var(--border-color, #ddd);border-radius:6px;font-size:12px;background:var(--input-bg, #f8f8f8) url('icons/search.svg') no-repeat 8px center;background-size:16px 16px;color:var(--text-color, #333);">
                 </div>
                 <div style="display:flex;gap:6px;padding:0 12px 8px 12px;flex-shrink:0;">
                     <button id="settingAddItemBtn" title="新增设定" style="flex:1;background:#28a745;color:white;border:none;border-radius:4px;cursor:pointer;font-size:12px;padding:5px 0;font-weight:500;">+ 设定</button>
-                     <button id="outlineAddFolderBtn" title="新增分类" style="flex:1;background:#9b784e;color:white;border:none;border-radius:4px;cursor:pointer;font-size:12px;padding:5px 0;font-weight:500;">
-        <img src="icons/folder.svg" width="14" height="14" alt="分类" style="vertical-align:middle; margin-right:4px;"> 分类
-    </button>
+                    <button id="settingAddFolderBtn" title="新增分类" style="flex:1;background:#9b784e;color:white;border:none;border-radius:4px;cursor:pointer;font-size:12px;padding:5px 0;font-weight:500;">
+                        <img src="icons/folder.svg" width="14" height="14" alt="分类" style="vertical-align:middle; margin-right:4px;"> 分类
+                    </button>
                 </div>
                 <div id="settingTree" style="flex:1;overflow-y:auto;padding:8px 4px;"></div>
                 <div style="padding:8px 12px;border-top:1px solid var(--border-color, rgba(0,0,0,0.08));font-size:11px;color:#888;display:flex;justify-content:space-between;flex-shrink:0;">
@@ -472,15 +472,15 @@ function renderSettingPage() {
                         <input type="text" id="settingEditorTitle" placeholder="设定名称" style="font-size:18px;font-weight:600;border:none;background:transparent;outline:none;flex:1;color:var(--text-color, #333);">
                     </div>
                     <div style="display:flex;gap:8px;">
-    <button id="outlinePinBtn" title="收起为侧边栏" style="padding:6px 12px;background:#6c757d;color:white;border:none;border-radius:6px;cursor:pointer;font-size:13px;">
-        <img src="icons/label.svg" width="14" height="14" alt="缩起" style="vertical-align:middle; margin-right:4px;"> 缩起
-    </button>
-    <button id="outlineSaveBtn" style="padding:6px 16px;background:#9b784e;color:white;border:none;border-radius:6px;cursor:pointer;">
-        <img src="icons/toolbar.svg" width="14" height="14" alt="保存" style="vertical-align:middle; margin-right:4px;"> 保存
-    </button>
-    <button id="outlineDeleteBtn" style="padding:6px 16px;background:#dc3545;color:white;border:none;border-radius:6px;cursor:pointer;">
-        <img src="icons/trash.svg" width="14" height="14" alt="删除" style="vertical-align:middle; margin-right:4px;"> 删除
-    </button>
+                        <button id="settingPinBtn" title="收起为侧边栏" style="padding:6px 12px;background:#6c757d;color:white;border:none;border-radius:6px;cursor:pointer;font-size:13px;">
+                            <img src="icons/label.svg" width="14" height="14" alt="缩起" style="vertical-align:middle; margin-right:4px;"> 缩起
+                        </button>
+                        <button id="settingSaveBtn" style="padding:6px 16px;background:#9b784e;color:white;border:none;border-radius:6px;cursor:pointer;">
+                            <img src="icons/toolbar.svg" width="14" height="14" alt="保存" style="vertical-align:middle; margin-right:4px;"> 保存
+                        </button>
+                        <button id="settingDeleteBtn" style="padding:6px 16px;background:#dc3545;color:white;border:none;border-radius:6px;cursor:pointer;">
+                            <img src="icons/trash.svg" width="14" height="14" alt="删除" style="vertical-align:middle; margin-right:4px;"> 删除
+                        </button>
                     </div>
                 </div>
                 <textarea id="settingEditorContent" style="flex:1;padding:20px;border:none;outline:none;resize:none;font-size:14px;line-height:1.8;background:transparent;color:var(--text-color, #333);font-family:inherit;" placeholder="在此撰写设定详情..."></textarea>
@@ -543,26 +543,111 @@ function initSettingEvents() {
             }, 150);
         };
     }
+    
+    // ===== 独立面板的设定按钮 =====
     var addItemBtn = document.getElementById('settingAddItemBtn');
     if (addItemBtn) {
         addItemBtn.onclick = function() {
             if (settingData.selectedId) {
-                addSettingChild(settingData.selectedId);
+                var parent = getSettingNode(settingData.selectedId);
+                if (parent) {
+                    var children = getSettingChildren(settingData.selectedId);
+                    var newNumber = children.length + 1;
+                    var defaultName = '设定' + newNumber;
+                    var newNode = {
+                        id: genSettingId(),
+                        parentId: settingData.selectedId,
+                        type: 'setting',
+                        name: defaultName,
+                        icon: '📄',
+                        order: children.length,
+                        content: '✍️ 在此撰写设定详情...\n\n【品阶】\n【描述】\n【来历】'
+                    };
+                    settingData.nodes.push(newNode);
+                    settingData.selectedId = newNode.id;
+                    localStorage.setItem('setting_expanded_' + settingData.selectedId, 'true');
+                    saveSettingData();
+                    renderSettingTree();
+                    updateSettingEditor();
+                    renderCompactSettingTree();
+                    updateCompactSettingEditor();
+                }
             } else {
-                alert('请先选择一个节点');
+                var roots = settingData.nodes.filter(function(n) { return n.parentId === null; });
+                var newNumber = roots.length + 1;
+                var defaultName = '📁 设定分类 ' + newNumber;
+                var newNode = {
+                    id: genSettingId(),
+                    parentId: null,
+                    type: 'folder',
+                    name: defaultName,
+                    icon: '📁',
+                    order: roots.length,
+                    content: '分类描述...'
+                };
+                settingData.nodes.push(newNode);
+                settingData.selectedId = newNode.id;
+                saveSettingData();
+                renderSettingTree();
+                updateSettingEditor();
+                renderCompactSettingTree();
+                updateCompactSettingEditor();
             }
         };
     }
+    
+    // ===== 独立面板的分类按钮 =====
     var addFolderBtn = document.getElementById('settingAddFolderBtn');
     if (addFolderBtn) {
         addFolderBtn.onclick = function() {
             if (settingData.selectedId) {
-                addSettingFolder(settingData.selectedId);
+                var parent = getSettingNode(settingData.selectedId);
+                if (parent) {
+                    var children = getSettingChildren(settingData.selectedId);
+                    var newNumber = children.length + 1;
+                    var defaultName = '📁 分类 ' + newNumber;
+                    var newNode = {
+                        id: genSettingId(),
+                        parentId: settingData.selectedId,
+                        type: 'folder',
+                        name: defaultName,
+                        icon: '📁',
+                        order: children.length,
+                        content: '分类说明'
+                    };
+                    settingData.nodes.push(newNode);
+                    settingData.selectedId = newNode.id;
+                    localStorage.setItem('setting_expanded_' + settingData.selectedId, 'true');
+                    saveSettingData();
+                    renderSettingTree();
+                    updateSettingEditor();
+                    renderCompactSettingTree();
+                    updateCompactSettingEditor();
+                }
             } else {
-                alert('请先选择一个节点');
+                var roots = settingData.nodes.filter(function(n) { return n.parentId === null; });
+                var newNumber = roots.length + 1;
+                var defaultName = '📁 分类 ' + newNumber;
+                var newNode = {
+                    id: genSettingId(),
+                    parentId: null,
+                    type: 'folder',
+                    name: defaultName,
+                    icon: '📁',
+                    order: roots.length,
+                    content: '分类说明'
+                };
+                settingData.nodes.push(newNode);
+                settingData.selectedId = newNode.id;
+                saveSettingData();
+                renderSettingTree();
+                updateSettingEditor();
+                renderCompactSettingTree();
+                updateCompactSettingEditor();
             }
         };
     }
+    
     var contentArea = document.getElementById('settingEditorContent');
     var titleInput = document.getElementById('settingEditorTitle');
     var saveTimer = null;
@@ -639,7 +724,6 @@ function updateSettingNodeCount() {
 // ====================================================================
 
 function openSettingSidebar(tool) {
-    console.log('openSettingSidebar 被调用，工具:', tool);
     var sidebar = document.querySelector('.sidebar-menu');
     if (sidebar) { sidebar.style.display = 'none'; }
     var existingPanel = document.getElementById('floatingToolPanel');
@@ -706,7 +790,7 @@ function renderCompactSettingPanel() {
             <div style="display:flex;flex:1;overflow:hidden;">
                 <div style="width:38%;min-width:120px;max-width:180px;border-right:1px solid var(--border-color, rgba(0,0,0,0.08));display:flex;flex-direction:column;overflow:hidden;">
                     <div style="padding:4px 8px;flex-shrink:0;">
-                        <input type="text" id="outlineSearchInput" placeholder="搜索..." style="width:100%;padding:6px 10px 6px 32px;border:1px solid var(--border-color, #ddd);border-radius:6px;font-size:12px;background:var(--input-bg, #f8f8f8) url('icons/search.svg') no-repeat 8px center;background-size:16px 16px;color:var(--text-color, #333);">
+                        <input type="text" id="compactSettingSearch" placeholder="搜索..." style="width:100%;padding:6px 10px 6px 32px;border:1px solid var(--border-color, #ddd);border-radius:6px;font-size:12px;background:var(--input-bg, #f8f8f8) url('icons/search.svg') no-repeat 8px center;background-size:16px 16px;color:var(--text-color, #333);">
                     </div>
                     <div style="display:flex;gap:6px;padding:4px 8px 6px 8px;flex-shrink:0;">
                         <button id="compactSettingAddBtn" title="新增设定" style="flex:1;background:#28a745;color:white;border:none;border-radius:4px;cursor:pointer;font-size:12px;padding:4px 0;font-weight:500;">➕ 设定</button>
@@ -840,30 +924,147 @@ function updateCompactSettingEditor() {
 }
 
 function bindCompactSettingEvents() {
+    // ===== 新增设定按钮 =====
     var addBtn = document.getElementById('compactSettingAddBtn');
     if (addBtn) {
         addBtn.onclick = function() {
             if (settingData.selectedId) {
-                addSettingChild(settingData.selectedId);
+                var parent = getSettingNode(settingData.selectedId);
+                if (parent) {
+                    var children = getSettingChildren(settingData.selectedId);
+                    var newNumber = children.length + 1;
+                    var defaultName = '设定' + newNumber;
+                    var newNode = {
+                        id: genSettingId(),
+                        parentId: settingData.selectedId,
+                        type: 'setting',
+                        name: defaultName,
+                        icon: '📄',
+                        order: children.length,
+                        content: '✍️ 在此撰写设定详情...\n\n【品阶】\n【描述】\n【来历】'
+                    };
+                    settingData.nodes.push(newNode);
+                    settingData.selectedId = newNode.id;
+                    localStorage.setItem('setting_expanded_' + settingData.selectedId, 'true');
+                    saveSettingData();
+                    renderSettingTree();
+                    updateSettingEditor();
+                    renderCompactSettingTree();
+                    updateCompactSettingEditor();
+                }
             } else {
-                alert('请先选择一个节点');
+                var roots = settingData.nodes.filter(function(n) { return n.parentId === null; });
+                var newNumber = roots.length + 1;
+                var defaultName = '📁 设定分类 ' + newNumber;
+                var newNode = {
+                    id: genSettingId(),
+                    parentId: null,
+                    type: 'folder',
+                    name: defaultName,
+                    icon: '📁',
+                    order: roots.length,
+                    content: '分类描述...'
+                };
+                settingData.nodes.push(newNode);
+                settingData.selectedId = newNode.id;
+                saveSettingData();
+                renderSettingTree();
+                updateSettingEditor();
+                renderCompactSettingTree();
+                updateCompactSettingEditor();
             }
-            renderCompactSettingTree();
-            updateCompactSettingEditor();
         };
     }
+    
+    // ===== 新增分类按钮 =====
     var addFolderBtn = document.getElementById('compactSettingAddFolderBtn');
     if (addFolderBtn) {
         addFolderBtn.onclick = function() {
             if (settingData.selectedId) {
-                addSettingFolder(settingData.selectedId);
+                var parent = getSettingNode(settingData.selectedId);
+                if (parent) {
+                    var children = getSettingChildren(settingData.selectedId);
+                    var newNumber = children.length + 1;
+                    var defaultName = '📁 分类 ' + newNumber;
+                    var newNode = {
+                        id: genSettingId(),
+                        parentId: settingData.selectedId,
+                        type: 'folder',
+                        name: defaultName,
+                        icon: '📁',
+                        order: children.length,
+                        content: '分类说明'
+                    };
+                    settingData.nodes.push(newNode);
+                    settingData.selectedId = newNode.id;
+                    localStorage.setItem('setting_expanded_' + settingData.selectedId, 'true');
+                    saveSettingData();
+                    renderSettingTree();
+                    updateSettingEditor();
+                    renderCompactSettingTree();
+                    updateCompactSettingEditor();
+                }
             } else {
-                alert('请先选择一个节点');
+                var roots = settingData.nodes.filter(function(n) { return n.parentId === null; });
+                var newNumber = roots.length + 1;
+                var defaultName = '📁 分类 ' + newNumber;
+                var newNode = {
+                    id: genSettingId(),
+                    parentId: null,
+                    type: 'folder',
+                    name: defaultName,
+                    icon: '📁',
+                    order: roots.length,
+                    content: '分类说明'
+                };
+                settingData.nodes.push(newNode);
+                settingData.selectedId = newNode.id;
+                saveSettingData();
+                renderSettingTree();
+                updateSettingEditor();
+                renderCompactSettingTree();
+                updateCompactSettingEditor();
             }
-            renderCompactSettingTree();
-            updateCompactSettingEditor();
         };
     }
+    
+    // ===== 高亮开关 =====
+    var titleContainer = document.querySelector('#compactSettingTitle')?.parentElement;
+    if (titleContainer) {
+        var highlightToggle = document.createElement('label');
+        highlightToggle.style.cssText = 'position:relative; display:inline-block; width:34px; height:20px; flex-shrink:0; margin-right:4px; cursor:pointer;';
+        highlightToggle.title = '点击在编辑器中高亮所有设定名称';
+        highlightToggle.innerHTML = `
+            <input type="checkbox" id="compactSettingHighlight" style="opacity:0; width:0; height:0;">
+            <span style="position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background:#ccc; border-radius:20px; transition:0.3s;">
+                <span style="position:absolute; content:''; height:14px; width:14px; left:3px; bottom:3px; background:white; border-radius:50%; transition:0.3s;"></span>
+            </span>
+        `;
+        var saveBtn = document.getElementById('compactSettingSaveBtn');
+        if (saveBtn && saveBtn.parentElement) {
+            saveBtn.parentElement.insertBefore(highlightToggle, saveBtn);
+        }
+        var highlightCheckbox = document.getElementById('compactSettingHighlight');
+        if (highlightCheckbox) {
+            highlightCheckbox.onchange = function() {
+                var isChecked = this.checked;
+                var span = this.nextElementSibling;
+                if (span) {
+                    span.style.background = isChecked ? '#007aff' : '#ccc';
+                    var dot = span.querySelector('span');
+                    if (dot) {
+                        dot.style.transform = isChecked ? 'translateX(14px)' : 'none';
+                    }
+                }
+                if (isChecked) {
+                    highlightSettingsInEditor();
+                } else {
+                    removeHighlightsInEditor('setting');
+                }
+            };
+        }
+    }
+    
     var expandBtn = document.getElementById('compactSettingExpandBtn');
     if (expandBtn) {
         expandBtn.onclick = function() {
@@ -1067,7 +1268,7 @@ function createNodeElement(node, depth) {
                     if (name && name.trim()) {
                         var icon = prompt('请输入图标：', '📄') || '📄';
                         var children = getSettingChildren(node.id);
-                        var newNode = { id: 'node_' + (settingData.nextId || 100), parentId: node.id, type: 'setting', name: name.trim(), icon: icon, order: children.length, content: '✍️ 在此撰写设定详情...' };
+                        var newNode = { id: 'set_' + (settingData.nextId || 100), parentId: node.id, type: 'setting', name: name.trim(), icon: icon, order: children.length, content: '✍️ 在此撰写设定详情...' };
                         settingData.nextId = (settingData.nextId || 100) + 1;
                         settingData.nodes.push(newNode);
                         selectedId = newNode.id;
@@ -1081,7 +1282,7 @@ function createNodeElement(node, depth) {
                     if (name && name.trim()) {
                         var icon = prompt('请输入图标：', '📁') || '📁';
                         var children = getSettingChildren(node.id);
-                        var newNode = { id: 'node_' + (settingData.nextId || 100), parentId: node.id, type: 'folder', name: name.trim(), icon: icon, order: children.length, content: '分类说明' };
+                        var newNode = { id: 'set_' + (settingData.nextId || 100), parentId: node.id, type: 'folder', name: name.trim(), icon: icon, order: children.length, content: '分类说明' };
                         settingData.nextId = (settingData.nextId || 100) + 1;
                         settingData.nodes.push(newNode);
                         selectedId = newNode.id;
@@ -1199,12 +1400,44 @@ function deleteNode() {
         alert('已删除');
     }
 }
-document.getElementById('winAddRoot').onclick = function() {
-    var name = prompt('请输入分类名称：', '新分类');
-    if (name && name.trim()) {
-        var icon = prompt('请输入图标：', '📁') || '📁';
+// ========== 独立窗口的设定和分类按钮（直接创建，无需输入） ==========
+document.getElementById('winAddSettingBtn').onclick = function() {
+    if (selectedId) {
+        var node = getSettingNode(selectedId);
+        if (node) {
+            var children = getSettingChildren(selectedId);
+            var newNumber = children.length + 1;
+            var defaultName = '设定' + newNumber;
+            var newNode = {
+                id: 'set_' + (settingData.nextId || 100),
+                parentId: selectedId,
+                type: 'setting',
+                name: defaultName,
+                icon: '📄',
+                order: children.length,
+                content: '✍️ 在此撰写设定详情...\\n\\n【品阶】\\n【描述】\\n【来历】'
+            };
+            settingData.nextId = (settingData.nextId || 100) + 1;
+            settingData.nodes.push(newNode);
+            selectedId = newNode.id;
+            localStorage.setItem('setting_expanded_' + selectedId, 'true');
+            saveSettingData();
+            renderTree();
+            updateEditor();
+        }
+    } else {
         var roots = settingData.nodes.filter(function(n) { return n.parentId === null; });
-        var newNode = { id: 'node_' + (settingData.nextId || 100), parentId: null, type: 'folder', name: name.trim(), icon: icon, order: roots.length, content: '分类描述...' };
+        var newNumber = roots.length + 1;
+        var defaultName = '📁 设定分类 ' + newNumber;
+        var newNode = {
+            id: 'set_' + (settingData.nextId || 100),
+            parentId: null,
+            type: 'folder',
+            name: defaultName,
+            icon: '📁',
+            order: roots.length,
+            content: '分类描述...'
+        };
         settingData.nextId = (settingData.nextId || 100) + 1;
         settingData.nodes.push(newNode);
         selectedId = newNode.id;
@@ -1213,45 +1446,64 @@ document.getElementById('winAddRoot').onclick = function() {
         updateEditor();
     }
 };
-document.getElementById('winAddSettingBtn').onclick = function() {
-    if (selectedId) {
-        var node = getSettingNode(selectedId);
-        if (node) {
-            var name = prompt('请输入设定名称：', '新设定');
-            if (name && name.trim()) {
-                var icon = prompt('请输入图标：', '📄') || '📄';
-                var children = getSettingChildren(selectedId);
-                var newNode = { id: 'node_' + (settingData.nextId || 100), parentId: selectedId, type: 'setting', name: name.trim(), icon: icon, order: children.length, content: '✍️ 在此撰写设定详情...' };
-                settingData.nextId = (settingData.nextId || 100) + 1;
-                settingData.nodes.push(newNode);
-                selectedId = newNode.id;
-                localStorage.setItem('setting_expanded_' + selectedId, 'true');
-                saveSettingData();
-                renderTree();
-                updateEditor();
-            }
-        }
-    } else { alert('请先选择一个节点'); }
-};
 document.getElementById('winAddFolderBtn').onclick = function() {
     if (selectedId) {
         var node = getSettingNode(selectedId);
         if (node) {
-            var name = prompt('请输入新分类名称：', '新分类');
-            if (name && name.trim()) {
-                var icon = prompt('请输入图标：', '📁') || '📁';
-                var children = getSettingChildren(selectedId);
-                var newNode = { id: 'node_' + (settingData.nextId || 100), parentId: selectedId, type: 'folder', name: name.trim(), icon: icon, order: children.length, content: '分类说明' };
-                settingData.nextId = (settingData.nextId || 100) + 1;
-                settingData.nodes.push(newNode);
-                selectedId = newNode.id;
-                localStorage.setItem('setting_expanded_' + selectedId, 'true');
-                saveSettingData();
-                renderTree();
-                updateEditor();
-            }
+            var children = getSettingChildren(selectedId);
+            var newNumber = children.length + 1;
+            var defaultName = '📁 分类 ' + newNumber;
+            var newNode = {
+                id: 'set_' + (settingData.nextId || 100),
+                parentId: selectedId,
+                type: 'folder',
+                name: defaultName,
+                icon: '📁',
+                order: children.length,
+                content: '分类说明'
+            };
+            settingData.nextId = (settingData.nextId || 100) + 1;
+            settingData.nodes.push(newNode);
+            selectedId = newNode.id;
+            localStorage.setItem('setting_expanded_' + selectedId, 'true');
+            saveSettingData();
+            renderTree();
+            updateEditor();
         }
-    } else { alert('请先选择一个节点'); }
+    } else {
+        var roots = settingData.nodes.filter(function(n) { return n.parentId === null; });
+        var newNumber = roots.length + 1;
+        var defaultName = '📁 分类 ' + newNumber;
+        var newNode = {
+            id: 'set_' + (settingData.nextId || 100),
+            parentId: null,
+            type: 'folder',
+            name: defaultName,
+            icon: '📁',
+            order: roots.length,
+            content: '分类说明'
+        };
+        settingData.nextId = (settingData.nextId || 100) + 1;
+        settingData.nodes.push(newNode);
+        selectedId = newNode.id;
+        saveSettingData();
+        renderTree();
+        updateEditor();
+    }
+};
+document.getElementById('winAddRoot').onclick = function() {
+    var name = prompt('请输入分类名称：', '新分类');
+    if (name && name.trim()) {
+        var icon = prompt('请输入图标：', '📁') || '📁';
+        var roots = settingData.nodes.filter(function(n) { return n.parentId === null; });
+        var newNode = { id: 'set_' + (settingData.nextId || 100), parentId: null, type: 'folder', name: name.trim(), icon: icon, order: roots.length, content: '分类描述...' };
+        settingData.nextId = (settingData.nextId || 100) + 1;
+        settingData.nodes.push(newNode);
+        selectedId = newNode.id;
+        saveSettingData();
+        renderTree();
+        updateEditor();
+    }
 };
 document.getElementById('winRefresh').onclick = function() { renderTree(); updateEditor(); };
 document.getElementById('winSave').onclick = saveNode;
@@ -1479,4 +1731,101 @@ window.bindSettingToolEntry = bindSettingToolEntry;
 console.log('设定工具已加载');
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(bindSettingToolEntry, 500);
+});
+
+// ========== 设定高亮功能 ==========
+
+function getAllSettingNames() {
+    var names = [];
+    if (settingData && settingData.nodes) {
+        for (var i = 0; i < settingData.nodes.length; i++) {
+            var node = settingData.nodes[i];
+            if (node.type === 'setting' && node.name) {
+                names.push(node.name.trim());
+            }
+        }
+    }
+    return names;
+}
+
+function highlightSettingsInEditor() {
+    var editor = document.getElementById('editor');
+    if (!editor) {
+        alert('请先打开一个章节');
+        return;
+    }
+    removeHighlightsInEditor('setting');
+    var names = getAllSettingNames();
+    if (names.length === 0) {
+        alert('暂无设定，请先创建设定');
+        return;
+    }
+    var textNodes = getTextNodes(editor);
+    var highlightCount = 0;
+    for (var i = 0; i < textNodes.length; i++) {
+        var node = textNodes[i];
+        var text = node.textContent;
+        var replaced = false;
+        for (var j = 0; j < names.length; j++) {
+            var name = names[j];
+            var regex = new RegExp('(' + escapeRegExp(name) + ')', 'g');
+            if (regex.test(text)) {
+                var newHtml = text.replace(regex, function(match) {
+                    highlightCount++;
+                    return '<span class="setting-highlight" data-name="' + match + '" style="background:rgba(155,120,78,0.2); border-radius:3px; padding:0 2px; border-bottom:2px solid #9b784e; font-weight:500;">' + match + '</span>';
+                });
+                var tempDiv = document.createElement('div');
+                tempDiv.innerHTML = newHtml;
+                var parent = node.parentNode;
+                while (tempDiv.firstChild) {
+                    parent.insertBefore(tempDiv.firstChild, node);
+                }
+                parent.removeChild(node);
+                replaced = true;
+                break;
+            }
+        }
+    }
+    if (highlightCount > 0) {
+        showToast('✅ 已高亮 ' + highlightCount + ' 个设定名称');
+        localStorage.setItem('setting_highlight_enabled', 'true');
+    } else {
+        showToast('⚠️ 未在文中找到设定名称');
+        var checkbox = document.getElementById('compactSettingHighlight');
+        if (checkbox) {
+            checkbox.checked = false;
+            var span = checkbox.nextElementSibling;
+            if (span) {
+                span.style.background = '#ccc';
+                var dot = span.querySelector('span');
+                if (dot) {
+                    dot.style.transform = 'none';
+                }
+            }
+        }
+    }
+}
+
+function restoreSettingHighlight() {
+    if (localStorage.getItem('setting_highlight_enabled') === 'true') {
+        setTimeout(function() {
+            highlightSettingsInEditor();
+            var checkbox = document.getElementById('compactSettingHighlight');
+            if (checkbox) {
+                checkbox.checked = true;
+                var span = checkbox.nextElementSibling;
+                if (span) {
+                    span.style.background = '#007aff';
+                    var dot = span.querySelector('span');
+                    if (dot) {
+                        dot.style.transform = 'translateX(14px)';
+                    }
+                }
+            }
+        }, 500);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    restoreSettingHighlight();
 });

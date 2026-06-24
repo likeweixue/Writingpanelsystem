@@ -79,7 +79,8 @@
             <nav class="menu-nav">
                 <button class="menu-item active" data-page="books">书籍</button>
                  <button class="menu-item" data-page="stats">数据</button>
-                <button class="menu-item" data-page="about">关于</button>
+                 <button class="menu-item" data-page="settings">设置</button>
+                 <button class="menu-item" data-page="about">关于</button>
             </nav>
             <div class="menu-footer">数据本地存储</div>
         </div>
@@ -105,18 +106,13 @@
     <div id="statsContainer" style="height:100%;"></div>
 </div>
 
-                <!-- 设置页面 -->
-                <div class="page" data-page="settings">
-                    <div class="settings-container" id="settingsContainer"></div>
-                </div>
-
                 <!-- 关于页面 -->
                 <div class="page" data-page="about">
                     <div class="about-content">
                         <h2>写作面板系统 WritingPanelSystem</h2>
                         <p>免费，开源，自由的写作软件</p>
                         <p>软件官网 WritingPanelSystem.com</p>
-                        <p>版本 v 1.10.0 正式版</p>
+                        <p>版本 v 1.11.0 正式版</p>
                         <p>GitHub: <a href="https://github.com/likeweixue/Writingpanelsystem" target="_blank">https://github.com/likeweixue/Writingpanelsystem</a></p>
                     </div>
                 </div>
@@ -180,6 +176,40 @@
 
 <!-- ========== 所有内联函数（放在一起，确保定义顺序正确） ========== -->
 <script>
+    // ===== 修复 Electron 打包后 window.open 不可用 =====
+(function fixWindowOpen() {
+    console.log('🔧 检查 window.open 状态...');
+    
+    // 保存原始的 window.open
+    var originalOpen = window.open;
+    
+    // 检查是否在 Electron 环境中
+    if (window.electron && window.electron.openWindow) {
+        console.log('✅ 检测到 Electron 环境，修复 window.open');
+        
+        // 重写 window.open
+        window.open = function(url, name, features) {
+            console.log('🔗 window.open 被调用:', url);
+            
+            // 如果是内部页面（html/ 开头、file://、data:）
+            if (url && (url.startsWith('html/') || 
+                        url.startsWith('file://') || 
+                        url.startsWith('data:') ||
+                        url.includes('.html'))) {
+                // 使用 Electron 的 openWindow
+                window.electron.openWindow(url, features);
+                return null;
+            }
+            
+            // 外部链接使用原始方法
+            return originalOpen.call(window, url, name, features);
+        };
+        
+        console.log('✅ window.open 已修复为 Electron 版本');
+    } else {
+        console.log('⚠️ 不在 Electron 环境中，使用原生 window.open');
+    }
+})();
     // ========== 静默所有备份提示 ==========
 (function silenceBackup() {
     var originalAlert = window.alert;
@@ -197,6 +227,7 @@
     };
     console.log('✅ 备份提示已静默');
 })();
+
 // 图片压缩函数
 function compressImage(file, maxWidth, maxHeight, quality, callback) {
     var reader = new FileReader();

@@ -411,25 +411,25 @@ function renderCharacterPage() {
                 <div class="character-sidebar-header" style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:rgba(0,0,0,0.03);border-bottom:1px solid var(--border-color, rgba(0,0,0,0.08));flex-shrink:0;">
                     <span style="font-weight:600;">👥 角色目录</span>
                     <div style="display:flex;gap:6px;">
-    <button id="outlineAddRootBtn" title="新增根节点" style="background:none;border:none;cursor:pointer;font-size:16px;">
-        <img src="icons/folder.svg" width="16" height="16" alt="新增根节点">
-    </button>
-    <button id="outlineRefreshBtn" title="刷新" style="background:none;border:none;cursor:pointer;font-size:16px;">
-        <img src="icons/refresh.svg" width="16" height="16" alt="刷新">
-    </button>
-    <button id="outlineCloseBtn" title="关闭" style="background:none;border:none;cursor:pointer;font-size:16px;">
-        <img src="icons/close.svg" width="16" height="16" alt="关闭">
-    </button>
-</div>
+                        <button id="characterAddRootBtn" title="新增根节点" style="background:none;border:none;cursor:pointer;font-size:16px;">
+                            <img src="icons/folder.svg" width="16" height="16" alt="新增根节点">
+                        </button>
+                        <button id="characterRefreshBtn" title="刷新" style="background:none;border:none;cursor:pointer;font-size:16px;">
+                            <img src="icons/refresh.svg" width="16" height="16" alt="刷新">
+                        </button>
+                        <button id="characterCloseBtn" title="关闭" style="background:none;border:none;cursor:pointer;font-size:16px;">
+                            <img src="icons/close.svg" width="16" height="16" alt="关闭">
+                        </button>
+                    </div>
                 </div>
                 <div style="padding:8px 12px;flex-shrink:0;">
-                    <input type="text" id="outlineSearchInput" placeholder="搜索..." style="width:100%;padding:6px 10px 6px 32px;border:1px solid var(--border-color, #ddd);border-radius:6px;font-size:12px;background:var(--input-bg, #f8f8f8) url('icons/search.svg') no-repeat 8px center;background-size:16px 16px;color:var(--text-color, #333);">
+                    <input type="text" id="characterSearchInput" placeholder="搜索..." style="width:100%;padding:6px 10px 6px 32px;border:1px solid var(--border-color, #ddd);border-radius:6px;font-size:12px;background:var(--input-bg, #f8f8f8) url('icons/search.svg') no-repeat 8px center;background-size:16px 16px;color:var(--text-color, #333);">
                 </div>
                 <div style="display:flex;gap:6px;padding:0 12px 8px 12px;flex-shrink:0;">
                     <button id="characterAddItemBtn" title="新增角色" style="flex:1;background:#28a745;color:white;border:none;border-radius:4px;cursor:pointer;font-size:12px;padding:5px 0;font-weight:500;">+ 角色</button>
-                     <button id="outlineAddFolderBtn" title="新增分类" style="flex:1;background:#9b784e;color:white;border:none;border-radius:4px;cursor:pointer;font-size:12px;padding:5px 0;font-weight:500;">
-        <img src="icons/folder.svg" width="14" height="14" alt="分类" style="vertical-align:middle; margin-right:4px;"> 分卷
-    </button>
+                    <button id="characterAddFolderBtn" title="新增分类" style="flex:1;background:#9b784e;color:white;border:none;border-radius:4px;cursor:pointer;font-size:12px;padding:5px 0;font-weight:500;">
+                        <img src="icons/folder.svg" width="14" height="14" alt="分类" style="vertical-align:middle; margin-right:4px;"> 分类
+                    </button>
                 </div>
                 <div id="characterTree" style="flex:1;overflow-y:auto;padding:8px 4px;"></div>
                 <div style="padding:8px 12px;border-top:1px solid var(--border-color, rgba(0,0,0,0.08));font-size:11px;color:#888;display:flex;justify-content:space-between;flex-shrink:0;">
@@ -442,15 +442,15 @@ function renderCharacterPage() {
                 <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 20px;border-bottom:1px solid var(--border-color, rgba(0,0,0,0.08));flex-shrink:0;">
                     <input type="text" id="characterEditorTitle" placeholder="角色姓名" style="font-size:18px;font-weight:600;border:none;background:transparent;outline:none;flex:1;color:var(--text-color, #333);">
                     <div style="display:flex;gap:8px;">
-    <button id="outlinePinBtn" title="收起为侧边栏" style="padding:6px 12px;background:#6c757d;color:white;border:none;border-radius:6px;cursor:pointer;font-size:13px;">
-        <img src="icons/label.svg" width="14" height="14" alt="缩起" style="vertical-align:middle; margin-right:4px;"> 缩起
-    </button>
-    <button id="outlineSaveBtn" style="padding:6px 16px;background:#9b784e;color:white;border:none;border-radius:6px;cursor:pointer;">
-        <img src="icons/toolbar.svg" width="14" height="14" alt="保存" style="vertical-align:middle; margin-right:4px;"> 保存
-    </button>
-    <button id="outlineDeleteBtn" style="padding:6px 16px;background:#dc3545;color:white;border:none;border-radius:6px;cursor:pointer;">
-        <img src="icons/trash.svg" width="14" height="14" alt="删除" style="vertical-align:middle; margin-right:4px;"> 删除
-    </button>
+                        <button id="characterPinBtn" title="收起为侧边栏" style="padding:6px 12px;background:#6c757d;color:white;border:none;border-radius:6px;cursor:pointer;font-size:13px;">
+                            <img src="icons/label.svg" width="14" height="14" alt="缩起" style="vertical-align:middle; margin-right:4px;"> 缩起
+                        </button>
+                        <button id="characterSaveBtn" style="padding:6px 16px;background:#9b784e;color:white;border:none;border-radius:6px;cursor:pointer;">
+                            <img src="icons/toolbar.svg" width="14" height="14" alt="保存" style="vertical-align:middle; margin-right:4px;"> 保存
+                        </button>
+                        <button id="characterDeleteBtn" style="padding:6px 16px;background:#dc3545;color:white;border:none;border-radius:6px;cursor:pointer;">
+                            <img src="icons/trash.svg" width="14" height="14" alt="删除" style="vertical-align:middle; margin-right:4px;"> 删除
+                        </button>
                     </div>
                 </div>
                 <textarea id="characterEditorContent" style="flex:1;padding:20px;border:none;outline:none;resize:none;font-size:14px;line-height:1.8;background:transparent;color:var(--text-color, #333);font-family:inherit;" placeholder="【姓名】\n【性别】\n【年龄】\n【外貌】\n【性格】\n【背景】\n【势力】\n【等级】\n【功法】\n【其他】"></textarea>
@@ -513,26 +513,107 @@ function initCharacterEvents() {
             }, 150);
         };
     }
+    
+    // ===== 独立面板的角色按钮 =====
     var addItemBtn = document.getElementById('characterAddItemBtn');
     if (addItemBtn) {
         addItemBtn.onclick = function() {
             if (characterData.selectedId) {
-                addCharacterChild(characterData.selectedId);
+                var parent = getCharacterNode(characterData.selectedId);
+                if (parent) {
+                    var children = getCharacterChildren(characterData.selectedId);
+                    var newNumber = children.length + 1;
+                    var defaultName = '角色' + newNumber;
+                    var newNode = {
+                        id: genCharacterId(),
+                        parentId: characterData.selectedId,
+                        type: 'character',
+                        name: defaultName,
+                        order: children.length,
+                        content: '【姓名】' + defaultName + '\n【性别】\n【年龄】\n【外貌】\n【性格】\n【背景】\n【势力】\n【等级】\n【功法】\n【其他】'
+                    };
+                    characterData.nodes.push(newNode);
+                    characterData.selectedId = newNode.id;
+                    localStorage.setItem('character_expanded_' + characterData.selectedId, 'true');
+                    saveCharacterData();
+                    renderCharacterTree();
+                    updateCharacterEditor();
+                    renderCompactCharacterTree();
+                    updateCompactCharacterEditor();
+                }
             } else {
-                alert('请先选择一个节点');
+                var roots = characterData.nodes.filter(function(n) { return n.parentId === null; });
+                var newNumber = roots.length + 1;
+                var defaultName = '📁 角色分类 ' + newNumber;
+                var newNode = {
+                    id: genCharacterId(),
+                    parentId: null,
+                    type: 'folder',
+                    name: defaultName,
+                    order: roots.length,
+                    content: '角色分类'
+                };
+                characterData.nodes.push(newNode);
+                characterData.selectedId = newNode.id;
+                saveCharacterData();
+                renderCharacterTree();
+                updateCharacterEditor();
+                renderCompactCharacterTree();
+                updateCompactCharacterEditor();
             }
         };
     }
+    
+    // ===== 独立面板的分类按钮 =====
     var addFolderBtn = document.getElementById('characterAddFolderBtn');
     if (addFolderBtn) {
         addFolderBtn.onclick = function() {
             if (characterData.selectedId) {
-                addCharacterFolder(characterData.selectedId);
+                var parent = getCharacterNode(characterData.selectedId);
+                if (parent) {
+                    var children = getCharacterChildren(characterData.selectedId);
+                    var newNumber = children.length + 1;
+                    var defaultName = '📁 分类 ' + newNumber;
+                    var newNode = {
+                        id: genCharacterId(),
+                        parentId: characterData.selectedId,
+                        type: 'folder',
+                        name: defaultName,
+                        order: children.length,
+                        content: '分类说明'
+                    };
+                    characterData.nodes.push(newNode);
+                    characterData.selectedId = newNode.id;
+                    localStorage.setItem('character_expanded_' + characterData.selectedId, 'true');
+                    saveCharacterData();
+                    renderCharacterTree();
+                    updateCharacterEditor();
+                    renderCompactCharacterTree();
+                    updateCompactCharacterEditor();
+                }
             } else {
-                alert('请先选择一个节点');
+                var roots = characterData.nodes.filter(function(n) { return n.parentId === null; });
+                var newNumber = roots.length + 1;
+                var defaultName = '📁 分类 ' + newNumber;
+                var newNode = {
+                    id: genCharacterId(),
+                    parentId: null,
+                    type: 'folder',
+                    name: defaultName,
+                    order: roots.length,
+                    content: '分类说明'
+                };
+                characterData.nodes.push(newNode);
+                characterData.selectedId = newNode.id;
+                saveCharacterData();
+                renderCharacterTree();
+                updateCharacterEditor();
+                renderCompactCharacterTree();
+                updateCompactCharacterEditor();
             }
         };
     }
+    
     var contentArea = document.getElementById('characterEditorContent');
     var titleInput = document.getElementById('characterEditorTitle');
     var saveTimer = null;
@@ -609,7 +690,6 @@ function updateCharacterNodeCount() {
 // ====================================================================
 
 function openCharacterSidebar(tool) {
-    console.log('openCharacterSidebar 被调用，工具:', tool);
     var sidebar = document.querySelector('.sidebar-menu');
     if (sidebar) { sidebar.style.display = 'none'; }
     var existingPanel = document.getElementById('floatingToolPanel');
@@ -676,7 +756,7 @@ function renderCompactCharacterPanel() {
             <div style="display:flex;flex:1;overflow:hidden;">
                 <div style="width:38%;min-width:120px;max-width:180px;border-right:1px solid var(--border-color, rgba(0,0,0,0.08));display:flex;flex-direction:column;overflow:hidden;">
                     <div style="padding:4px 8px;flex-shrink:0;">
-                        <input type="text" id="outlineSearchInput" placeholder="搜索..." style="width:100%;padding:6px 10px 6px 32px;border:1px solid var(--border-color, #ddd);border-radius:6px;font-size:12px;background:var(--input-bg, #f8f8f8) url('icons/search.svg') no-repeat 8px center;background-size:16px 16px;color:var(--text-color, #333);">
+                        <input type="text" id="compactCharacterSearch" placeholder="搜索..." style="width:100%;padding:6px 10px 6px 32px;border:1px solid var(--border-color, #ddd);border-radius:6px;font-size:12px;background:var(--input-bg, #f8f8f8) url('icons/search.svg') no-repeat 8px center;background-size:16px 16px;color:var(--text-color, #333);">
                     </div>
                     <div style="display:flex;gap:6px;padding:4px 8px 6px 8px;flex-shrink:0;">
                         <button id="compactCharacterAddBtn" title="新增角色" style="flex:1;background:#28a745;color:white;border:none;border-radius:4px;cursor:pointer;font-size:12px;padding:4px 0;font-weight:500;">➕ 角色</button>
@@ -806,30 +886,143 @@ function updateCompactCharacterEditor() {
 }
 
 function bindCompactCharacterEvents() {
+    // ===== 新增角色按钮 =====
     var addBtn = document.getElementById('compactCharacterAddBtn');
     if (addBtn) {
         addBtn.onclick = function() {
             if (characterData.selectedId) {
-                addCharacterChild(characterData.selectedId);
+                var parent = getCharacterNode(characterData.selectedId);
+                if (parent) {
+                    var children = getCharacterChildren(characterData.selectedId);
+                    var newNumber = children.length + 1;
+                    var defaultName = '角色' + newNumber;
+                    var newNode = {
+                        id: genCharacterId(),
+                        parentId: characterData.selectedId,
+                        type: 'character',
+                        name: defaultName,
+                        order: children.length,
+                        content: '【姓名】' + defaultName + '\n【性别】\n【年龄】\n【外貌】\n【性格】\n【背景】\n【势力】\n【等级】\n【功法】\n【其他】'
+                    };
+                    characterData.nodes.push(newNode);
+                    characterData.selectedId = newNode.id;
+                    localStorage.setItem('character_expanded_' + characterData.selectedId, 'true');
+                    saveCharacterData();
+                    renderCharacterTree();
+                    updateCharacterEditor();
+                    renderCompactCharacterTree();
+                    updateCompactCharacterEditor();
+                }
             } else {
-                alert('请先选择一个节点');
+                var roots = characterData.nodes.filter(function(n) { return n.parentId === null; });
+                var newNumber = roots.length + 1;
+                var defaultName = '📁 角色分类 ' + newNumber;
+                var newNode = {
+                    id: genCharacterId(),
+                    parentId: null,
+                    type: 'folder',
+                    name: defaultName,
+                    order: roots.length,
+                    content: '角色分类'
+                };
+                characterData.nodes.push(newNode);
+                characterData.selectedId = newNode.id;
+                saveCharacterData();
+                renderCharacterTree();
+                updateCharacterEditor();
+                renderCompactCharacterTree();
+                updateCompactCharacterEditor();
             }
-            renderCompactCharacterTree();
-            updateCompactCharacterEditor();
         };
     }
+    
+    // ===== 新增分类按钮 =====
     var addFolderBtn = document.getElementById('compactCharacterAddFolderBtn');
     if (addFolderBtn) {
         addFolderBtn.onclick = function() {
             if (characterData.selectedId) {
-                addCharacterFolder(characterData.selectedId);
+                var parent = getCharacterNode(characterData.selectedId);
+                if (parent) {
+                    var children = getCharacterChildren(characterData.selectedId);
+                    var newNumber = children.length + 1;
+                    var defaultName = '📁 分类 ' + newNumber;
+                    var newNode = {
+                        id: genCharacterId(),
+                        parentId: characterData.selectedId,
+                        type: 'folder',
+                        name: defaultName,
+                        order: children.length,
+                        content: '分类说明'
+                    };
+                    characterData.nodes.push(newNode);
+                    characterData.selectedId = newNode.id;
+                    localStorage.setItem('character_expanded_' + characterData.selectedId, 'true');
+                    saveCharacterData();
+                    renderCharacterTree();
+                    updateCharacterEditor();
+                    renderCompactCharacterTree();
+                    updateCompactCharacterEditor();
+                }
             } else {
-                alert('请先选择一个节点');
+                var roots = characterData.nodes.filter(function(n) { return n.parentId === null; });
+                var newNumber = roots.length + 1;
+                var defaultName = '📁 分类 ' + newNumber;
+                var newNode = {
+                    id: genCharacterId(),
+                    parentId: null,
+                    type: 'folder',
+                    name: defaultName,
+                    order: roots.length,
+                    content: '分类说明'
+                };
+                characterData.nodes.push(newNode);
+                characterData.selectedId = newNode.id;
+                saveCharacterData();
+                renderCharacterTree();
+                updateCharacterEditor();
+                renderCompactCharacterTree();
+                updateCompactCharacterEditor();
             }
-            renderCompactCharacterTree();
-            updateCompactCharacterEditor();
         };
     }
+    
+    // 高亮开关
+    var titleContainer = document.querySelector('#compactCharacterTitle')?.parentElement;
+    if (titleContainer) {
+        var highlightToggle = document.createElement('label');
+        highlightToggle.style.cssText = 'position:relative; display:inline-block; width:34px; height:20px; flex-shrink:0; margin-right:4px; cursor:pointer;';
+        highlightToggle.title = '点击在编辑器中高亮所有角色名';
+        highlightToggle.innerHTML = `
+            <input type="checkbox" id="compactCharacterHighlight" style="opacity:0; width:0; height:0;">
+            <span style="position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background:#ccc; border-radius:20px; transition:0.3s;">
+                <span style="position:absolute; content:''; height:14px; width:14px; left:3px; bottom:3px; background:white; border-radius:50%; transition:0.3s;"></span>
+            </span>
+        `;
+        var saveBtn = document.getElementById('compactCharacterSaveBtn');
+        if (saveBtn && saveBtn.parentElement) {
+            saveBtn.parentElement.insertBefore(highlightToggle, saveBtn);
+        }
+        var highlightCheckbox = document.getElementById('compactCharacterHighlight');
+        if (highlightCheckbox) {
+            highlightCheckbox.onchange = function() {
+                var isChecked = this.checked;
+                var span = this.nextElementSibling;
+                if (span) {
+                    span.style.background = isChecked ? '#007aff' : '#ccc';
+                    var dot = span.querySelector('span');
+                    if (dot) {
+                        dot.style.transform = isChecked ? 'translateX(14px)' : 'none';
+                    }
+                }
+                if (isChecked) {
+                    highlightCharactersInEditor();
+                } else {
+                    removeHighlightsInEditor('character');
+                }
+            };
+        }
+    }
+    
     var expandBtn = document.getElementById('compactCharacterExpandBtn');
     if (expandBtn) {
         expandBtn.onclick = function() {
@@ -949,10 +1142,13 @@ function openCharacterInNewWindow() {
     }
     
     getCharacterData();
-    var dataJson = JSON.stringify(characterData);
     var bookId = currentBookId || 'global';
     var selectedId = characterData.selectedId ? JSON.stringify(characterData.selectedId) : 'null';
     
+    // ===== 关键修复：使用 JSON.stringify 安全序列化数据 =====
+    var dataJson = JSON.stringify(characterData);
+    
+    // ===== 使用函数序列化方式，避免转义问题 =====
     var jsCode = `
 function getCharacterChildren(parentId) {
     return characterData.nodes.filter(function(n) { return n.parentId === parentId; }).sort(function(a,b) { return (a.order||0)-(b.order||0); });
@@ -1031,7 +1227,7 @@ function createNodeElement(node, depth) {
                     var name = prompt('请输入角色姓名：', '新角色');
                     if (name && name.trim()) {
                         var children = getCharacterChildren(node.id);
-                        var newNode = { id: 'node_' + (characterData.nextId || 100), parentId: node.id, type: 'character', name: name.trim(), order: children.length, content: '【姓名】' + name.trim() + '\\n【性别】\\n【年龄】\\n【外貌】\\n【性格】\\n【背景】\\n【势力】\\n【等级】\\n【功法】\\n【其他】' };
+                        var newNode = { id: 'char_' + (characterData.nextId || 100), parentId: node.id, type: 'character', name: name.trim(), order: children.length, content: '【姓名】' + name.trim() + '\\n【性别】\\n【年龄】\\n【外貌】\\n【性格】\\n【背景】\\n【势力】\\n【等级】\\n【功法】\\n【其他】' };
                         characterData.nextId = (characterData.nextId || 100) + 1;
                         characterData.nodes.push(newNode);
                         selectedId = newNode.id;
@@ -1044,7 +1240,7 @@ function createNodeElement(node, depth) {
                     var name = prompt('请输入新分类名称：', '新分类');
                     if (name && name.trim()) {
                         var children = getCharacterChildren(node.id);
-                        var newNode = { id: 'node_' + (characterData.nextId || 100), parentId: node.id, type: 'folder', name: name.trim(), order: children.length, content: '分类说明' };
+                        var newNode = { id: 'char_' + (characterData.nextId || 100), parentId: node.id, type: 'folder', name: name.trim(), order: children.length, content: '分类说明' };
                         characterData.nextId = (characterData.nextId || 100) + 1;
                         characterData.nodes.push(newNode);
                         selectedId = newNode.id;
@@ -1156,11 +1352,42 @@ function deleteNode() {
         alert('已删除');
     }
 }
-document.getElementById('winAddRoot').onclick = function() {
-    var name = prompt('请输入分类名称：', '新分类');
-    if (name && name.trim()) {
+// ========== 独立窗口的角色和分类按钮（直接创建，无需输入） ==========
+document.getElementById('winAddCharacterBtn').onclick = function() {
+    if (selectedId) {
+        var node = getCharacterNode(selectedId);
+        if (node) {
+            var children = getCharacterChildren(selectedId);
+            var newNumber = children.length + 1;
+            var defaultName = '角色' + newNumber;
+            var newNode = {
+                id: 'char_' + (characterData.nextId || 100),
+                parentId: selectedId,
+                type: 'character',
+                name: defaultName,
+                order: children.length,
+                content: '【姓名】' + defaultName + '\\n【性别】\\n【年龄】\\n【外貌】\\n【性格】\\n【背景】\\n【势力】\\n【等级】\\n【功法】\\n【其他】'
+            };
+            characterData.nextId = (characterData.nextId || 100) + 1;
+            characterData.nodes.push(newNode);
+            selectedId = newNode.id;
+            localStorage.setItem('character_expanded_' + selectedId, 'true');
+            saveCharacterData();
+            renderTree();
+            updateEditor();
+        }
+    } else {
         var roots = characterData.nodes.filter(function(n) { return n.parentId === null; });
-        var newNode = { id: 'node_' + (characterData.nextId || 100), parentId: null, type: 'folder', name: name.trim(), order: roots.length, content: '分类描述' };
+        var newNumber = roots.length + 1;
+        var defaultName = '📁 角色分类 ' + newNumber;
+        var newNode = {
+            id: 'char_' + (characterData.nextId || 100),
+            parentId: null,
+            type: 'folder',
+            name: defaultName,
+            order: roots.length,
+            content: '角色分类'
+        };
         characterData.nextId = (characterData.nextId || 100) + 1;
         characterData.nodes.push(newNode);
         selectedId = newNode.id;
@@ -1169,43 +1396,61 @@ document.getElementById('winAddRoot').onclick = function() {
         updateEditor();
     }
 };
-document.getElementById('winAddCharacterBtn').onclick = function() {
-    if (selectedId) {
-        var node = getCharacterNode(selectedId);
-        if (node) {
-            var name = prompt('请输入角色姓名：', '新角色');
-            if (name && name.trim()) {
-                var children = getCharacterChildren(selectedId);
-                var newNode = { id: 'node_' + (characterData.nextId || 100), parentId: selectedId, type: 'character', name: name.trim(), order: children.length, content: '【姓名】' + name.trim() + '\\n【性别】\\n【年龄】\\n【外貌】\\n【性格】\\n【背景】\\n【势力】\\n【等级】\\n【功法】\\n【其他】' };
-                characterData.nextId = (characterData.nextId || 100) + 1;
-                characterData.nodes.push(newNode);
-                selectedId = newNode.id;
-                localStorage.setItem('character_expanded_' + selectedId, 'true');
-                saveCharacterData();
-                renderTree();
-                updateEditor();
-            }
-        }
-    } else { alert('请先选择一个节点'); }
-};
 document.getElementById('winAddFolderBtn').onclick = function() {
     if (selectedId) {
         var node = getCharacterNode(selectedId);
         if (node) {
-            var name = prompt('请输入新分类名称：', '新分类');
-            if (name && name.trim()) {
-                var children = getCharacterChildren(selectedId);
-                var newNode = { id: 'node_' + (characterData.nextId || 100), parentId: selectedId, type: 'folder', name: name.trim(), order: children.length, content: '分类说明' };
-                characterData.nextId = (characterData.nextId || 100) + 1;
-                characterData.nodes.push(newNode);
-                selectedId = newNode.id;
-                localStorage.setItem('character_expanded_' + selectedId, 'true');
-                saveCharacterData();
-                renderTree();
-                updateEditor();
-            }
+            var children = getCharacterChildren(selectedId);
+            var newNumber = children.length + 1;
+            var defaultName = '📁 分类 ' + newNumber;
+            var newNode = {
+                id: 'char_' + (characterData.nextId || 100),
+                parentId: selectedId,
+                type: 'folder',
+                name: defaultName,
+                order: children.length,
+                content: '分类说明'
+            };
+            characterData.nextId = (characterData.nextId || 100) + 1;
+            characterData.nodes.push(newNode);
+            selectedId = newNode.id;
+            localStorage.setItem('character_expanded_' + selectedId, 'true');
+            saveCharacterData();
+            renderTree();
+            updateEditor();
         }
-    } else { alert('请先选择一个节点'); }
+    } else {
+        var roots = characterData.nodes.filter(function(n) { return n.parentId === null; });
+        var newNumber = roots.length + 1;
+        var defaultName = '📁 分类 ' + newNumber;
+        var newNode = {
+            id: 'char_' + (characterData.nextId || 100),
+            parentId: null,
+            type: 'folder',
+            name: defaultName,
+            order: roots.length,
+            content: '分类说明'
+        };
+        characterData.nextId = (characterData.nextId || 100) + 1;
+        characterData.nodes.push(newNode);
+        selectedId = newNode.id;
+        saveCharacterData();
+        renderTree();
+        updateEditor();
+    }
+};
+document.getElementById('winAddRoot').onclick = function() {
+    var name = prompt('请输入分类名称：', '新分类');
+    if (name && name.trim()) {
+        var roots = characterData.nodes.filter(function(n) { return n.parentId === null; });
+        var newNode = { id: 'char_' + (characterData.nextId || 100), parentId: null, type: 'folder', name: name.trim(), order: roots.length, content: '分类描述' };
+        characterData.nextId = (characterData.nextId || 100) + 1;
+        characterData.nodes.push(newNode);
+        selectedId = newNode.id;
+        saveCharacterData();
+        renderTree();
+        updateEditor();
+    }
 };
 document.getElementById('winRefresh').onclick = function() { renderTree(); updateEditor(); };
 document.getElementById('winSave').onclick = saveNode;
@@ -1431,4 +1676,166 @@ window.bindCharacterToolEntry = bindCharacterToolEntry;
 console.log('人物工具已加载');
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(bindCharacterToolEntry, 500);
+});
+
+// ========== 角色高亮功能 ==========
+
+function getAllCharacterNames() {
+    var names = [];
+    if (characterData && characterData.nodes) {
+        for (var i = 0; i < characterData.nodes.length; i++) {
+            var node = characterData.nodes[i];
+            if (node.type === 'character' && node.name) {
+                names.push(node.name.trim());
+            }
+        }
+    }
+    return names;
+}
+
+function highlightCharactersInEditor() {
+    var editor = document.getElementById('editor');
+    if (!editor) {
+        alert('请先打开一个章节');
+        return;
+    }
+    removeHighlightsInEditor('character');
+    var names = getAllCharacterNames();
+    if (names.length === 0) {
+        alert('暂无角色，请先创建角色');
+        return;
+    }
+    var textNodes = getTextNodes(editor);
+    var highlightCount = 0;
+    for (var i = 0; i < textNodes.length; i++) {
+        var node = textNodes[i];
+        var text = node.textContent;
+        var replaced = false;
+        for (var j = 0; j < names.length; j++) {
+            var name = names[j];
+            var regex = new RegExp('(' + escapeRegExp(name) + ')', 'g');
+            if (regex.test(text)) {
+                var newHtml = text.replace(regex, function(match) {
+                    highlightCount++;
+                    return '<span class="character-highlight" data-name="' + match + '" style="background:rgba(255,193,7,0.35); border-radius:3px; padding:0 2px; border-bottom:2px solid #ffc107; font-weight:500;">' + match + '</span>';
+                });
+                var tempDiv = document.createElement('div');
+                tempDiv.innerHTML = newHtml;
+                var parent = node.parentNode;
+                while (tempDiv.firstChild) {
+                    parent.insertBefore(tempDiv.firstChild, node);
+                }
+                parent.removeChild(node);
+                replaced = true;
+                break;
+            }
+        }
+    }
+    if (highlightCount > 0) {
+        showToast('✅ 已高亮 ' + highlightCount + ' 个角色名');
+        localStorage.setItem('character_highlight_enabled', 'true');
+    } else {
+        showToast('⚠️ 未在文中找到角色名');
+        var checkbox = document.getElementById('compactCharacterHighlight');
+        if (checkbox) {
+            checkbox.checked = false;
+            var span = checkbox.nextElementSibling;
+            if (span) {
+                span.style.background = '#ccc';
+                var dot = span.querySelector('span');
+                if (dot) {
+                    dot.style.transform = 'none';
+                }
+            }
+        }
+    }
+}
+
+function getTextNodes(element) {
+    var nodes = [];
+    var walker = document.createTreeWalker(
+        element,
+        NodeFilter.SHOW_TEXT,
+        {
+            acceptNode: function(node) {
+                if (node.parentNode && node.parentNode.classList && 
+                    (node.parentNode.classList.contains('character-highlight') || 
+                     node.parentNode.classList.contains('setting-highlight'))) {
+                    return NodeFilter.FILTER_REJECT;
+                }
+                var parent = node.parentNode;
+                if (parent.tagName === 'SCRIPT' || parent.tagName === 'STYLE') {
+                    return NodeFilter.FILTER_REJECT;
+                }
+                return NodeFilter.FILTER_ACCEPT;
+            }
+        },
+        false
+    );
+    var node;
+    while (node = walker.nextNode()) {
+        if (node.textContent.trim()) {
+            nodes.push(node);
+        }
+    }
+    return nodes;
+}
+
+function escapeRegExp(str) {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function removeHighlightsInEditor(type) {
+    var editor = document.getElementById('editor');
+    if (!editor) return;
+    var className = type === 'character' ? 'character-highlight' : 'setting-highlight';
+    var highlights = editor.querySelectorAll('.' + className);
+    for (var i = 0; i < highlights.length; i++) {
+        var el = highlights[i];
+        var textNode = document.createTextNode(el.textContent);
+        el.parentNode.replaceChild(textNode, el);
+    }
+    if (type === 'character') {
+        localStorage.removeItem('character_highlight_enabled');
+    } else {
+        localStorage.removeItem('setting_highlight_enabled');
+    }
+}
+
+function showToast(message) {
+    var existing = document.getElementById('highlightToast');
+    if (existing) existing.remove();
+    var toast = document.createElement('div');
+    toast.id = 'highlightToast';
+    toast.style.cssText = 'position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.8);color:white;padding:8px 20px;border-radius:20px;font-size:14px;z-index:99999;pointer-events:none;backdrop-filter:blur(10px);';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    setTimeout(function() {
+        toast.style.opacity = '0';
+        setTimeout(function() { if (toast.parentNode) toast.remove(); }, 300);
+    }, 2000);
+}
+
+function restoreCharacterHighlight() {
+    if (localStorage.getItem('character_highlight_enabled') === 'true') {
+        setTimeout(function() {
+            highlightCharactersInEditor();
+            var checkbox = document.getElementById('compactCharacterHighlight');
+            if (checkbox) {
+                checkbox.checked = true;
+                var span = checkbox.nextElementSibling;
+                if (span) {
+                    span.style.background = '#007aff';
+                    var dot = span.querySelector('span');
+                    if (dot) {
+                        dot.style.transform = 'translateX(14px)';
+                    }
+                }
+            }
+        }, 500);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    restoreCharacterHighlight();
 });

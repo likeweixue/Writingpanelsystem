@@ -1,6 +1,5 @@
 // ========== 大纲工具 - 完整版 ==========
 
-// 大纲数据（按书籍隔离）
 var outlineData = {
     nodes: [],
     selectedId: null,
@@ -11,7 +10,6 @@ var outlineData = {
 
 function getOutlineData() {
     var bookId = currentBookId || 'global';
-    console.log('getOutlineData 使用 bookId:', bookId);
     var key = 'openwrite_outline_' + bookId;
     var saved = localStorage.getItem(key);
     if (saved) {
@@ -20,15 +18,10 @@ function getOutlineData() {
             outlineData.nodes = data.nodes || [];
             outlineData.selectedId = data.selectedId || null;
             outlineData.nextId = data.nextId || 1;
-            console.log('📂 从 localStorage 加载了', outlineData.nodes.length, '个大纲节点');
             return;
-        } catch(e) {
-            console.error('解析大纲数据失败:', e);
-        }
+        } catch(e) {}
     }
-    console.log('📂 未找到大纲数据，使用默认数据');
     setDefaultOutlineData();
-    console.log('📂 默认数据已设置，节点数:', outlineData.nodes.length);
 }
 
 function setDefaultOutlineData() {
@@ -75,6 +68,19 @@ function getAllDescendants(parentId) {
         result = result.concat(getAllDescendants(child.id));
     });
     return result;
+}
+
+// 数字转中文
+function numberToChinese(num) {
+    var chineseNum = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
+    if (num <= 10) return chineseNum[num];
+    if (num < 20) return '十' + (num === 10 ? '' : chineseNum[num - 10]);
+    if (num < 100) {
+        var tens = Math.floor(num / 10);
+        var ones = num % 10;
+        return chineseNum[tens] + '十' + (ones === 0 ? '' : chineseNum[ones]);
+    }
+    return num.toString();
 }
 
 // ========== 全屏模式渲染 ==========
@@ -190,17 +196,12 @@ function toggleOutlineFolder(nodeId) {
 }
 
 function selectOutlineNode(id) {
-    console.log('selectOutlineNode 被调用:', id);
     outlineData.selectedId = id;
     saveOutlineData();
-    
-    // 更新全屏模式（仅当全屏模式的 DOM 存在时）
     if (document.getElementById('outlineTree')) {
         renderOutlineTree();
         updateOutlineEditor();
     }
-    
-    // 更新紧凑模式
     if (document.getElementById('compactOutlineTree')) {
         renderCompactOutlineTree();
         updateCompactEditor();
@@ -282,8 +283,6 @@ function addOutlineRoot() {
     updateCompactEditor();
 }
 
-// ========== 添加子节点（直接创建章节） ==========
-
 function addOutlineChild(parentId) {
     var parent = getOutlineNode(parentId);
     if (!parent) {
@@ -292,7 +291,6 @@ function addOutlineChild(parentId) {
     }
     var name = prompt('请输入新章节名称：', '新章节');
     if (!name || !name.trim()) return;
-    
     var children = getOutlineChildren(parentId);
     var newNode = {
         id: genOutlineId(),
@@ -385,12 +383,9 @@ function updateOutlineEditor() {
     var contentArea = document.getElementById('outlineEditorContent');
     var wordCount = document.getElementById('outlineWordCount');
     var statusEl = document.getElementById('outlineStatus');
-    
-    // 如果元素不存在，说明全屏模式未打开，直接返回
     if (!titleInput || !contentArea) {
         return;
     }
-    
     var node = getOutlineNode(outlineData.selectedId);
     if (node) {
         titleInput.value = node.name || '';
@@ -504,27 +499,25 @@ function renderOutlinePage() {
                 <div class="outline-sidebar-header" style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:rgba(0,0,0,0.03);border-bottom:1px solid var(--border-color, rgba(0,0,0,0.08));flex-shrink:0;">
                     <span style="font-weight:600;">📋 大纲目录</span>
                     <div style="display:flex;gap:6px;">
-    <button id="outlineAddRootBtn" title="新增根节点" style="background:none;border:none;cursor:pointer;font-size:16px;">
-        <img src="icons/folder.svg" width="16" height="16" alt="新增根节点">
-    </button>
-    <button id="outlineRefreshBtn" title="刷新" style="background:none;border:none;cursor:pointer;font-size:16px;">
-        <img src="icons/refresh.svg" width="16" height="16" alt="刷新">
-    </button>
-    <button id="outlineCloseBtn" title="关闭" style="background:none;border:none;cursor:pointer;font-size:16px;">
-        <img src="icons/close.svg" width="16" height="16" alt="关闭">
-    </button>
-</div>
+                        <button id="outlineAddRootBtn" title="新增根节点" style="background:none;border:none;cursor:pointer;font-size:16px;">
+                            <img src="icons/folder.svg" width="16" height="16" alt="新增根节点">
+                        </button>
+                        <button id="outlineRefreshBtn" title="刷新" style="background:none;border:none;cursor:pointer;font-size:16px;">
+                            <img src="icons/refresh.svg" width="16" height="16" alt="刷新">
+                        </button>
+                        <button id="outlineCloseBtn" title="关闭" style="background:none;border:none;cursor:pointer;font-size:16px;">
+                            <img src="icons/close.svg" width="16" height="16" alt="关闭">
+                        </button>
+                    </div>
                 </div>
-                <!-- 搜索框 -->
                 <div style="padding:8px 12px;flex-shrink:0;">
                     <input type="text" id="outlineSearchInput" placeholder="搜索大纲..." style="width:100%;padding:6px 10px 6px 32px;border:1px solid var(--border-color, #ddd);border-radius:6px;font-size:12px;background:var(--input-bg, #f8f8f8) url('icons/search.svg') no-repeat 8px center;background-size:16px 16px;color:var(--text-color, #333);">
                 </div>
-                <!-- 添加按钮 - 一左一右 -->
                 <div style="display:flex;gap:6px;padding:0 12px 8px 12px;flex-shrink:0;">
                     <button id="outlineAddChapterBtn" title="新增章节" style="flex:1;background:#28a745;color:white;border:none;border-radius:4px;cursor:pointer;font-size:12px;padding:5px 0;font-weight:500;">+ 章节</button>
-                     <button id="outlineAddFolderBtn" title="新增文件夹" style="flex:1;background:#9b784e;color:white;border:none;border-radius:4px;cursor:pointer;font-size:12px;padding:5px 0;font-weight:500;">
-        <img src="icons/folder.svg" width="14" height="14" alt="分卷" style="vertical-align:middle; margin-right:4px;"> 分卷
-    </button>
+                    <button id="outlineAddFolderBtn" title="新增文件夹" style="flex:1;background:#9b784e;color:white;border:none;border-radius:4px;cursor:pointer;font-size:12px;padding:5px 0;font-weight:500;">
+                        <img src="icons/folder.svg" width="14" height="14" alt="分卷" style="vertical-align:middle; margin-right:4px;"> 分卷
+                    </button>
                 </div>
                 <div id="outlineTree" class="outline-tree-container" style="flex:1;overflow-y:auto;padding:8px 4px;"></div>
                 <div style="padding:8px 12px;border-top:1px solid var(--border-color, rgba(0,0,0,0.08));font-size:11px;color:#888;display:flex;justify-content:space-between;flex-shrink:0;">
@@ -537,15 +530,15 @@ function renderOutlinePage() {
                 <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 20px;border-bottom:1px solid var(--border-color, rgba(0,0,0,0.08));flex-shrink:0;">
                     <input type="text" id="outlineEditorTitle" placeholder="大纲标题" style="font-size:18px;font-weight:600;border:none;background:transparent;outline:none;flex:1;color:var(--text-color, #333);">
                     <div style="display:flex;gap:8px;">
-    <button id="outlinePinBtn" title="收起为侧边栏" style="padding:6px 12px;background:#6c757d;color:white;border:none;border-radius:6px;cursor:pointer;font-size:13px;">
-        <img src="icons/label.svg" width="14" height="14" alt="缩起" style="vertical-align:middle; margin-right:4px;"> 缩起
-    </button>
-    <button id="outlineSaveBtn" style="padding:6px 16px;background:#9b784e;color:white;border:none;border-radius:6px;cursor:pointer;">
-        <img src="icons/toolbar.svg" width="14" height="14" alt="保存" style="vertical-align:middle; margin-right:4px;"> 保存
-    </button>
-    <button id="outlineDeleteBtn" style="padding:6px 16px;background:#dc3545;color:white;border:none;border-radius:6px;cursor:pointer;">
-        <img src="icons/trash.svg" width="14" height="14" alt="删除" style="vertical-align:middle; margin-right:4px;"> 删除
-    </button>
+                        <button id="outlinePinBtn" title="收起为侧边栏" style="padding:6px 12px;background:#6c757d;color:white;border:none;border-radius:6px;cursor:pointer;font-size:13px;">
+                            <img src="icons/label.svg" width="14" height="14" alt="缩起" style="vertical-align:middle; margin-right:4px;"> 缩起
+                        </button>
+                        <button id="outlineSaveBtn" style="padding:6px 16px;background:#9b784e;color:white;border:none;border-radius:6px;cursor:pointer;">
+                            <img src="icons/toolbar.svg" width="14" height="14" alt="保存" style="vertical-align:middle; margin-right:4px;"> 保存
+                        </button>
+                        <button id="outlineDeleteBtn" style="padding:6px 16px;background:#dc3545;color:white;border:none;border-radius:6px;cursor:pointer;">
+                            <img src="icons/trash.svg" width="14" height="14" alt="删除" style="vertical-align:middle; margin-right:4px;"> 删除
+                        </button>
                     </div>
                 </div>
                 <textarea id="outlineEditorContent" style="flex:1;padding:20px;border:none;outline:none;resize:none;font-size:14px;line-height:1.8;background:transparent;color:var(--text-color, #333);font-family:inherit;" placeholder="在此撰写大纲内容..."></textarea>
@@ -567,24 +560,101 @@ function initOutlineEvents() {
     if (deleteBtn) deleteBtn.onclick = deleteOutlineNode;
     var addRootBtn = document.getElementById('outlineAddRootBtn');
     if (addRootBtn) addRootBtn.onclick = addOutlineRoot;
+    
     var addChildBtn = document.getElementById('outlineAddChildBtn');
     if (addChildBtn) {
         addChildBtn.onclick = function() {
             if (outlineData.selectedId) {
-                addOutlineChild(outlineData.selectedId);
+                var parent = getOutlineNode(outlineData.selectedId);
+                if (parent) {
+                    var children = getOutlineChildren(outlineData.selectedId);
+                    var newNumber = children.length + 1;
+                    var defaultName = '第' + numberToChinese(newNumber) + '章';
+                    var newNode = {
+                        id: genOutlineId(),
+                        parentId: outlineData.selectedId,
+                        type: 'chapter',
+                        name: defaultName,
+                        order: children.length,
+                        content: '✍️ 在此撰写章节细纲...'
+                    };
+                    outlineData.nodes.push(newNode);
+                    outlineData.selectedId = newNode.id;
+                    localStorage.setItem('outline_expanded_' + outlineData.selectedId, 'true');
+                    saveOutlineData();
+                    renderOutlineTree();
+                    updateOutlineEditor();
+                    renderCompactOutlineTree();
+                    updateCompactEditor();
+                }
             } else {
-                alert('请先选择一个节点');
+                var roots = outlineData.nodes.filter(function(n) { return n.parentId === null; });
+                var newNumber = roots.length + 1;
+                var defaultName = '📌 总纲 ' + newNumber;
+                var newNode = {
+                    id: genOutlineId(),
+                    parentId: null,
+                    type: 'folder',
+                    name: defaultName,
+                    order: roots.length,
+                    content: '在此撰写总纲内容...'
+                };
+                outlineData.nodes.push(newNode);
+                outlineData.selectedId = newNode.id;
+                saveOutlineData();
+                renderOutlineTree();
+                updateOutlineEditor();
+                renderCompactOutlineTree();
+                updateCompactEditor();
             }
         };
     }
-    // ========== 新增：标签页的章节和分卷按钮 ==========
+    
     var outlineAddChapterBtn = document.getElementById('outlineAddChapterBtn');
     if (outlineAddChapterBtn) {
         outlineAddChapterBtn.onclick = function() {
             if (outlineData.selectedId) {
-                addOutlineChild(outlineData.selectedId);
+                var parent = getOutlineNode(outlineData.selectedId);
+                if (parent) {
+                    var children = getOutlineChildren(outlineData.selectedId);
+                    var newNumber = children.length + 1;
+                    var defaultName = '第' + numberToChinese(newNumber) + '章';
+                    var newNode = {
+                        id: genOutlineId(),
+                        parentId: outlineData.selectedId,
+                        type: 'chapter',
+                        name: defaultName,
+                        order: children.length,
+                        content: '✍️ 在此撰写章节细纲...'
+                    };
+                    outlineData.nodes.push(newNode);
+                    outlineData.selectedId = newNode.id;
+                    localStorage.setItem('outline_expanded_' + outlineData.selectedId, 'true');
+                    saveOutlineData();
+                    renderOutlineTree();
+                    updateOutlineEditor();
+                    renderCompactOutlineTree();
+                    updateCompactEditor();
+                }
             } else {
-                alert('请先选择一个节点');
+                var roots = outlineData.nodes.filter(function(n) { return n.parentId === null; });
+                var newNumber = roots.length + 1;
+                var defaultName = '📌 总纲 ' + newNumber;
+                var newNode = {
+                    id: genOutlineId(),
+                    parentId: null,
+                    type: 'folder',
+                    name: defaultName,
+                    order: roots.length,
+                    content: '在此撰写总纲内容...'
+                };
+                outlineData.nodes.push(newNode);
+                outlineData.selectedId = newNode.id;
+                saveOutlineData();
+                renderOutlineTree();
+                updateOutlineEditor();
+                renderCompactOutlineTree();
+                updateCompactEditor();
             }
         };
     }
@@ -595,34 +665,49 @@ function initOutlineEvents() {
             if (outlineData.selectedId) {
                 var parent = getOutlineNode(outlineData.selectedId);
                 if (parent) {
-                    var name = prompt('请输入新文件夹名称：', '新分卷');
-                    if (name && name.trim()) {
-                        var children = getOutlineChildren(outlineData.selectedId);
-                        var newNode = {
-                            id: genOutlineId(),
-                            parentId: outlineData.selectedId,
-                            type: 'folder',
-                            name: name.trim(),
-                            order: children.length,
-                            content: '📁 文件夹内容'
-                        };
-                        outlineData.nodes.push(newNode);
-                        outlineData.selectedId = newNode.id;
-                        localStorage.setItem('outline_expanded_' + outlineData.selectedId, 'true');
-                        saveOutlineData();
-                        renderOutlineTree();
-                        updateOutlineEditor();
-                        renderCompactOutlineTree();
-                        updateCompactEditor();
-                    }
+                    var children = getOutlineChildren(outlineData.selectedId);
+                    var newNumber = children.length + 1;
+                    var defaultName = '📁 分卷 ' + newNumber;
+                    var newNode = {
+                        id: genOutlineId(),
+                        parentId: outlineData.selectedId,
+                        type: 'folder',
+                        name: defaultName,
+                        order: children.length,
+                        content: '📁 文件夹内容'
+                    };
+                    outlineData.nodes.push(newNode);
+                    outlineData.selectedId = newNode.id;
+                    localStorage.setItem('outline_expanded_' + outlineData.selectedId, 'true');
+                    saveOutlineData();
+                    renderOutlineTree();
+                    updateOutlineEditor();
+                    renderCompactOutlineTree();
+                    updateCompactEditor();
                 }
             } else {
-                addOutlineRoot();
+                var roots = outlineData.nodes.filter(function(n) { return n.parentId === null; });
+                var newNumber = roots.length + 1;
+                var defaultName = '📁 总纲 ' + newNumber;
+                var newNode = {
+                    id: genOutlineId(),
+                    parentId: null,
+                    type: 'folder',
+                    name: defaultName,
+                    order: roots.length,
+                    content: '📁 文件夹内容'
+                };
+                outlineData.nodes.push(newNode);
+                outlineData.selectedId = newNode.id;
+                saveOutlineData();
                 renderOutlineTree();
                 updateOutlineEditor();
+                renderCompactOutlineTree();
+                updateCompactEditor();
             }
         };
     }
+    
     var refreshBtn = document.getElementById('outlineRefreshBtn');
     if (refreshBtn) {
         refreshBtn.onclick = function() {
@@ -638,7 +723,6 @@ function initOutlineEvents() {
     var pinBtn = document.getElementById('outlinePinBtn');
     if (pinBtn) {
         pinBtn.onclick = function() {
-            console.log('📌 缩起按钮被点击！');
             closeOutlinePanel();
             setTimeout(function() {
                 openToolSidebar('outline');
@@ -718,20 +802,11 @@ function updateNodeCount() {
 
 // ========== 通用侧边栏打开函数 ==========
 
-// ========== 通用侧边栏打开函数 ==========
-
 function openToolSidebar(tool) {
-    console.log('openToolSidebar 被调用，工具:', tool);
-    
     var sidebar = document.querySelector('.sidebar-menu');
     if (sidebar) { sidebar.style.display = 'none'; }
-    
-    // 如果面板已存在，先移除
     var existingPanel = document.getElementById('floatingToolPanel');
-    if (existingPanel) {
-        existingPanel.remove();
-    }
-    
+    if (existingPanel) { existingPanel.remove(); }
     var rightSidebar = document.getElementById('rightSidebar');
     if (rightSidebar) {
         rightSidebar.classList.remove('collapsed');
@@ -740,39 +815,28 @@ function openToolSidebar(tool) {
         rightSidebar.style.minWidth = '48px';
         localStorage.setItem('rightSidebar_collapsed', 'false');
     }
-    
     var detailMain = document.querySelector('.detail-main');
     if (!detailMain) {
-        console.warn('detailMain 不存在');
         return;
     }
-    
-    // 1. 创建 panel（只创建一次！）
     var panel = document.createElement('div');
     panel.id = 'floatingToolPanel';
     panel.setAttribute('data-tool', tool);
     panel.style.cssText = 'width:420px;min-width:350px;max-width:550px;height:100%;background:var(--panel-bg, rgba(255,255,255,0.98));backdrop-filter:blur(12px);border-left:1px solid var(--border-color, rgba(0,0,0,0.08));border-right:1px solid var(--border-color, rgba(0,0,0,0.08));display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;z-index:10;transition:width 0.2s ease;box-shadow:-2px 0 12px rgba(0,0,0,0.08);';
-    
-    // 2. 先把 panel 添加到 DOM
     var editor = document.querySelector('.detail-editor');
     if (editor && editor.nextSibling) {
         detailMain.insertBefore(panel, editor.nextSibling);
     } else {
         detailMain.appendChild(panel);
     }
-    
-    // 3. 根据工具类型渲染内容
     switch(tool) {
         case 'outline':
-            console.log('📋 大纲面板开始加载...');
-            console.log('📋 当前 bookId:', currentBookId);
             panel.innerHTML = renderCompactOutlinePanel();
             getOutlineData();
             renderCompactOutlineTree();
             updateCompactEditor();
             bindCompactOutlineEvents();
             break;
-            
         case 'timeline':
             panel.innerHTML = renderCompactTimelinePanel();
             getTimelineData();
@@ -780,7 +844,6 @@ function openToolSidebar(tool) {
             updateCompactTimelineEditor();
             bindCompactTimelineEvents();
             break;
-            
         case 'characters':
             panel.innerHTML = renderCompactCharacterPanel();
             getCharacterData();
@@ -788,7 +851,6 @@ function openToolSidebar(tool) {
             updateCompactCharacterEditor();
             bindCompactCharacterEvents();
             break;
-            
         case 'setting':
             panel.innerHTML = renderCompactSettingPanel();
             getSettingData();
@@ -796,7 +858,6 @@ function openToolSidebar(tool) {
             updateCompactSettingEditor();
             bindCompactSettingEvents();
             break;
-            
         case 'relation':
             panel.innerHTML = renderCompactRelationPanel();
             getRelationData();
@@ -807,7 +868,6 @@ function openToolSidebar(tool) {
             }, 200);
             bindCompactRelationEvents();
             break;
-            
         case 'whiteboard':
             try {
                 panel.innerHTML = renderCompactWhiteboardPanel();
@@ -816,11 +876,9 @@ function openToolSidebar(tool) {
                 renderCompactWhiteboardLines();
                 bindCompactWhiteboardEvents();
             } catch(e) {
-                console.error('白板渲染失败:', e);
                 panel.innerHTML = '<div style="padding:20px;text-align:center;color:#888;">白板加载失败，请刷新后重试</div>';
             }
             break;
-            
         case 'namegen':
             try {
                 panel.innerHTML = renderCompactNameGenPanel();
@@ -828,11 +886,9 @@ function openToolSidebar(tool) {
                 renderCompactNameGenFavorites();
                 bindCompactNameGenEvents();
             } catch(e) {
-                console.error('起名生成器渲染失败:', e);
                 panel.innerHTML = '<div style="padding:20px;text-align:center;color:#888;">起名生成器加载失败，请刷新后重试</div>';
             }
             break;
-            
         case 'notes':
             panel.innerHTML = renderCompactNotePanel();
             getNoteData();
@@ -840,62 +896,23 @@ function openToolSidebar(tool) {
             updateCompactNoteEditor();
             bindCompactNoteEvents();
             break;
-            
         case 'dictionary':
-    console.log('📚 词典面板开始加载...');
-    console.log('📚 当前 bookId:', currentBookId);
-    
-    // 渲染面板 HTML
-    try {
-        if (typeof renderCompactDictionaryPanel === 'function') {
-            panel.innerHTML = renderCompactDictionaryPanel();
-            console.log('📚 词典面板 HTML 已设置');
-        } else {
-            console.error('❌ renderCompactDictionaryPanel 不是函数');
-            panel.innerHTML = '<div style="padding:20px;text-align:center;color:#888;">词典加载失败：renderCompactDictionaryPanel 未定义</div>';
+            try {
+                panel.innerHTML = renderCompactDictionaryPanel();
+                getDictionaryData();
+                setTimeout(function() {
+                    renderCompactDictionaryTree();
+                    updateCompactDictionaryEditor();
+                    bindCompactDictionaryEvents();
+                    renderCompactDictionaryStats();
+                }, 50);
+            } catch(e) {
+                panel.innerHTML = '<div style="padding:20px;text-align:center;color:#888;">词典加载失败，请刷新后重试</div>';
+            }
             break;
-        }
-        
-        // 加载数据
-        if (typeof getDictionaryData === 'function') {
-            getDictionaryData();
-            console.log('📚 词典数据已加载，词条数:', dictionaryData.entries.length);
-        } else {
-            console.error('❌ getDictionaryData 不是函数');
-        }
-        
-        // 渲染树 - 延迟执行以确保 DOM 已更新
-        setTimeout(function() {
-            if (typeof renderCompactDictionaryTree === 'function') {
-                renderCompactDictionaryTree();
-                console.log('📚 词典树已渲染');
-            } else {
-                console.error('❌ renderCompactDictionaryTree 不是函数');
-            }
-            
-            if (typeof updateCompactDictionaryEditor === 'function') {
-                updateCompactDictionaryEditor();
-                console.log('📚 词典编辑器已更新');
-            }
-            
-            if (typeof bindCompactDictionaryEvents === 'function') {
-                bindCompactDictionaryEvents();
-                console.log('📚 词典事件已绑定');
-            }
-        }, 50);
-        
-    } catch(e) {
-        console.error('❌ 词典面板渲染失败:', e);
-        panel.innerHTML = '<div style="padding:20px;text-align:center;color:#888;">词典加载失败：' + e.message + '</div>';
-    }
-    break;
-            
         default:
-            console.warn('未知工具类型:', tool);
             panel.innerHTML = '<div style="padding:20px;text-align:center;color:#888;">工具加载中...</div>';
     }
-    
-    // 4. 高亮当前工具
     setTimeout(function() {
         var toolItems = document.querySelectorAll('.sidebar-tool-item');
         toolItems.forEach(function(item) {
@@ -934,16 +951,13 @@ function renderCompactOutlinePanel() {
             </div>
             <div style="display:flex;flex:1;overflow:hidden;">
                 <div style="width:38%;min-width:120px;max-width:180px;border-right:1px solid var(--border-color, rgba(0,0,0,0.08));display:flex;flex-direction:column;overflow:hidden;">
-                    <!-- 搜索框 -->
                     <div style="padding:4px 8px;flex-shrink:0;">
                         <input type="text" id="outlineSearchInput" placeholder="搜索..." style="width:100%;padding:6px 10px 6px 32px;border:1px solid var(--border-color, #ddd);border-radius:6px;font-size:12px;background:var(--input-bg, #f8f8f8) url('icons/search.svg') no-repeat 8px center;background-size:16px 16px;color:var(--text-color, #333);">
                     </div>
-                    <!-- 添加按钮 - 一左一右 -->
                     <div style="display:flex;gap:6px;padding:4px 8px 6px 8px;flex-shrink:0;">
                         <button id="compactOutlineAddBtn" title="新增章节" style="flex:1;background:#28a745;color:white;border:none;border-radius:4px;cursor:pointer;font-size:12px;padding:4px 0;font-weight:500;">➕ 章节</button>
                         <button id="compactOutlineAddFolderBtn" title="新增文件夹" style="flex:1;background:#9b784e;color:white;border:none;border-radius:4px;cursor:pointer;font-size:12px;padding:4px 0;font-weight:500;">📁 分卷</button>
                     </div>
-                    <!-- 大纲树 -->
                     <div id="compactOutlineTree" style="flex:1;overflow-y:auto;padding:4px 4px;"></div>
                     <div style="padding:3px 10px;border-top:1px solid var(--border-color, rgba(0,0,0,0.08));font-size:10px;color:#888;flex-shrink:0;display:flex;justify-content:space-between;">
                         <span>节点: <span id="compactNodeCount">0</span></span>
@@ -966,38 +980,20 @@ function renderCompactOutlinePanel() {
     `;
 }
 
-// ========== 紧凑模式渲染 ==========
-
 function renderCompactOutlineTree() {
     var container = document.getElementById('compactOutlineTree');
-    if (!container) {
-        console.warn('⚠️ compactOutlineTree 元素不存在');
-        return;
-    }
-    
-    console.log('🔄 开始渲染大纲树，节点数:', outlineData.nodes.length);
+    if (!container) return;
     container.innerHTML = '';
-    
-    var roots = outlineData.nodes.filter(function(n) { 
-        return n.parentId === null; 
-    }).sort(function(a, b) { 
-        return (a.order || 0) - (b.order || 0); 
-    });
-    
+    var roots = outlineData.nodes.filter(function(n) { return n.parentId === null; }).sort(function(a, b) { return (a.order || 0) - (b.order || 0); });
     if (roots.length === 0) {
-        console.log('⚠️ 没有根节点');
         container.innerHTML = '<div style="padding:12px;text-align:center;color:#888;font-size:12px;">暂无大纲节点</div>';
         return;
     }
-    
-    console.log('🌳 找到', roots.length, '个根节点');
     roots.forEach(function(root) {
         container.appendChild(createCompactOutlineNode(root, 0));
     });
-    
     var countEl = document.getElementById('compactNodeCount');
     if (countEl) countEl.textContent = outlineData.nodes.length;
-    console.log('✅ 大纲树渲染完成，共', outlineData.nodes.length, '个节点');
 }
 
 function createCompactOutlineNode(node, depth) {
@@ -1005,7 +1001,6 @@ function createCompactOutlineNode(node, depth) {
     div.className = 'compact-outline-node';
     div.setAttribute('data-id', node.id);
     div.style.marginBottom = '1px';
-    
     var header = document.createElement('div');
     header.className = 'compact-outline-header';
     header.style.cssText = 'display:flex;align-items:center;gap:4px;padding:3px 6px;border-radius:4px;cursor:pointer;transition:background 0.15s;padding-left:' + (depth * 12 + 4) + 'px;font-size:12px;';
@@ -1014,7 +1009,6 @@ function createCompactOutlineNode(node, depth) {
         header.style.fontWeight = '500';
     }
     header.setAttribute('data-id', node.id);
-    
     var hasChildren = getOutlineChildren(node.id).length > 0;
     var toggle = document.createElement('span');
     toggle.style.cssText = 'font-size:8px;width:12px;text-align:center;cursor:pointer;color:#888;flex-shrink:0;';
@@ -1034,38 +1028,27 @@ function createCompactOutlineNode(node, depth) {
         toggle.style.color = '#ccc';
     }
     header.appendChild(toggle);
-    
     var icon = document.createElement('span');
     icon.style.fontSize = '12px';
     icon.style.flexShrink = '0';
     icon.textContent = node.type === 'folder' ? '📁' : '📄';
     header.appendChild(icon);
-    
     var nameSpan = document.createElement('span');
     nameSpan.style.cssText = 'flex:1;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-color, #333);';
     nameSpan.textContent = node.name || '未命名';
     header.appendChild(nameSpan);
-    
-    // ========== 点击选择 ==========
     header.onclick = function(e) {
-    if (e.target === toggle) return;
-    console.log('紧凑模式选中:', node.name);
-    outlineData.selectedId = node.id;
-    saveOutlineData();
-    
-    // 只更新紧凑模式（浮动面板）
-    renderCompactOutlineTree();
-    updateCompactEditor();
-    
-    // 如果全屏模式存在，也更新它
-    if (document.getElementById('outlineTree')) {
-        renderOutlineTree();
-        updateOutlineEditor();
-    }
-};
-    
+        if (e.target === toggle) return;
+        outlineData.selectedId = node.id;
+        saveOutlineData();
+        renderCompactOutlineTree();
+        updateCompactEditor();
+        if (document.getElementById('outlineTree')) {
+            renderOutlineTree();
+            updateOutlineEditor();
+        }
+    };
     div.appendChild(header);
-    
     var children = getOutlineChildren(node.id);
     if (children.length > 0) {
         var childrenDiv = document.createElement('div');
@@ -1077,15 +1060,7 @@ function createCompactOutlineNode(node, depth) {
         });
         div.appendChild(childrenDiv);
     }
-    
     return div;
-}
-
-function toggleCompactOutlineFolder(nodeId) {
-    var current = localStorage.getItem('outline_expanded_' + nodeId);
-    var newState = current === 'false' ? 'true' : 'false';
-    localStorage.setItem('outline_expanded_' + nodeId, newState);
-    renderCompactOutlineTree();
 }
 
 function updateCompactEditor() {
@@ -1107,55 +1082,105 @@ function updateCompactEditor() {
     }
 }
 
-// ========== 紧凑模式事件绑定 ==========
-
 function bindCompactOutlineEvents() {
     var addBtn = document.getElementById('compactOutlineAddBtn');
     if (addBtn) {
         addBtn.onclick = function() {
             if (outlineData.selectedId) {
-                addOutlineChild(outlineData.selectedId);
+                var parent = getOutlineNode(outlineData.selectedId);
+                if (parent) {
+                    var children = getOutlineChildren(outlineData.selectedId);
+                    var newNumber = children.length + 1;
+                    var defaultName = '第' + numberToChinese(newNumber) + '章';
+                    var newNode = {
+                        id: genOutlineId(),
+                        parentId: outlineData.selectedId,
+                        type: 'chapter',
+                        name: defaultName,
+                        order: children.length,
+                        content: '✍️ 在此撰写章节细纲...'
+                    };
+                    outlineData.nodes.push(newNode);
+                    outlineData.selectedId = newNode.id;
+                    localStorage.setItem('outline_expanded_' + outlineData.selectedId, 'true');
+                    saveOutlineData();
+                    renderOutlineTree();
+                    updateOutlineEditor();
+                    renderCompactOutlineTree();
+                    updateCompactEditor();
+                }
             } else {
-                addOutlineRoot();
+                var roots = outlineData.nodes.filter(function(n) { return n.parentId === null; });
+                var newNumber = roots.length + 1;
+                var defaultName = '📌 总纲 ' + newNumber;
+                var newNode = {
+                    id: genOutlineId(),
+                    parentId: null,
+                    type: 'folder',
+                    name: defaultName,
+                    order: roots.length,
+                    content: '在此撰写总纲内容...'
+                };
+                outlineData.nodes.push(newNode);
+                outlineData.selectedId = newNode.id;
+                saveOutlineData();
+                renderOutlineTree();
+                updateOutlineEditor();
+                renderCompactOutlineTree();
+                updateCompactEditor();
             }
-            renderCompactOutlineTree();
-            updateCompactEditor();
         };
     }
+    
     var addFolderBtn = document.getElementById('compactOutlineAddFolderBtn');
     if (addFolderBtn) {
         addFolderBtn.onclick = function() {
             if (outlineData.selectedId) {
                 var parent = getOutlineNode(outlineData.selectedId);
                 if (parent) {
-                    var name = prompt('请输入新文件夹名称：', '新文件夹');
-                    if (name && name.trim()) {
-                        var children = getOutlineChildren(outlineData.selectedId);
-                        var newNode = {
-                            id: genOutlineId(),
-                            parentId: outlineData.selectedId,
-                            type: 'folder',
-                            name: name.trim(),
-                            order: children.length,
-                            content: '📁 文件夹内容'
-                        };
-                        outlineData.nodes.push(newNode);
-                        outlineData.selectedId = newNode.id;
-                        localStorage.setItem('outline_expanded_' + outlineData.selectedId, 'true');
-                        saveOutlineData();
-                        renderOutlineTree();
-                        updateOutlineEditor();
-                        renderCompactOutlineTree();
-                        updateCompactEditor();
-                    }
+                    var children = getOutlineChildren(outlineData.selectedId);
+                    var newNumber = children.length + 1;
+                    var defaultName = '📁 分卷 ' + newNumber;
+                    var newNode = {
+                        id: genOutlineId(),
+                        parentId: outlineData.selectedId,
+                        type: 'folder',
+                        name: defaultName,
+                        order: children.length,
+                        content: '📁 文件夹内容'
+                    };
+                    outlineData.nodes.push(newNode);
+                    outlineData.selectedId = newNode.id;
+                    localStorage.setItem('outline_expanded_' + outlineData.selectedId, 'true');
+                    saveOutlineData();
+                    renderOutlineTree();
+                    updateOutlineEditor();
+                    renderCompactOutlineTree();
+                    updateCompactEditor();
                 }
             } else {
-                addOutlineRoot();
+                var roots = outlineData.nodes.filter(function(n) { return n.parentId === null; });
+                var newNumber = roots.length + 1;
+                var defaultName = '📁 总纲 ' + newNumber;
+                var newNode = {
+                    id: genOutlineId(),
+                    parentId: null,
+                    type: 'folder',
+                    name: defaultName,
+                    order: roots.length,
+                    content: '📁 文件夹内容'
+                };
+                outlineData.nodes.push(newNode);
+                outlineData.selectedId = newNode.id;
+                saveOutlineData();
+                renderOutlineTree();
+                updateOutlineEditor();
                 renderCompactOutlineTree();
                 updateCompactEditor();
             }
         };
     }
+
     var expandBtn = document.getElementById('compactOutlineExpandBtn');
     if (expandBtn) {
         expandBtn.onclick = function() {
@@ -1332,7 +1357,6 @@ function showCompactContextMenu(x, y, nodeId) {
 function openOutlineInNewWindow() {
     closeFloatingPanel();
     
-    // ========== 获取主题和自定义背景 ==========
     var currentTheme = localStorage.getItem('app_theme') || 'default';
     var customBgImage = localStorage.getItem('custom_bg_image') || '';
     var customBgOpacity = parseInt(localStorage.getItem('custom_bg_opacity') || '30');
@@ -1349,7 +1373,6 @@ function openOutlineInNewWindow() {
     var isOpen = currentTheme === 'open';
     var hasCustomBg = customBgImage && customBgImage.length > 0;
     
-    // 构建背景样式
     var bgStyle = '';
     if (hasCustomBg) {
         bgStyle = 'background-image: url(' + JSON.stringify(customBgImage) + '); background-size: cover; background-position: center; background-attachment: fixed; opacity: ' + (customBgOpacity/100) + ';';
@@ -1370,7 +1393,6 @@ function openOutlineInNewWindow() {
             color:${c.text};
             position:relative;
         }
-        /* 如果使用自定义背景，加一个半透明遮罩让文字清晰 */
         ${hasCustomBg ? `
         body::before {
             content: '';
@@ -1397,7 +1419,6 @@ function openOutlineInNewWindow() {
             display:flex; flex-direction:column; flex-shrink:0; overflow:hidden; 
             ${isOpen ? 'border-radius:20px;border:1px solid rgba(255,255,255,0.15);margin:0;' : ''}
         }
-        /* 暗色主题且有自定义背景时，面板更透明 */
         ${hasCustomBg && isDark ? `
         .outline-sidebar { background:rgba(0,0,0,0.6); }
         .outline-editor { background:rgba(0,0,0,0.5); }
@@ -1548,6 +1569,18 @@ function getOutlineChildren(parentId) {
 }
 function getOutlineNode(id) {
     return outlineData.nodes.find(function(n) { return n.id === id; });
+}
+// ===== 数字转中文（独立窗口需要） =====
+function numberToChinese(num) {
+    var chineseNum = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
+    if (num <= 10) return chineseNum[num];
+    if (num < 20) return '十' + (num === 10 ? '' : chineseNum[num - 10]);
+    if (num < 100) {
+        var tens = Math.floor(num / 10);
+        var ones = num % 10;
+        return chineseNum[tens] + '十' + (ones === 0 ? '' : chineseNum[ones]);
+    }
+    return num.toString();
 }
 function saveOutlineData() {
     var key = 'openwrite_outline_' + (currentBookId || 'global');
@@ -1734,44 +1767,96 @@ function deleteNode() {
         alert('已删除');
     }
 }
-// ========== 独立窗口的章节和分卷按钮 ==========
+
+// ========== 独立窗口的章节和分卷按钮（直接创建，无需输入） ==========
 document.getElementById('winAddChapterBtn').onclick = function() {
     if (selectedId) {
         var node = getOutlineNode(selectedId);
         if (node) {
-            var name = prompt('请输入新章节名称：', '新章节');
-            if (name && name.trim()) {
-                var children = getOutlineChildren(selectedId);
-                var newNode = { id: 'node_' + (outlineData.nextId || 100), parentId: selectedId, type: 'chapter', name: name.trim(), order: children.length, content: '✍️ 在此撰写章节细纲...' };
-                outlineData.nextId = (outlineData.nextId || 100) + 1;
-                outlineData.nodes.push(newNode);
-                selectedId = newNode.id;
-                localStorage.setItem('outline_expanded_' + selectedId, 'true');
-                saveOutlineData();
-                renderTree();
-                updateEditor();
-            }
+            var children = getOutlineChildren(selectedId);
+            var newNumber = children.length + 1;
+            var defaultName = '第' + numberToChinese(newNumber) + '章';
+            
+            var newNode = {
+                id: 'node_' + (outlineData.nextId || 100),
+                parentId: selectedId,
+                type: 'chapter',
+                name: defaultName,
+                order: children.length,
+                content: '✍️ 在此撰写章节细纲...'
+            };
+            outlineData.nextId = (outlineData.nextId || 100) + 1;
+            outlineData.nodes.push(newNode);
+            selectedId = newNode.id;
+            localStorage.setItem('outline_expanded_' + selectedId, 'true');
+            saveOutlineData();
+            renderTree();
+            updateEditor();
         }
-    } else { alert('请先选择一个节点'); }
+    } else {
+        var roots = outlineData.nodes.filter(function(n) { return n.parentId === null; });
+        var newNumber = roots.length + 1;
+        var defaultName = '📌 总纲 ' + newNumber;
+        var newNode = {
+            id: 'node_' + (outlineData.nextId || 100),
+            parentId: null,
+            type: 'folder',
+            name: defaultName,
+            order: roots.length,
+            content: '在此撰写总纲内容...'
+        };
+        outlineData.nextId = (outlineData.nextId || 100) + 1;
+        outlineData.nodes.push(newNode);
+        selectedId = newNode.id;
+        saveOutlineData();
+        renderTree();
+        updateEditor();
+    }
 };
+
 document.getElementById('winAddFolderBtn').onclick = function() {
     if (selectedId) {
         var node = getOutlineNode(selectedId);
         if (node) {
-            var name = prompt('请输入新分卷名称：', '新分卷');
-            if (name && name.trim()) {
-                var children = getOutlineChildren(selectedId);
-                var newNode = { id: 'node_' + (outlineData.nextId || 100), parentId: selectedId, type: 'folder', name: name.trim(), order: children.length, content: '📁 文件夹内容' };
-                outlineData.nextId = (outlineData.nextId || 100) + 1;
-                outlineData.nodes.push(newNode);
-                selectedId = newNode.id;
-                localStorage.setItem('outline_expanded_' + selectedId, 'true');
-                saveOutlineData();
-                renderTree();
-                updateEditor();
-            }
+            var children = getOutlineChildren(selectedId);
+            var newNumber = children.length + 1;
+            var defaultName = '📁 分卷 ' + newNumber;
+            
+            var newNode = {
+                id: 'node_' + (outlineData.nextId || 100),
+                parentId: selectedId,
+                type: 'folder',
+                name: defaultName,
+                order: children.length,
+                content: '📁 文件夹内容'
+            };
+            outlineData.nextId = (outlineData.nextId || 100) + 1;
+            outlineData.nodes.push(newNode);
+            selectedId = newNode.id;
+            localStorage.setItem('outline_expanded_' + selectedId, 'true');
+            saveOutlineData();
+            renderTree();
+            updateEditor();
         }
-    } else { alert('请先选择一个节点'); }
+    } else {
+        var roots = outlineData.nodes.filter(function(n) { return n.parentId === null; });
+        var newNumber = roots.length + 1;
+        var defaultName = '📁 总纲 ' + newNumber;
+        var newNode = {
+            id: 'node_' + (outlineData.nextId || 100),
+            parentId: null,
+            type: 'folder',
+            name: defaultName,
+            order: roots.length,
+            content: '📁 文件夹内容'
+        };
+        outlineData.nextId = (outlineData.nextId || 100) + 1;
+        outlineData.nodes.push(newNode);
+        selectedId = newNode.id;
+        saveOutlineData();
+        renderTree();
+        updateEditor();
+    }
 };
 
 document.getElementById('winAddRoot').onclick = function() {
@@ -1839,7 +1924,6 @@ console.log('大纲窗口已打开');
 </body>
 </html>`;
     
-    // 打开窗口
     var newWindow = window.open('', '_blank', 'width=1200,height=800,menubar=no,toolbar=no,location=no,status=no,scrollbars=no');
     if (newWindow) {
         newWindow.document.write(html);
@@ -1899,8 +1983,6 @@ console.log('大纲工具已加载');
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(bindOutlineToolEntry, 500);
 });
-// ========== 导出大纲侧边栏函数 ==========
-// 在 outline.js 末尾添加
 
 function openOutlineSidebar() {
     if (typeof openToolSidebar === 'function') {
@@ -1910,6 +1992,5 @@ function openOutlineSidebar() {
     }
 }
 
-// 确保导出到 window
 window.openOutlineSidebar = openOutlineSidebar;
 window.openOutlineInNewWindow = openOutlineInNewWindow;

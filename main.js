@@ -4,93 +4,7 @@ const fs = require('fs');
 const os = require('os');
 
 let mainWindow;
-
-// 创建启动画面
-function createSplashWindow() {
-    splashWindow = new BrowserWindow({
-        width: 500,
-        height: 350,
-        frame: false,          // 无边框
-        transparent: true,     // 透明背景
-        alwaysOnTop: true,     // 置顶
-        resizable: false,
-        center: true,
-        skipTaskbar: true,     // 不在任务栏显示
-        webPreferences: {
-            nodeIntegration: false,
-            contextIsolation: true
-        }
-    });
-    
-    // 加载启动画面 HTML
-    splashWindow.loadFile('splash.html');
-    
-    // 2秒后自动关闭（如果主窗口还没加载完）
-    setTimeout(() => {
-        if (splashWindow && !splashWindow.isDestroyed()) {
-            splashWindow.close();
-            splashWindow = null;
-        }
-    }, 3000);
-}
-
-function createWindow() {
-    // 先显示启动画面
-    createSplashWindow();
-    
-    setTimeout(() => {
-        mainWindow = new BrowserWindow({
-            width: 1400,
-            height: 900,
-            minWidth: 800,
-            minHeight: 600,
-            show: false,
-            webPreferences: {
-                nodeIntegration: false,
-                contextIsolation: true,
-                preload: path.join(__dirname, 'preload.js'),
-                webSecurity: false,
-                allowRunningInsecureContent: true,
-                // ========== 新增：允许弹出窗口 ==========
-                sandbox: false,
-                additionalArguments: ['--allow-popups']
-            },
-            icon: path.join(__dirname, 'icon.icns'),
-            title: '写作面板系统 WritingPanelSystem',
-            frame: true
-        });
-
-        mainWindow.loadFile('index.html');
-        
-        // ========== 修改：允许新窗口打开 ==========
-        mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-    // 创建新窗口
-    const newWindow = new BrowserWindow({
-        width: 1200,
-        height: 800,
-        parent: mainWindow,
-        modal: false,
-        show: false,
-        frame: true,
-        webPreferences: {
-            nodeIntegration: false,
-            contextIsolation: true,
-            preload: path.join(__dirname, 'preload.js')
-        }
-    });
-    
-    newWindow.loadURL(url);
-    newWindow.once('ready-to-show', () => {
-        newWindow.show();
-    });
-    
-    // 必须返回 allow
-    return { action: 'allow' };
-});
-        
-        // ... 其他代码保持不变 ...
-    }, 100);
-}
+let splashWindow;
 
 // 获取文档目录中的备份文件夹
 const documentsPath = path.join(os.homedir(), 'Documents', '写作面板系统备份');
@@ -109,6 +23,28 @@ function sanitizeFileName(name) {
     return name.replace(/[\\/:*?"<>|]/g, '_').replace(/\s+$/g, '');
 }
 
+// 创建启动画面
+function createSplashWindow() {
+    splashWindow = new BrowserWindow({
+        width: 500,
+        height: 350,
+        frame: false,
+        transparent: true,
+        alwaysOnTop: true,
+        resizable: false,
+        center: true,
+        skipTaskbar: true,
+        show: true,  // 确保显示
+        webPreferences: {
+            nodeIntegration: false,
+            contextIsolation: true
+        }
+    });
+    
+    splashWindow.loadFile('splash.html');
+    
+    // 不再使用 setTimeout 自动关闭，由主窗口 ready-to-show 控制
+}
 
 // 备份单本书籍
 async function backupBook(book) {
@@ -196,104 +132,170 @@ async function backupAllBooks(books) {
 }
 
 function createWindow() {
-    mainWindow = new BrowserWindow({
-        width: 1400,
-        height: 900,
-        minWidth: 800,
-        minHeight: 600,
-        webPreferences: {
-            nodeIntegration: false,
-            contextIsolation: true,
-            preload: path.join(__dirname, 'preload.js'),
-            webSecurity: false,  // 允许 file:// 协议加载图片
-            allowRunningInsecureContent: true
-        },
-        icon: path.join(__dirname, 'icon.icns'),
-        title: '写作面板系统 WritingPanelSystem',
-        frame: true
-    });
-
-    mainWindow.loadFile('index.html');
+    // 先显示启动画面
+    createSplashWindow();
     
-    mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-        const newWindow = new BrowserWindow({
-            width: 1200,
-            height: 800,
+    setTimeout(() => {
+        mainWindow = new BrowserWindow({
+            width: 1400,
+            height: 900,
+            minWidth: 800,
+            minHeight: 600,
+            show: false,  // 这里虽然是 false，但后面会调用 show()
             webPreferences: {
                 nodeIntegration: false,
-                contextIsolation: true
-            }
+                contextIsolation: true,
+                preload: path.join(__dirname, 'preload.js'),
+                webSecurity: false,
+                allowRunningInsecureContent: true,
+                sandbox: false,
+                additionalArguments: ['--allow-popups'],
+                nativeWindowOpen: true
+            },
+            icon: path.join(__dirname, 'icon.icns'),
+            title: '写作面板系统 WritingPanelSystem',
+            frame: true
         });
-        newWindow.loadURL(url);
-        return { action: 'deny' };
-    });
-    
-    const menuTemplate = [
-        {
-            label: '文件',
-            submenu: [
-                { label: '新建窗口', click: () => { createWindow(); } },
-                { type: 'separator' },
-                { label: '退出', role: 'quit' }
-            ]
-        },
-        {
-            label: '编辑',
-            submenu: [
-                { label: '撤销', role: 'undo' },
-                { label: '重做', role: 'redo' },
-                { type: 'separator' },
-                { label: '剪切', role: 'cut' },
-                { label: '复制', role: 'copy' },
-                { label: '粘贴', role: 'paste' }
-            ]
-        },
-        {
-            label: '视图',
-            submenu: [
-                { label: '重新加载', role: 'reload' },
-                { label: '全屏', role: 'togglefullscreen' },
-                { label: '开发者工具', role: 'toggleDevTools' }
-            ]
-        },
-        {
-            label: '帮助',
-            submenu: [
-                { 
-                    label: '关于', 
-                    click: () => {
-                        dialog.showMessageBox(mainWindow, {
-                            type: 'info',
-                            title: '关于 写作面板系统 Writingpanelsystem',
-                            message: '写作面板系统 Writingpanelsystem 版本 1.10.0\n\n免费，开源，自由的写作软件n\n开发者@麻昌生',
-                            detail: 'GitHub: https://github.com/likeweixue/Writingpanelsystem\n\n备份位置：~/Documents/写作面板系统备份/'
-                        });
+
+        mainWindow.loadFile('index.html');
+        
+        // ===== 关键修复：页面加载完成后显示主窗口 =====
+        mainWindow.once('ready-to-show', () => {
+            // 关闭启动画面
+            if (splashWindow && !splashWindow.isDestroyed()) {
+                splashWindow.close();
+                splashWindow = null;
+            }
+            // 显示主窗口
+            mainWindow.show();
+            mainWindow.focus();
+        });
+        
+        // ===== 备用：如果 ready-to-show 没触发，5秒后强制显示 =====
+        setTimeout(() => {
+            if (mainWindow && !mainWindow.isVisible()) {
+                console.log('⚠️ 强制显示主窗口（备用方案）');
+                if (splashWindow && !splashWindow.isDestroyed()) {
+                    splashWindow.close();
+                    splashWindow = null;
+                }
+                mainWindow.show();
+                mainWindow.focus();
+            }
+        }, 5000);
+        
+        // 设置窗口打开处理器
+        mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+            console.log('🔗 打开新窗口:', url);
+            
+            if (url && (url.startsWith('file://') || url.startsWith('data:') || url.includes('.html'))) {
+                const newWindow = new BrowserWindow({
+                    width: 1200,
+                    height: 800,
+                    parent: mainWindow,
+                    modal: false,
+                    show: false,
+                    frame: true,
+                    webPreferences: {
+                        nodeIntegration: false,
+                        contextIsolation: true,
+                        preload: path.join(__dirname, 'preload.js'),
+                        webSecurity: false,
+                        allowRunningInsecureContent: true,
+                        sandbox: false,
+                        nativeWindowOpen: true
                     }
-                },
-                {
-                    label: '打开备份文件夹',
-                    click: () => {
-                        if (fs.existsSync(documentsPath)) {
-                            shell.openPath(documentsPath);
-                        } else {
+                });
+                
+                newWindow.loadURL(url);
+                newWindow.once('ready-to-show', () => {
+                    newWindow.show();
+                });
+                
+                newWindow.on('closed', () => {
+                    console.log('子窗口已关闭');
+                });
+                
+                return { action: 'allow' };
+            }
+            
+            try {
+                shell.openExternal(url);
+            } catch(e) {
+                console.error('打开外部链接失败:', e);
+            }
+            return { action: 'deny' };
+        });
+        
+        // 设置菜单
+        const menuTemplate = [
+            {
+                label: '文件',
+                submenu: [
+                    { label: '新建窗口', click: () => { createWindow(); } },
+                    { type: 'separator' },
+                    { label: '退出', role: 'quit' }
+                ]
+            },
+            {
+                label: '编辑',
+                submenu: [
+                    { label: '撤销', role: 'undo' },
+                    { label: '重做', role: 'redo' },
+                    { type: 'separator' },
+                    { label: '剪切', role: 'cut' },
+                    { label: '复制', role: 'copy' },
+                    { label: '粘贴', role: 'paste' }
+                ]
+            },
+            {
+                label: '视图',
+                submenu: [
+                    { label: '重新加载', role: 'reload' },
+                    { label: '全屏', role: 'togglefullscreen' },
+                    { label: '开发者工具', role: 'toggleDevTools' }
+                ]
+            },
+            {
+                label: '帮助',
+                submenu: [
+                    { 
+                        label: '关于', 
+                        click: () => {
                             dialog.showMessageBox(mainWindow, {
                                 type: 'info',
-                                title: '提示',
-                                message: '备份文件夹尚未创建，请先执行一次备份'
+                                title: '关于 写作面板系统 Writingpanelsystem',
+                                message: '写作面板系统 Writingpanelsystem 版本 1.9.1\n\n免费，开源，自由的写作软件\n开发者@麻昌生',
+                                detail: 'GitHub: https://github.com/likeweixue/Writingpanelsystem\n\n备份位置：~/Documents/写作面板系统备份/'
                             });
                         }
+                    },
+                    {
+                        label: '打开备份文件夹',
+                        click: () => {
+                            if (fs.existsSync(documentsPath)) {
+                                shell.openPath(documentsPath);
+                            } else {
+                                dialog.showMessageBox(mainWindow, {
+                                    type: 'info',
+                                    title: '提示',
+                                    message: '备份文件夹尚未创建，请先执行一次备份'
+                                });
+                            }
+                        }
                     }
-                }
-            ]
-        }
-    ];
-    
-    const menu = Menu.buildFromTemplate(menuTemplate);
-    Menu.setApplicationMenu(menu);
-    
-    mainWindow.on('closed', () => {
-        mainWindow = null;
-    });
+                ]
+            }
+        ];
+        
+        const menu = Menu.buildFromTemplate(menuTemplate);
+        Menu.setApplicationMenu(menu);
+        
+        mainWindow.on('closed', () => {
+            mainWindow = null;
+        });
+        
+    }, 100);
 }
 
 // IPC 事件处理
@@ -314,7 +316,7 @@ ipcMain.handle('open-backup-folder', async () => {
     }
 });
 
-// 保存图片 - 添加调试日志
+// 保存图片
 ipcMain.handle('save-image', async (event, { imageData, fileName }) => {
     console.log('保存图片请求:', fileName);
     
@@ -344,7 +346,6 @@ ipcMain.handle('save-image', async (event, { imageData, fileName }) => {
         const buffer = Buffer.from(base64Data, 'base64');
         fs.writeFileSync(filePath, buffer);
         
-        // 返回 file:// URL
         const fileUrl = `file://${filePath}`;
         console.log('图片保存成功，URL:', fileUrl);
         
@@ -397,6 +398,17 @@ ipcMain.handle('save-zip-file', async (event, { fileName, data }) => {
         return { success: true, filePath: result.filePath };
     }
     return { success: false, canceled: true };
+});
+
+// ===== 新增：显示提示框（用于替代 alert） =====
+ipcMain.handle('show-alert', async (event, { message }) => {
+    await dialog.showMessageBox({
+        type: 'info',
+        title: '提示',
+        message: message,
+        buttons: ['确定']
+    });
+    return true;
 });
 
 app.whenReady().then(() => {
