@@ -910,6 +910,11 @@ function openToolSidebar(tool) {
                 panel.innerHTML = '<div style="padding:20px;text-align:center;color:#888;">词典加载失败，请刷新后重试</div>';
             }
             break;
+        case 'dialogue':
+    panel.innerHTML = renderDialoguePanel();
+    getDialogueData();
+    bindDialogueEvents();
+    break;
         default:
             panel.innerHTML = '<div style="padding:20px;text-align:center;color:#888;">工具加载中...</div>';
     }

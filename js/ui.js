@@ -228,7 +228,7 @@ if (pageId === 'stats') {
             <h2 style="font-size:24px; margin-bottom:8px;">写作面板系统 WritingPanelSystem</h2>
             <p style="color:#888; margin-bottom:4px;">免费，开源，自由的写作软件</p>
             <p style="color:#888; margin-bottom:4px;">软件官网 WritingPanelSystem.com</p>
-            <p style="color:#888; margin-bottom:4px;">版本 v 1.11.0 正式版</p>
+            <p style="color:#888; margin-bottom:4px;">版本 v 1.12.0 正式版</p>
             <p style="color:#888; margin-bottom:20px;">GitHub: <a href="https://github.com/likeweixue/Writingpanelsystem" target="_blank" style="color:#007aff; text-decoration:none;">https://github.com/likeweixue/Writingpanelsystem</a></p>
             
             <div style="margin-top:30px; padding-top:20px; border-top:1px solid rgba(0,0,0,0.1);">

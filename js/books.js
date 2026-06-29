@@ -378,10 +378,9 @@ function renderBookEditor(bookId) {
         '</div>' +
         '</div>' +  // 结束 detail-editor
         // 在 renderBookEditor 函数中，找到右侧边栏部分
-// 在 renderBookEditor 函数中，修改右侧边栏
+// 在 renderBookEditor 函数中，右侧边栏部分
 '<div class="right-sidebar" id="rightSidebar">' +
 '<div class="right-sidebar-header">' +
-
 '</div>' +
 '<div class="right-sidebar-content">' +
 // 大纲
@@ -437,10 +436,19 @@ function renderBookEditor(bookId) {
 '<div class="sidebar-tool-icon"><img src="icons/library.svg" width="24" height="24" alt="词典"></div>' +
 '<div class="sidebar-tool-label">词典</div>' +
 '<button class="tool-expand-btn" data-tool="dictionary" title="在新标签页打开" style="background:none; border:none; cursor:pointer; font-size:12px; opacity:0.4; margin-left:auto;">⤢</button>' +
+'</div>' +
+
+// ===== 对话高亮 =====
+'<div class="sidebar-tool-item" data-tool="dialogue">' +
+'<div class="sidebar-tool-icon">💬</div>' +
+'<div class="sidebar-tool-label">对话高亮</div>' +
+'<button class="tool-expand-btn" data-tool="dialogue" title="在新窗口打开" style="background:none; border:none; cursor:pointer; font-size:12px; opacity:0.4; margin-left:auto;">⤢</button>' +
 '</div>'
-        '</div>' +  // 结束 right-sidebar
-        '</div>' +  // 结束 detail-main
-        '</div>';  // 结束 book-detail-page
+
+'</div>' +  // 结束 right-sidebar-content
+'</div>' +  // 结束 right-sidebar
+'</div>' +  // 结束 detail-main
+'</div>';   // 结束 book-detail-page
 }
 
 function initBookEditor(tabId, bookId) {
@@ -487,6 +495,7 @@ setTimeout(function() {
     addBatchActionButtons();
     bindCheckboxEvents();
 }, 200);
+
 // 添加可调节的拖动条 - 完全修复版
 function addResizeHandle() {
     var chaptersPanel = document.getElementById('leftSidebar');
@@ -898,7 +907,49 @@ function addResizeHandle() {
     }
 
 // ========== 在 initBookEditor 函数中，替换工具绑定部分 ==========
-
+setTimeout(function() {
+    // 初始化对话高亮 - 使用更可靠的方式
+    if (typeof bindDialogueToolEntry === 'function') {
+        bindDialogueToolEntry();
+    } else if (typeof initDialogueHighlight === 'function') {
+        initDialogueHighlight();
+    }
+    
+    // 额外的保障：直接绑定事件
+    var dialogueBtn = document.querySelector('.sidebar-tool-item[data-tool="dialogue"]');
+    if (dialogueBtn && !dialogueBtn._bound) {
+        dialogueBtn._bound = true;
+        dialogueBtn.onclick = function(e) {
+            if (e.target.closest && e.target.closest('.tool-expand-btn')) return;
+            var existingPanel = document.getElementById('floatingToolPanel');
+            if (existingPanel) {
+                var panelTool = existingPanel.getAttribute('data-tool');
+                if (panelTool === 'dialogue') {
+                    if (typeof closeDialogueFloatingPanel === 'function') {
+                        closeDialogueFloatingPanel();
+                    }
+                    this.style.background = '';
+                    this.style.borderRadius = '';
+                    this.style.color = '';
+                    return;
+                } else {
+                    if (typeof closeFloatingPanel === 'function') {
+                        closeFloatingPanel();
+                    } else {
+                        existingPanel.remove();
+                    }
+                }
+            }
+            if (typeof openDialogueSidebar === 'function') {
+                openDialogueSidebar('dialogue');
+                this.style.background = 'rgba(0,122,255,0.15)';
+                this.style.borderRadius = '8px';
+                this.style.color = '#007aff';
+            }
+        };
+        console.log('✅ 对话高亮按钮已永久绑定');
+    }
+}, 500);
 // ---- 工具面板统一管理 ----
 // 工具 -> 侧边栏打开函数映射
 var toolSidebarMap = {
