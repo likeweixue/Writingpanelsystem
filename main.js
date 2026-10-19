@@ -185,46 +185,54 @@ function createWindow() {
         }, 5000);
         
         // 设置窗口打开处理器
+        // 内部页面（file:// / blob: / about:blank / 带 .html）一律允许，交给 Chromium 自己创建，
+        // 这样 opener 关系和 localStorage 都能跟主窗口保持一致；外部链接交给浏览器打开。
         mainWindow.webContents.setWindowOpenHandler(({ url }) => {
             console.log('🔗 打开新窗口:', url);
-            
-            if (url && (url.startsWith('file://') || url.startsWith('data:') || url.includes('.html'))) {
-                const newWindow = new BrowserWindow({
-                    width: 1200,
-                    height: 800,
-                    parent: mainWindow,
-                    modal: false,
-                    show: false,
-                    frame: true,
-                    webPreferences: {
-                        nodeIntegration: false,
-                        contextIsolation: true,
-                        preload: path.join(__dirname, 'preload.js'),
-                        webSecurity: false,
-                        allowRunningInsecureContent: true,
-                        sandbox: false,
-                        nativeWindowOpen: true
+
+            var isInternal = !url || url === 'about:blank' ||
+                url.startsWith('file://') ||
+                url.startsWith('blob:') ||
+                url.startsWith('data:') ||
+                url.startsWith('about:') ||
+                /\.html?(\?|#|$)/.test(url) ||
+                url.includes('__panel__');
+
+            if (isInternal) {
+                return {
+                    action: 'allow',
+                    overrideBrowserWindowOptions: {
+                        width: 1200,
+                        height: 800,
+                        minWidth: 800,
+                        minHeight: 600,
+                        frame: true,
+                        title: '写作面板系统 WritingPanelSystem',
+                        webPreferences: {
+                            nodeIntegration: false,
+                            contextIsolation: true,
+                            preload: path.join(__dirname, 'preload.js'),
+                            webSecurity: false,
+                            allowRunningInsecureContent: true,
+                            sandbox: false,
+                            nativeWindowOpen: true
+                        }
                     }
-                });
-                
-                newWindow.loadURL(url);
-                newWindow.once('ready-to-show', () => {
-                    newWindow.show();
-                });
-                
-                newWindow.on('closed', () => {
-                    console.log('子窗口已关闭');
-                });
-                
-                return { action: 'allow' };
+                };
             }
-            
+
             try {
-                shell.openExternal(url);
-            } catch(e) {
+                if (url) shell.openExternal(url);
+            } catch (e) {
                 console.error('打开外部链接失败:', e);
             }
             return { action: 'deny' };
+        });
+
+        // 子窗口创建完成后统一登记（方便定位问题，也可在此加通用设置）
+        mainWindow.webContents.on('did-create-window', (childWindow) => {
+            console.log('✅ 面板窗口已创建');
+            childWindow.on('closed', () => { console.log('面板窗口已关闭'); });
         });
         
         // 设置菜单
@@ -398,6 +406,25 @@ ipcMain.handle('save-zip-file', async (event, { fileName, data }) => {
         return { success: true, filePath: result.filePath };
     }
     return { success: false, canceled: true };
+});
+
+// ===== 全屏面板窗口：把渲染进程生成的 HTML 写到用户数据目录，返回可打开的 file:// 地址 =====
+// 为什么这么绕：Electron 打包后 window.open('') / data: / blob: 都可能被拦截，
+// 写成真实文件再用 window.open 打开，既能绕过弹窗拦截，又能保留 opener 关系与同源 localStorage。
+ipcMain.handle('write-panel-file', async (event, { name, html }) => {
+    try {
+        const panelsDir = path.join(app.getPath('userData'), 'panels');
+        if (!fs.existsSync(panelsDir)) {
+            fs.mkdirSync(panelsDir, { recursive: true });
+        }
+        const safeName = String(name || 'panel').replace(/[\\/:*?"<>|]/g, '_') + '.html';
+        const filePath = path.join(panelsDir, safeName);
+        fs.writeFileSync(filePath, html, 'utf8');
+        return { success: true, url: require('url').pathToFileURL(filePath).href, filePath: filePath };
+    } catch (err) {
+        console.error('写入面板文件失败:', err);
+        return { success: false, error: err.message };
+    }
 });
 
 // ===== 新增：显示提示框（用于替代 alert） =====

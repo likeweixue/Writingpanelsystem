@@ -176,40 +176,9 @@
 
 <!-- ========== 所有内联函数（放在一起，确保定义顺序正确） ========== -->
 <script>
-    // ===== 修复 Electron 打包后 window.open 不可用 =====
-(function fixWindowOpen() {
-    console.log('🔧 检查 window.open 状态...');
-    
-    // 保存原始的 window.open
-    var originalOpen = window.open;
-    
-    // 检查是否在 Electron 环境中
-    if (window.electron && window.electron.openWindow) {
-        console.log('✅ 检测到 Electron 环境，修复 window.open');
-        
-        // 重写 window.open
-        window.open = function(url, name, features) {
-            console.log('🔗 window.open 被调用:', url);
-            
-            // 如果是内部页面（html/ 开头、file://、data:）
-            if (url && (url.startsWith('html/') || 
-                        url.startsWith('file://') || 
-                        url.startsWith('data:') ||
-                        url.includes('.html'))) {
-                // 使用 Electron 的 openWindow
-                window.electron.openWindow(url, features);
-                return null;
-            }
-            
-            // 外部链接使用原始方法
-            return originalOpen.call(window, url, name, features);
-        };
-        
-        console.log('✅ window.open 已修复为 Electron 版本');
-    } else {
-        console.log('⚠️ 不在 Electron 环境中，使用原生 window.open');
-    }
-})();
+    // 说明：以前这里会重写 window.open 强行走 Electron，反而让 window.open 失去返回值、
+    //       也让空 URL / file:// 的弹窗更容易被拦。现在统一交给 main.js 的
+    //       setWindowOpenHandler 处理 + js/panel-window.js 的 openPanelWindow()。
     // ========== 静默所有备份提示 ==========
 (function silenceBackup() {
     var originalAlert = window.alert;
@@ -416,6 +385,7 @@ console.log('createNewGroupV2:', typeof createNewGroupV2);
 <!-- 先加载工具模块 -->
 <script src="js/data.js"></script>
 <script src="js/ui.js"></script>
+<script src="js/panel-window.js"></script>  <!-- 全屏面板 / 主题，供下面各工具模块共用 -->
 <script src="js/outline.js"></script>      <!-- 大纲 -->
 <script src="js/setting.js"></script>
 <script src="js/characters.js"></script>   <!-- 角色 -->

@@ -1105,26 +1105,16 @@ function openDictionaryInNewWindow() {
     closeDictionaryFloatingPanel();
     getDictionaryData();
     
-    var currentTheme = localStorage.getItem('app_theme') || 'default';
-    var customBgImage = localStorage.getItem('custom_bg_image') || '';
-    var customBgOpacity = parseInt(localStorage.getItem('custom_bg_opacity') || '30');
-    
-    var themeColors = {
-        'default': { bg: '#f0f2f5', panel: 'rgba(255,255,255,0.95)', border: 'rgba(0,0,0,0.08)', text: '#333', textSecondary: '#888', headerBg: 'rgba(0,0,0,0.03)' },
-        'eye': { bg: '#e8f0e5', panel: 'rgba(200,219,197,0.95)', border: 'rgba(44,62,47,0.12)', text: '#2c3e2f', textSecondary: '#5a7a5a', headerBg: 'rgba(44,62,47,0.06)' },
-        'warm': { bg: '#f5efe5', panel: 'rgba(223,213,189,0.95)', border: 'rgba(74,59,44,0.12)', text: '#4a3b2c', textSecondary: '#8a7a6a', headerBg: 'rgba(74,59,44,0.06)' },
-        'dark': { bg: '#1a1a2e', panel: 'rgba(30,30,46,0.95)', border: 'rgba(255,255,255,0.08)', text: '#e0e0e0', textSecondary: '#8888aa', headerBg: 'rgba(255,255,255,0.05)' },
-        'open': { bg: '#f0f2f5', panel: 'rgba(255,255,255,0.2)', border: 'rgba(255,255,255,0.1)', text: '#333', textSecondary: '#888', headerBg: 'rgba(255,255,255,0.08)' }
-    };
-    var c = themeColors[currentTheme] || themeColors['default'];
-    var isDark = currentTheme === 'dark';
-    var isOpen = currentTheme === 'open';
-    var hasCustomBg = customBgImage && customBgImage.length > 0;
-    
-    var bgStyle = '';
-    if (hasCustomBg) {
-        bgStyle = 'background-image: url(' + JSON.stringify(customBgImage) + '); background-size: cover; background-position: center; background-attachment: fixed; opacity: ' + (customBgOpacity/100) + ';';
-    }
+    // ===== 主题 + 自定义背景（统一由 js/panel-window.js 提供，9 个模块共用） =====
+    var panelTheme = getPanelTheme();
+    var currentTheme = panelTheme.name;
+    var customBgImage = panelTheme.customBgImage;
+    var customBgOpacity = panelTheme.customBgOpacity;
+    var c = panelTheme.colors;
+    var isDark = panelTheme.isDark;
+    var isOpen = panelTheme.isOpen;
+    var hasCustomBg = panelTheme.hasCustomBg;
+    var bgStyle = panelTheme.bgStyle;
     
     var dataJson = JSON.stringify(dictionaryData);
     var bookId = currentBookId || 'global';
@@ -1528,14 +1518,7 @@ ${jsCode}
 </body>
 </html>`;
     
-    var newWindow = window.open('', '_blank', 'width=1200,height=800,menubar=no,toolbar=no,location=no,status=no,scrollbars=no');
-    if (newWindow) {
-        newWindow.document.write(html);
-        newWindow.document.close();
-        newWindow.focus();
-    } else {
-        alert('请允许弹出窗口，或手动打开新窗口。');
-    }
+    openPanelWindow({ name: 'dictionary', html: html, width: 1200, height: 800 });
 }
 
 // ========== 右侧边栏入口绑定 ==========

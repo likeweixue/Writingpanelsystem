@@ -17,6 +17,9 @@ contextBridge.exposeInMainWorld('electron', {
     
     platform: process.platform,
 
+    // ===== 全屏面板窗口：把 HTML 写入用户数据目录，返回 file:// 地址 =====
+    writePanelFile: (name, html) => ipcRenderer.invoke('write-panel-file', { name, html }),
+    
     // ===== 打开新窗口（内部页面） =====
     openWindow: (url, options) => {
         console.log('🔗 Electron openWindow 被调用:', url);
