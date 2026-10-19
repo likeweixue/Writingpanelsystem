@@ -17,6 +17,9 @@ contextBridge.exposeInMainWorld('electron', {
     
     platform: process.platform,
 
+    // 版本号唯一真源：package.json，渲染进程直接读取，避免各处硬编码漂移
+    appVersion: require('./package.json').version,
+
     // ===== 全屏面板窗口：把 HTML 写入用户数据目录，返回 file:// 地址 =====
     writePanelFile: (name, html) => ipcRenderer.invoke('write-panel-file', { name, html }),
     

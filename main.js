@@ -41,7 +41,7 @@ function createSplashWindow() {
         }
     });
     
-    splashWindow.loadFile('splash.html');
+    splashWindow.loadFile('splash.html', { query: { v: app.getVersion() } });
     
     // 不再使用 setTimeout 自动关闭，由主窗口 ready-to-show 控制
 }
@@ -273,7 +273,7 @@ function createWindow() {
                             dialog.showMessageBox(mainWindow, {
                                 type: 'info',
                                 title: '关于 写作面板系统 Writingpanelsystem',
-                                message: '写作面板系统 Writingpanelsystem 版本 1.9.1\n\n免费，开源，自由的写作软件\n开发者@麻昌生',
+                                message: `写作面板系统 Writingpanelsystem 版本 ${app.getVersion()}\n\n免费，开源，自由的写作软件\n开发者@麻昌生`,
                                 detail: 'GitHub: https://github.com/likeweixue/Writingpanelsystem\n\n备份位置：~/Documents/写作面板系统备份/'
                             });
                         }
