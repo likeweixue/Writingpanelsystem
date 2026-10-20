@@ -356,7 +356,7 @@ setTimeout(function() {
     }
 }, 500);
 
-// 重新绑定新建书籍和新建分组按钮
+// 绑定新建书籍和新建分组按钮（V2 滑出面板）
 document.getElementById('newBookBtn').onclick = openNewBookPanelV2;
 document.getElementById('newGroupBtn').onclick = openNewGroupPanelV2;
 document.getElementById('confirmNewBookBtnV2').onclick = createNewBookV2;
@@ -376,9 +376,6 @@ if (coverInput) {
         }
     };
 }
-
-console.log('所有函数已加载，createNewBookV2:', typeof createNewBookV2);
-console.log('createNewGroupV2:', typeof createNewGroupV2);
 </script>
 
 <!-- JS 文件（放在最后加载） -->
@@ -410,70 +407,3 @@ console.log('createNewGroupV2:', typeof createNewGroupV2);
 
 </body>
 </html>
-<script>
-// 永久修复：确保新建书籍和新建分组按钮正常工作
-(function fixButtons() {
-    // 等待页面完全加载
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function() {
-            setTimeout(bindButtons, 300);
-        });
-    } else {
-        setTimeout(bindButtons, 300);
-    }
-    
-    function bindButtons() {
-        var newBookBtn = document.getElementById('newBookBtn');
-        var newGroupBtn = document.getElementById('newGroupBtn');
-        var confirmBookBtn = document.getElementById('confirmNewBookBtnV2');
-        var confirmGroupBtn = document.getElementById('confirmNewGroupBtnV2');
-        
-        if (newBookBtn) {
-            newBookBtn.onclick = function(e) {
-                e.preventDefault();
-                if (typeof openNewBookPanelV2 === 'function') {
-                    openNewBookPanelV2();
-                } else {
-                    console.error('openNewBookPanelV2 函数不存在');
-                }
-            };
-            console.log('新建书籍按钮已绑定');
-        }
-        
-        if (newGroupBtn) {
-            newGroupBtn.onclick = function(e) {
-                e.preventDefault();
-                if (typeof openNewGroupPanelV2 === 'function') {
-                    openNewGroupPanelV2();
-                } else {
-                    console.error('openNewGroupPanelV2 函数不存在');
-                }
-            };
-            console.log('新建分组按钮已绑定');
-        }
-        
-        if (confirmBookBtn) {
-            confirmBookBtn.onclick = function(e) {
-                e.preventDefault();
-                if (typeof createNewBookV2 === 'function') {
-                    createNewBookV2();
-                } else {
-                    console.error('createNewBookV2 函数不存在');
-                }
-            };
-        }
-        
-        if (confirmGroupBtn) {
-            confirmGroupBtn.onclick = function(e) {
-                e.preventDefault();
-                if (typeof createNewGroupV2 === 'function') {
-                    createNewGroupV2();
-                } else {
-                    console.error('createNewGroupV2 函数不存在');
-                }
-            };
-        }
-    }
-})();
-
-</script>

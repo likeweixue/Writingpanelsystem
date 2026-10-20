@@ -45,6 +45,20 @@
 - 新增 `.gitignore`：忽略 `node_modules/`、`dist/`、`release/`、`.DS_Store`、`.workbuddy/` 等。
 - 将历史上误提交的 8 个 `.DS_Store` 移出版本控制。
 - `package.json` 的版本号由 `"v 1.12.0"`（带 `v` 和空格，不是合法 semver，会让 `electron-builder` 与 npm 解析异常）修正为 `"1.13.0"`。
+- 重构 `.github/workflows/build.yml`：推送 `v*` 标签时自动打包并**发布 GitHub Release**（自动附带 dmg / exe），macOS 同时产出 Intel（x64）与 Apple Silicon（arm64）两个架构；手动触发则只上传 artifact 不发布。
+
+### 清理
+
+- 删除 `js/books.js` 中每次打开书籍都会刷屏的 5 行调试日志，以及指向不存在的 `html/` 目录的死降级代码（`toolNewWindowMap` 9 处假回退 + 展开按钮 2 块降级 fileMap）。
+- 删除 `js/dictionary.js` 尾部 4 行重复导出。
+- 修复 `js/namegen.js` 紧凑面板「⤢ 展开」按钮的错位大括号：原来 `console.warn` 无条件执行，且按钮不存在时会直接抛 TypeError 中断整个事件绑定函数。
+- 删除 `index.html` 尾部 `</html>` 之后的重复绑定补丁（`fixButtons`，67 行），与正文内联脚本功能重复；同步删除 `js/app.js` 中基于不存在 DOM（`newBookDrawer` 等）的旧抽屉式新建书籍/分组代码（`openDrawer`/`closeDrawer`/`createNewBook`/`createNewGroup`，约 55 行）。
+- 以上清理净减约 150 行，不改变任何现有行为。
+
+### 已知遗留（本版本未动）
+
+- `js/sidebar.js` 的 `createRightSidebar` / `openSecondaryWindow`、`js/books.js` 的 `initRightSidebar` 等首页侧边栏旧路径仍引用不存在的 `html/` 目录，其实际可达性依赖运行时初始化时序，需实测后再清理。
+- 主窗口 `webPreferences` 中 `webSecurity: false`（为本地自定义背景图放行），后续版本评估收紧。
 
 ### 升级说明
 

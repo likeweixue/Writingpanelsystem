@@ -139,59 +139,9 @@ function updateSidebarVisibility() {
 }
 
 function bindButtons() {
-    var newBookBtn = document.getElementById('newBookBtn');
-    var newGroupBtn = document.getElementById('newGroupBtn');
+    // 新建书籍/分组按钮由 index.html 内联脚本绑定到 V2 滑出面板（openNewBookPanelV2 等）
     var trashBtn = document.getElementById('trashBtn');
-    var closeBookDrawer = document.getElementById('closeBookDrawer');
-    var confirmNewBook = document.getElementById('confirmNewBookBtn');
-    var closeGroupDrawer = document.getElementById('closeGroupDrawer');
-    var confirmNewGroup = document.getElementById('confirmNewGroupBtn');
-    if (newBookBtn) newBookBtn.onclick = function() { openDrawer('newBookDrawer'); };
-    if (newGroupBtn) newGroupBtn.onclick = function() { openDrawer('newGroupDrawer'); };
     if (trashBtn) trashBtn.onclick = function() { openTrashTab(); };
-    if (closeBookDrawer) closeBookDrawer.onclick = function() { closeDrawer('newBookDrawer'); };
-    if (confirmNewBook) confirmNewBook.onclick = createNewBook;
-    if (closeGroupDrawer) closeGroupDrawer.onclick = function() { closeDrawer('newGroupDrawer'); };
-    if (confirmNewGroup) confirmNewGroup.onclick = createNewGroup;
-}
-
-function openDrawer(id) {
-    var drawer = document.getElementById(id);
-    if (drawer) drawer.classList.add('open');
-}
-function closeDrawer(id) {
-    var drawer = document.getElementById(id);
-    if (drawer) drawer.classList.remove('open');
-}
-
-function createNewBook() {
-    var nameInput = document.getElementById('newBookName');
-    var name = nameInput ? nameInput.value.trim() : '';
-    if (!name) { alert('请输入书籍名称'); return; }
-    var defaultGroup = groups.find(function(g) { return g.name === '默认分组'; });
-    var groupId = defaultGroup ? defaultGroup.id : 'default';
-    var newChapter = new Chapter(Date.now(), '第一章', '<p></p>');
-    var newVolume = new Volume(Date.now(), '第一卷', [newChapter]);
-    var newBook = new Book(Date.now(), name, [newVolume]);
-    newBook.groupId = groupId;
-    books.push(newBook);
-    saveAllData();
-    renderBooks();
-    closeDrawer('newBookDrawer');
-    openBookTab(newBook.id);
-    nameInput.value = '';
-}
-
-function createNewGroup() {
-    var nameInput = document.getElementById('newGroupName');
-    var name = nameInput ? nameInput.value.trim() : '';
-    if (!name) { alert('请输入分组名称'); return; }
-    groups.push({ id: Date.now().toString(), name: name });
-    saveGroups();
-    renderBooks();
-    closeDrawer('newGroupDrawer');
-    nameInput.value = '';
-    alert('分组创建成功');
 }
 
 function openTrashTab() {

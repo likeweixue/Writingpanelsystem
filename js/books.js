@@ -452,12 +452,6 @@ function renderBookEditor(bookId) {
 }
 
 function initBookEditor(tabId, bookId) {
-    // 在 initBookEditor 函数开头添加
-console.log('检查工具函数是否已加载:');
-console.log('openOutlineSidebar:', typeof window.openOutlineSidebar);
-console.log('openCharacterSidebar:', typeof window.openCharacterSidebar);
-console.log('openWhiteboardSidebar:', typeof window.openWhiteboardSidebar);
-console.log('openNameGenSidebar:', typeof window.openNameGenSidebar);
     currentBookId = bookId;
     var book = getCurrentBook();
     if (book && book.volumes && book.volumes.length > 0) {
@@ -964,35 +958,17 @@ var toolSidebarMap = {
     dictionary: window.openDictionarySidebar || function() { console.warn('词典侧边栏未加载'); }
 };
 
-// 工具 -> 新窗口打开函数映射
+// 工具 -> 新窗口打开函数映射（各模块的 openXxxInNewWindow 均已定义，直接引用）
 var toolNewWindowMap = {
-    outline: window.openOutlineInNewWindow || function() { 
-        window.open('html/outline.html', '_blank', 'width=1200,height=800,resizable=yes'); 
-    },
-    timeline: window.openTimelineInNewWindow || function() { 
-        window.open('html/timeline.html', '_blank', 'width=1200,height=800,resizable=yes'); 
-    },
-    characters: window.openCharacterInNewWindow || function() { 
-        window.open('html/characters.html', '_blank', 'width=1200,height=800,resizable=yes'); 
-    },
-    setting: window.openSettingInNewWindow || function() { 
-        window.open('html/setting.html', '_blank', 'width=1200,height=800,resizable=yes'); 
-    },
-    relation: window.openRelationInNewWindow || function() { 
-        window.open('html/relation.html', '_blank', 'width=1200,height=800,resizable=yes'); 
-    },
-    whiteboard: window.openWhiteboardInNewWindow || function() { 
-        window.open('html/whiteboard.html', '_blank', 'width=1200,height=800,resizable=yes'); 
-    },
-    namegen: window.openNameGenInNewWindow || function() { 
-        window.open('html/namegen.html', '_blank', 'width=1200,height=800,resizable=yes'); 
-    },
-    notes: window.openNoteInNewWindow || function() { 
-        window.open('html/notes.html', '_blank', 'width=1200,height=800,resizable=yes'); 
-    },
-    dictionary: window.openDictionaryInNewWindow || function() { 
-        window.open('html/dictionary.html', '_blank', 'width=1200,height=800,resizable=yes'); 
-    }
+    outline: window.openOutlineInNewWindow,
+    timeline: window.openTimelineInNewWindow,
+    characters: window.openCharacterInNewWindow,
+    setting: window.openSettingInNewWindow,
+    relation: window.openRelationInNewWindow,
+    whiteboard: window.openWhiteboardInNewWindow,
+    namegen: window.openNameGenInNewWindow,
+    notes: window.openNoteInNewWindow,
+    dictionary: window.openDictionaryInNewWindow
 };
 
 // ---- 全局关闭浮动面板函数 ----
@@ -1097,45 +1073,15 @@ for (var i = 0; i < tools.length; i++) {
                     openFn();
                 } catch(err) {
                     console.error('打开新窗口失败:', err);
-                    // 降级方案
-                    var fileMap = {
-                        outline: 'html/outline.html',
-                        timeline: 'html/timeline.html',
-                        characters: 'html/characters.html',
-                        setting: 'html/setting.html',
-                        relation: 'html/relation.html',
-                        whiteboard: 'html/whiteboard.html',
-                        namegen: 'html/namegen.html',
-                        notes: 'html/notes.html'
-                    };
-                    var file = fileMap[tool];
-                    if (file) {
-                        window.open(file, '_blank', 'width=1200,height=800,resizable=yes');
-                    }
+                    alert('打开「' + tool + '」失败，请重试');
                 }
             } else {
-                // 降级方案
-                var fileMap = {
-                    outline: 'html/outline.html',
-                    timeline: 'html/timeline.html',
-                    characters: 'html/characters.html',
-                    setting: 'html/setting.html',
-                    relation: 'html/relation.html',
-                    whiteboard: 'html/whiteboard.html',
-                    namegen: 'html/namegen.html',
-                    notes: 'html/notes.html'
-                };
-                var file = fileMap[tool];
-                if (file) {
-                    window.open(file, '_blank', 'width=1200,height=800,resizable=yes');
-                }
+                console.warn('[侧边栏] 工具未注册新窗口入口:', tool);
             }
         };
     }
 }
 
-console.log('✅ 工具面板统一绑定完成');
-    
     // 启动状态栏定时器
     startStatusBarTimers();
 }

@@ -1925,14 +1925,10 @@ window.getDictionaryEntry = getDictionaryEntry;
 window.searchDictionary = searchDictionary;
 window.getDefaultDictionaryEntries = getDefaultDictionaryEntries;
 
-window.openDictionarySidebar = openDictionarySidebar;
-window.openDictionaryInNewWindow = openDictionaryInNewWindow;
 window.renderCompactDictionaryPanel = renderCompactDictionaryPanel;
 window.renderCompactDictionaryTree = renderCompactDictionaryTree;
 window.updateCompactDictionaryEditor = updateCompactDictionaryEditor;
 window.bindCompactDictionaryEvents = bindCompactDictionaryEvents;
-window.getDictionaryData = getDictionaryData;
-window.dictionaryData = dictionaryData;
 
 console.log('📚 词典工具已加载');
 console.log('✅ openDictionarySidebar 存在:', typeof openDictionarySidebar === 'function');

@@ -982,12 +982,12 @@ function bindCompactNameGenEvents() {
     }
     
     // 展开 - 使用 openNameGenInNewWindow
-document.getElementById('compactNameGenExpandBtn').onclick = function() {
-    if (typeof openNameGenInNewWindow === 'function') {
-        openNameGenInNewWindow();
-    } else {
-        window.open('html/namegen.html', '_blank', 'width=1200,height=800,resizable=yes');
+    var nameGenExpandBtn = document.getElementById('compactNameGenExpandBtn');
+    if (nameGenExpandBtn) {
+        nameGenExpandBtn.onclick = function() {
+            openNameGenInNewWindow();
         };
+    } else {
         console.warn('compactNameGenExpandBtn 按钮不存在');
     }
     
