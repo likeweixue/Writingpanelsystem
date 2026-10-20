@@ -1,14 +1,21 @@
-name: 📦 自动打包
+name: 📦 自动打包发布
 
+# 触发方式：
+#   1. 推送 v* 标签（如 v1.13.0）→ 打包并发布 GitHub Release，自动附带 dmg / exe
+#   2. Actions 页面手动运行（workflow_dispatch）→ 只打包上传 artifact，不发布 Release
 on:
   push:
     tags:
       - 'v*'
   workflow_dispatch:
 
+# electron-builder 发布 GitHub Release 需要写权限
+permissions:
+  contents: write
+
 jobs:
   build-windows:
-    name: 🪟 Windows 打包
+    name: 🪟 Windows 打包（exe 安装包）
     runs-on: windows-latest
     steps:
       - name: 📥 拉取代码
@@ -17,24 +24,29 @@ jobs:
       - name: 🔧 安装 Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
 
       - name: 📦 安装依赖
-        run: |
-          npm install
-          npm install electron-builder --save-dev
+        run: npm install
 
-      - name: 🚀 打包 Windows
+      - name: 🚀 打包并发布到 Release（仅推标签时）
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm run build-win -- --publish always
+
+      - name: 🚀 仅打包（手动触发时）
+        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
         run: npm run build-win
 
-      - name: 📤 上传
+      - name: 📤 上传产物
         uses: actions/upload-artifact@v4
         with:
           name: WritingPanelSystem-Windows
-          path: dist/
+          path: dist/*.exe
 
   build-mac:
-    name: 🍎 macOS 打包
+    name: 🍎 macOS 打包（dmg，Intel + Apple Silicon）
     runs-on: macos-latest
     steps:
       - name: 📥 拉取代码
@@ -43,18 +55,23 @@ jobs:
       - name: 🔧 安装 Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
 
       - name: 📦 安装依赖
-        run: |
-          npm install
-          npm install electron-builder --save-dev
+        run: npm install
 
-      - name: 🚀 打包 macOS
+      - name: 🚀 打包并发布到 Release（仅推标签时，双架构）
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm run build-mac -- --x64 --arm64 --publish always
+
+      - name: 🚀 仅打包（手动触发时）
+        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
         run: npm run build-mac
 
-      - name: 📤 上传
+      - name: 📤 上传产物
         uses: actions/upload-artifact@v4
         with:
           name: WritingPanelSystem-macOS
-          path: dist/
+          path: dist/*.dmg
