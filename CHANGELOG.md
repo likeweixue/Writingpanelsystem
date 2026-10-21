@@ -9,6 +9,18 @@
 
 ---
 
+## [1.13.1] - 2026-10-20
+
+本版本为 **v1.13.0 的发布工程热修**：代码功能与 v1.13.0 完全一致，仅修复 CI 自动发布流程，确保推送标签后能正常生成 GitHub Release（附带 Windows exe 与 macOS dmg）。
+
+### 工程
+
+- 重写 `.github/workflows/build.yml` 的发布策略：原先由 Windows / macOS 两个打包作业各自 `electron-builder --publish always` **并行**发布到同一个 GitHub Release，存在「创建 Release」的竞争，导致推送 v1.13.0 标签后 Release 未生成（两个作业均成功，却查不到已发布的 Release）。
+- 改为：两个打包作业**只产出安装包产物**（不上传 Release），再由一个独立的 `release` 作业通过 `gh release create` 统一把 exe / dmg 发布到 GitHub Release，彻底消除竞争，并保证幂等（若已存在同名 Release 则先删后建）。
+- 因发布流程修复需进入发版链路，故以 **v1.13.1** 重新发版；原 `v1.13.0` 标签继续保留（仅作纯标签，无对应 Release）。
+
+---
+
 ## [1.13.0] - 2026-10-19
 
 本次为**修复 + 重构**版本，不新增功能，重点解决打包版「放大面板」打不开的老问题。
