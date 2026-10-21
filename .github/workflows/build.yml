@@ -137,6 +137,8 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -x
+          # 本作业未 checkout，无 .git 上下文；用 GH_REPO 显式告诉 gh 目标仓库
+          export GH_REPO="$GITHUB_REPOSITORY"
           # 收集所有产物文件（忽略 artifact 目录结构）
           mapfile -t FILES < <(find artifacts -type f)
           if [ "${#FILES[@]}" -eq 0 ]; then
