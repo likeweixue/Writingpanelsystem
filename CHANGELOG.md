@@ -22,9 +22,10 @@
 
 #### 过程中排查（重要结论）
 
-- 此前数轮（提交 `a3ee956` → `c8f76ab` → `c0f384b` → `857e381` → `773d4d2`）无论采用「打包作业 `--publish always` + `GH_TOKEN`」还是「独立 `release` 作业 `gh` 兜底」，**均未真正生成过 Release**——经 GitHub Releases API 与网页双向核验，仓库 `latest` 仍为 `v1.12.0`，根本不存在 `v1.13.0` / `v1.13.1` 的 Release。即 electron-builder 的 `--publish always` 在本仓库 CI 中**静默跳过发布**（run 仍显示 success），旧方案并不可靠。
-- 上述 run 中 `773d4d2`（恢复 `--publish always` + `GH_TOKEN`）的构建作业虽 success，但 Release 依旧缺失，证实「依赖 electron-builder 发布器」此路不通。
-- 故 `v1.13.1` 最终改用「构建作业只产出 artifact + `gh release create` 确定性发布」的方案，移除 `build.publish`，并以标签 `v1.13.1` 重新发版验证。
+- 经 GitHub Releases API 与网页双向核验，仓库 `latest` 仍为 `v1.12.0`，此前的 `v1.13.0` / `v1.13.1` 标签**从未真正生成过 Release**——相关 run 要么构建失败、要么构建 success 却未产出 Release。
+- 真正的拦路石（在 `3f2f316` 轮通过 job 的 check-run annotations 定位）：**electron-builder 在 CI 且检测到 Git 标签时会自动尝试发布**（构建日志可见 `artifacts will be published reason=tag is defined tag=v1.13.1`）。当构建作业既不带 `build.publish` 也无 `GH_TOKEN` 时，它想发布却无提供方/令牌 → `exit 1`，构建失败。此前误判为「CDN 偶发下载失败」。
+- 修复：构建命令加 `--publish never` 显式禁止发布，发布完全交由 `publish-release` 作业的 `gh` 完成；同时移除 `package.json` 的 `build.publish`，彻底堵住任何自动发布路径。
+- `773d4d2` 那轮（带 `--publish always` + `GH_TOKEN` + `build.publish`）构建步骤虽 success，但 Release 依旧缺失，说明 electron-builder 的发布器在本仓库并不可靠——因此最终改用确定性更强的 `gh release create` 方案。
 - 原 `v1.13.0` 标签继续保留（仅作纯标签，无对应 Release）。
 
 ---

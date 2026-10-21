@@ -38,7 +38,8 @@ jobs:
           do {
             $attempt++
             Write-Host "=== build-win attempt $attempt ==="
-            npm run build-win > build-win.log 2>&1
+            # --publish never：显式禁止 electron-builder 在 CI+tag 下自动发布（否则会因无发布提供方而 exit 1）。发布由 publish-release 作业用 gh 完成。
+            npm run build-win -- --publish never > build-win.log 2>&1
             $code = $LASTEXITCODE
             Get-Content build-win.log
             if ($code -eq 0) { break }
@@ -88,7 +89,8 @@ jobs:
           while [ "$attempt" -lt "$max" ]; do
             attempt=$((attempt+1))
             echo "=== build-mac attempt $attempt ==="
-            npm run build-mac -- --x64 --arm64 > build-mac.log 2>&1
+            # --publish never：显式禁止 electron-builder 在 CI+tag 下自动发布（否则会因无发布提供方而 exit 1）。发布由 publish-release 作业用 gh 完成。
+            npm run build-mac -- --x64 --arm64 --publish never > build-mac.log 2>&1
             code=$?
             cat build-mac.log
             if [ "$code" -eq 0 ]; then break; fi
