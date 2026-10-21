@@ -15,8 +15,9 @@
 
 ### 工程
 
-- 重写 `.github/workflows/build.yml` 的发布策略：原先由 Windows / macOS 两个打包作业各自 `electron-builder --publish always` **并行**发布到同一个 GitHub Release，存在「创建 Release」的竞争，导致推送 v1.13.0 标签后 Release 未生成（两个作业均成功，却查不到已发布的 Release）。
-- 改为：两个打包作业**只产出安装包产物**（不上传 Release），再由一个独立的 `release` 作业通过 `gh release create` 统一把 exe / dmg 发布到 GitHub Release，彻底消除竞争，并保证幂等（若已存在同名 Release 则先删后建）。
+- 修复 CI 自动发布失败的根因：`package.json` 的 `build.publish` 配置会让 electron-builder 在 CI（`CI=true`）环境下**自动发布**；旧流程由打包作业自带 `GH_TOKEN` 并 `--publish always` 发布，而改写后的流程把发布挪到了独立的 `release` 作业、打包作业不再带 `GH_TOKEN`，于是打包作业里的 electron-builder 仍尝试自动发布却拿不到令牌，导致 `electron-builder` 构建步骤直接 `exit 1`、构建失败、`release` 作业被跳过。
+- 处置：从 `package.json` 删除 `build.publish` 配置（发布改由 `gh release create` 负责），打包作业恢复为「只构建、不发布」，构建不再依赖发布令牌。
+- 重写 `.github/workflows/build.yml` 的发布策略：Windows / macOS 两个打包作业**只产出安装包产物**（不上传 Release），再由一个独立的 `release` 作业通过 `gh release create` 统一把 exe / dmg 发布到 GitHub Release，并保证幂等（若已存在同名 Release 则先删后建）。
 - 因发布流程修复需进入发版链路，故以 **v1.13.1** 重新发版；原 `v1.13.0` 标签继续保留（仅作纯标签，无对应 Release）。
 
 ---
