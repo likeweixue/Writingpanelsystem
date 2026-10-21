@@ -37,6 +37,13 @@
       "**/*",
       "!node_modules",
       "!dist"
+    ],
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "likeweixue",
+        "repo": "Writingpanelsystem"
+      }
     ]
   }
 }

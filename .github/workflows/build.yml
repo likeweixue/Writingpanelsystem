@@ -1,7 +1,7 @@
 name: 📦 自动打包发布
 
 # 触发方式：
-#   1. 推送 v* 标签（如 v1.13.0）→ 打包 Windows exe + macOS dmg，并发布 GitHub Release
+#   1. 推送 v* 标签（如 v1.13.1）→ 打包 Windows exe + macOS dmg，并通过 electron-builder 发布 GitHub Release
 #   2. Actions 页面手动运行（workflow_dispatch）→ 只打包上传 artifact，不发布 Release
 on:
   push:
@@ -29,18 +29,24 @@ jobs:
       - name: 📦 安装依赖
         run: npm install
 
-      - name: 🔨 打包 Windows（仅产出安装包，不发布）
-        shell: bash
-        run: npm run build-win 2>&1 | tee build-win.log; exit ${PIPESTATUS[0]}
-
-      - name: 📋 记录构建错误（仅失败时，便于排查）
-        if: failure()
-        shell: bash
+      - name: 🔨 打包并发布到 Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release create "ci-debug-win-${{ github.run_id }}" --prerelease --title "CI 构建错误(windows) #${{ github.run_id }}" --notes "$(tail -80 build-win.log 2>/dev/null || echo 'no log')" || true
+        shell: pwsh
+        run: |
+          # 仅当推送标签时才 --publish always；手动触发只构建不发布
+          $publish = if ($env:GITHUB_REF.StartsWith('refs/tags/')) { '--publish','always' } else { @() }
+          npm run build-win -- @publish 2>&1 | Tee-Object -FilePath build-win.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
-      - name: 📤 上传产物
+      - name: 📤 上传构建日志（失败时排查用）
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: win-build-log
+          path: build-win.log
+
+      - name: 📤 上传产物（成功时保留）
         if: success()
         uses: actions/upload-artifact@v4
         with:
@@ -62,49 +68,43 @@ jobs:
       - name: 📦 安装依赖
         run: npm install
 
-      - name: 🔨 打包 macOS（双架构，仅产出 dmg，不发布）
-        shell: bash
-        run: npm run build-mac -- --x64 --arm64 2>&1 | tee build-mac.log; exit ${PIPESTATUS[0]}
-
-      - name: 📋 记录构建错误（仅失败时，便于排查）
-        if: failure()
-        shell: bash
+      - name: 🔨 打包并发布到 Release（双架构）
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release create "ci-debug-mac-${{ github.run_id }}" --prerelease --title "CI 构建错误(macos) #${{ github.run_id }}" --notes "$(tail -80 build-mac.log 2>/dev/null || echo 'no log')" || true
+        run: |
+          # 仅当推送标签时才 --publish always；手动触发只构建不发布
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then PUB="--publish always"; else PUB=""; fi
+          npm run build-mac -- --x64 --arm64 $PUB 2>&1 | tee build-mac.log
+          exit ${PIPESTATUS[0]}
 
-      - name: 📤 上传产物
+      - name: 📤 上传构建日志（失败时排查用）
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mac-build-log
+          path: build-mac.log
+
+      - name: 📤 上传产物（成功时保留）
         if: success()
         uses: actions/upload-artifact@v4
         with:
           name: mac-artifacts
           path: dist/*.dmg
 
-  release:
-    name: 🚀 发布 GitHub Release
+  publish-release:
+    name: 🚀 确保 Release 已发布
     needs: [build-windows, build-mac]
     runs-on: ubuntu-latest
-    # 仅当推送标签时才发布 Release；手动触发只产出 artifact
+    # 仅当推送标签时才处理 Release；手动触发不发布
     if: startsWith(github.ref, 'refs/tags/')
     steps:
-      - name: 📥 下载全部产物
-        uses: actions/download-artifact@v4
-        with:
-          path: artifacts
-          pattern: '*-artifacts'
-          merge-multiple: true
-
-      - name: 🚀 创建并发布 Release
+      - name: 🚀 确保 Release 为「已发布」且为 latest（非草稿）
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # 若已存在同名 Release（含草稿），先删除再重建，保证幂等
           if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
-            echo "发现已存在的 Release，先删除：$GITHUB_REF_NAME"
-            gh release delete "$GITHUB_REF_NAME" --yes
+            echo "Release $GITHUB_REF_NAME 已存在，确保其为已发布且为 latest"
+            gh release edit "$GITHUB_REF_NAME" --draft=false --latest || true
+          else
+            echo "::warning::未找到 $GITHUB_REF_NAME 的 Release，构建作业可能未成功发布，请检查构建日志 artifact（win-build-log / mac-build-log）。"
           fi
-          gh release create "$GITHUB_REF_NAME" \
-            --title "$GITHUB_REF_NAME" \
-            --generate-notes \
-            --latest \
-            artifacts/*

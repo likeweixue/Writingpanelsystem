@@ -15,10 +15,16 @@
 
 ### 工程
 
-- 修复 CI 自动发布失败的根因：`package.json` 的 `build.publish` 配置会让 electron-builder 在 CI（`CI=true`）环境下**自动发布**；旧流程由打包作业自带 `GH_TOKEN` 并 `--publish always` 发布，而改写后的流程把发布挪到了独立的 `release` 作业、打包作业不再带 `GH_TOKEN`，于是打包作业里的 electron-builder 仍尝试自动发布却拿不到令牌，导致 `electron-builder` 构建步骤直接 `exit 1`、构建失败、`release` 作业被跳过。
-- 处置：从 `package.json` 删除 `build.publish` 配置（发布改由 `gh release create` 负责），打包作业恢复为「只构建、不发布」，构建不再依赖发布令牌。
-- 重写 `.github/workflows/build.yml` 的发布策略：Windows / macOS 两个打包作业**只产出安装包产物**（不上传 Release），再由一个独立的 `release` 作业通过 `gh release create` 统一把 exe / dmg 发布到 GitHub Release，并保证幂等（若已存在同名 Release 则先删后建）。
-- 因发布流程修复需进入发版链路，故以 **v1.13.1** 重新发版；原 `v1.13.0` 标签继续保留（仅作纯标签，无对应 Release）。
+- 恢复并固化「经过验证」的发布配置：每个打包作业携带 `GH_TOKEN` 并运行 `electron-builder ... --publish always`，`package.json` 的 `build.publish` 指向 `github/likeweixue/Writingpanelsystem`。该配置（提交 `a3ee956`）实测曾成功产出 GitHub Release。
+- 新增幂等的 `publish-release` 兜底作业：构建完成后确保同名 Release 处于「已发布」且为 `latest` 状态（非草稿）。
+- 增加诊断能力：打包作业在失败时通过 `upload-artifact` 上传 `build-win.log` / `build-mac.log`，便于在构建失败时拿到真实报错（此前数轮失败仅暴露 `Process completed with exit code 1`，无详细日志，根因未能定位）。
+- 固定构建机镜像：`windows-2022` / `macos-14`；手动触发（`workflow_dispatch`）仅构建并上传产物、不发布 Release。
+
+#### 过程中排查与未决项
+
+- `v1.13.0`（`a3ee956`）之后，曾尝试把发布从打包作业剥离为独立 `release` 作业（提交 `c8f76ab` → `c0f384b` → `857e381`），即打包作业不再带 `GH_TOKEN`、也不再 `--publish always`、并一度删除 `build.publish`。这三轮**打包步骤均 `exit 1` 失败**，独立 `release` 作业因此被跳过、从未生成 Release。
+- 由于失败日志仅有一句 `exit code 1`，无法确认去掉发布是否为真正根因；但可确认的是：带 `--publish always` + `GH_TOKEN` 的 `a3ee956` 配置**实测成功**，而无该配置的三轮**实测失败**。故 `v1.13.1` 回退到验证可用的配置，并补上日志 artifact 以便未来若再失败可定位真实原因。
+- 原 `v1.13.0` 标签继续保留（仅作纯标签，无对应 Release）；以 **v1.13.1** 重新发版。
 
 ---
 
