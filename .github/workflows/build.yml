@@ -136,6 +136,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          set -x
           # 收集所有产物文件（忽略 artifact 目录结构）
           mapfile -t FILES < <(find artifacts -type f)
           if [ "${#FILES[@]}" -eq 0 ]; then
@@ -145,14 +146,20 @@ jobs:
           echo "即将发布的文件："
           printf ' - %s\n' "${FILES[@]}"
 
+          emit_err() { while IFS= read -r l; do echo "::error::$l"; done; }
+
           if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
             echo "Release $GITHUB_REF_NAME 已存在，追加/覆盖资产"
-            gh release upload "$GITHUB_REF_NAME" --clobber "${FILES[@]}"
+            gh release upload "$GITHUB_REF_NAME" --clobber "${FILES[@]}" 2>gh_err.log \
+              || { echo "::error::gh release upload 失败："; cat gh_err.log | emit_err; exit 1; }
           else
             echo "创建 Release $GITHUB_REF_NAME 并附带资产"
             gh release create "$GITHUB_REF_NAME" \
               --title "$GITHUB_REF_NAME" \
-              --generate-notes \
+              --notes "自动打包发布 v1.13.1：Windows exe 安装包 + macOS dmg（Intel / Apple Silicon）。" \
               --latest \
-              "${FILES[@]}"
+              "${FILES[@]}" 2>gh_err.log \
+              || { echo "::error::gh release create 失败："; cat gh_err.log | emit_err; exit 1; }
+          fi
+          set +x
           fi
