@@ -20,6 +20,12 @@
 - 增加诊断能力：打包作业在失败时通过 `upload-artifact` 上传 `build-win.log` / `build-mac.log`，便于在构建失败时拿到真实报错。
 - 固定构建机镜像：`windows-2022` / `macos-14`；手动触发（`workflow_dispatch`）仅构建并上传产物、不发布 Release；`publish-release` 仅在「推送标签 且 两个打包作业均成功」时运行。
 
+#### 追加修复（发布草稿陷阱）
+
+- **现象**：`82d8356` 那轮三个作业全绿、步骤「创建/更新 Release 并上传资产」显示 success，但 GitHub Releases 里 `v1.13.1` 始终查不到（REST API `releases/tags/v1.13.1` 返回 404，网页端却能看到）。
+- **根因**：该标签下已存在一个**网页端手动创建的草稿 Release**。工作流旧的发布逻辑是「`gh release view` 命中已存在 Release → 走 `gh release upload` 分支」，而 `upload` **不会把草稿发布出去**，于是步骤"成功"却只把资产传进草稿、草稿从未发布。草稿对 REST API 不可见，正好解释了 404。
+- **修复**：在「已存在 Release」分支里 `upload` 之后显式执行 `gh release edit <tag> --draft=false --latest` 把草稿转为已发布；并给发布脚本加 `set -e`，任何 `gh` 命令失败都会让步骤立即失败，杜绝再次"假成功"。`gh release create` 分支本身即发布态，不受影响。
+
 #### 过程中排查（重要结论）
 
 - 经 GitHub Releases API 与网页双向核验，仓库 `latest` 仍为 `v1.12.0`，此前的 `v1.13.0` / `v1.13.1` 标签**从未真正生成过 Release**——相关 run 要么构建失败、要么构建 success 却未产出 Release。

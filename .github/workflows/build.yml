@@ -139,7 +139,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          set -x
+          set -ex
           # 本作业已 checkout，gh 可自动解析仓库与目标 commit；再显式指定 GH_REPO 兜底
           export GH_REPO="$GITHUB_REPOSITORY"
           # 收集所有产物文件（忽略 artifact 目录结构）
@@ -151,19 +151,19 @@ jobs:
           echo "即将发布的文件："
           printf ' - %s\n' "${FILES[@]}"
 
-          emit_err() { while IFS= read -r l; do echo "::error::$l"; done; }
-
           if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
-            echo "Release $GITHUB_REF_NAME 已存在，追加/覆盖资产"
-            gh release upload "$GITHUB_REF_NAME" --clobber "${FILES[@]}" 2>gh_err.log \
-              || { echo "::error::gh release upload 失败："; cat gh_err.log | emit_err; exit 1; }
+            echo "Release $GITHUB_REF_NAME 已存在，覆盖上传资产并将其发布（含取消草稿状态）"
+            gh release upload "$GITHUB_REF_NAME" --clobber "${FILES[@]}" \
+              || { echo "::error::gh release upload 失败"; exit 1; }
+            # 关键：若已存在的是「草稿」，上面的 upload 不会发布它；必须显式取消草稿并标记为 latest
+            gh release edit "$GITHUB_REF_NAME" --draft=false --latest \
+              || { echo "::error::gh release edit（发布草稿）失败"; exit 1; }
           else
-            echo "创建 Release $GITHUB_REF_NAME 并附带资产"
+            echo "创建并发布 Release $GITHUB_REF_NAME"
             gh release create "$GITHUB_REF_NAME" \
               --title "$GITHUB_REF_NAME" \
-              --notes "自动打包发布 v1.13.1：Windows exe 安装包 + macOS dmg（Intel / Apple Silicon）。" \
+              --notes "自动打包发布 $GITHUB_REF_NAME：Windows exe 安装包 + macOS dmg（Intel / Apple Silicon）。" \
               --latest \
-              "${FILES[@]}" 2>gh_err.log \
-              || { echo "::error::gh release create 失败："; cat gh_err.log | emit_err; exit 1; }
+              "${FILES[@]}" \
+              || { echo "::error::gh release create 失败"; exit 1; }
           fi
-          set +x
