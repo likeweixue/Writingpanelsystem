@@ -1,7 +1,7 @@
 name: 📦 自动打包发布
 
 # 触发方式：
-#   1. 推送 v* 标签（如 v1.13.0）→ 打包并发布 GitHub Release，自动附带 dmg / exe
+#   1. 推送 v* 标签（如 v1.13.0）→ 打包 Windows exe + macOS dmg，并发布 GitHub Release
 #   2. Actions 页面手动运行（workflow_dispatch）→ 只打包上传 artifact，不发布 Release
 on:
   push:
@@ -9,7 +9,7 @@ on:
       - 'v*'
   workflow_dispatch:
 
-# electron-builder 发布 GitHub Release 需要写权限
+# 创建/发布 GitHub Release 需要写权限
 permissions:
   contents: write
 
@@ -29,20 +29,13 @@ jobs:
       - name: 📦 安装依赖
         run: npm install
 
-      - name: 🚀 打包并发布到 Release（仅推标签时）
-        if: startsWith(github.ref, 'refs/tags/')
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm run build-win -- --publish always
-
-      - name: 🚀 仅打包（手动触发时）
-        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+      - name: 🔨 打包 Windows（仅产出安装包，不发布）
         run: npm run build-win
 
       - name: 📤 上传产物
         uses: actions/upload-artifact@v4
         with:
-          name: WritingPanelSystem-Windows
+          name: win-artifacts
           path: dist/*.exe
 
   build-mac:
@@ -60,18 +53,40 @@ jobs:
       - name: 📦 安装依赖
         run: npm install
 
-      - name: 🚀 打包并发布到 Release（仅推标签时，双架构）
-        if: startsWith(github.ref, 'refs/tags/')
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm run build-mac -- --x64 --arm64 --publish always
-
-      - name: 🚀 仅打包（手动触发时）
-        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
-        run: npm run build-mac
+      - name: 🔨 打包 macOS（双架构，仅产出 dmg，不发布）
+        run: npm run build-mac -- --x64 --arm64
 
       - name: 📤 上传产物
         uses: actions/upload-artifact@v4
         with:
-          name: WritingPanelSystem-macOS
+          name: mac-artifacts
           path: dist/*.dmg
+
+  release:
+    name: 🚀 发布 GitHub Release
+    needs: [build-windows, build-mac]
+    runs-on: ubuntu-latest
+    # 仅当推送标签时才发布 Release；手动触发只产出 artifact
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: 📥 下载全部产物
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          pattern: '*-artifacts'
+          merge-multiple: true
+
+      - name: 🚀 创建并发布 Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # 若已存在同名 Release（含草稿），先删除再重建，保证幂等
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            echo "发现已存在的 Release，先删除：$GITHUB_REF_NAME"
+            gh release delete "$GITHUB_REF_NAME" --yes
+          fi
+          gh release create "$GITHUB_REF_NAME" \
+            --title "$GITHUB_REF_NAME" \
+            --generate-notes \
+            --latest \
+            artifacts/*
