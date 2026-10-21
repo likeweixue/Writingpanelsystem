@@ -16,7 +16,7 @@ permissions:
 jobs:
   build-windows:
     name: 🪟 Windows 打包（exe 安装包）
-    runs-on: windows-latest
+    runs-on: windows-2022
     steps:
       - name: 📥 拉取代码
         uses: actions/checkout@v4
@@ -30,9 +30,18 @@ jobs:
         run: npm install
 
       - name: 🔨 打包 Windows（仅产出安装包，不发布）
-        run: npm run build-win
+        shell: bash
+        run: npm run build-win 2>&1 | tee build-win.log; exit ${PIPESTATUS[0]}
+
+      - name: 📋 记录构建错误（仅失败时，便于排查）
+        if: failure()
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release create "ci-debug-win-${{ github.run_id }}" --prerelease --title "CI 构建错误(windows) #${{ github.run_id }}" --notes "$(tail -80 build-win.log 2>/dev/null || echo 'no log')" || true
 
       - name: 📤 上传产物
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: win-artifacts
@@ -40,7 +49,7 @@ jobs:
 
   build-mac:
     name: 🍎 macOS 打包（dmg，Intel + Apple Silicon）
-    runs-on: macos-latest
+    runs-on: macos-14
     steps:
       - name: 📥 拉取代码
         uses: actions/checkout@v4
@@ -54,9 +63,18 @@ jobs:
         run: npm install
 
       - name: 🔨 打包 macOS（双架构，仅产出 dmg，不发布）
-        run: npm run build-mac -- --x64 --arm64
+        shell: bash
+        run: npm run build-mac -- --x64 --arm64 2>&1 | tee build-mac.log; exit ${PIPESTATUS[0]}
+
+      - name: 📋 记录构建错误（仅失败时，便于排查）
+        if: failure()
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release create "ci-debug-mac-${{ github.run_id }}" --prerelease --title "CI 构建错误(macos) #${{ github.run_id }}" --notes "$(tail -80 build-mac.log 2>/dev/null || echo 'no log')" || true
 
       - name: 📤 上传产物
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: mac-artifacts
