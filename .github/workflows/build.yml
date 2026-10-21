@@ -127,6 +127,9 @@ jobs:
       needs.build-windows.result == 'success' &&
       needs.build-mac.result == 'success'
     steps:
+      - name: 📥 拉取代码（供 gh 解析仓库与标签 commit）
+        uses: actions/checkout@v4
+
       - name: 📥 下载两平台产物
         uses: actions/download-artifact@v4
         with:
@@ -137,7 +140,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -x
-          # 本作业未 checkout，无 .git 上下文；用 GH_REPO 显式告诉 gh 目标仓库
+          # 本作业已 checkout，gh 可自动解析仓库与目标 commit；再显式指定 GH_REPO 兜底
           export GH_REPO="$GITHUB_REPOSITORY"
           # 收集所有产物文件（忽略 artifact 目录结构）
           mapfile -t FILES < <(find artifacts -type f)
