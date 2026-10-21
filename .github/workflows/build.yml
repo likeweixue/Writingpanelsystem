@@ -29,11 +29,27 @@ jobs:
       - name: 📦 安装依赖
         run: npm install
 
-      - name: 🔨 打包（仅构建，不发布）
+      - name: 🔨 打包（仅构建，不发布，失败重试 3 次）
         shell: pwsh
         run: |
-          npm run build-win 2>&1 | Tee-Object -FilePath build-win.log
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $max = 3
+          $attempt = 0
+          $code = 1
+          do {
+            $attempt++
+            Write-Host "=== build-win attempt $attempt ==="
+            npm run build-win > build-win.log 2>&1
+            $code = $LASTEXITCODE
+            Get-Content build-win.log
+            if ($code -eq 0) { break }
+            Write-Host "build-win exited $code，5 秒后重试…"
+            Start-Sleep -Seconds 5
+          } while ($attempt -lt $max)
+          if ($code -ne 0) {
+            Write-Host "::error::build-win 最终失败，build-win.log 末尾如下："
+            Get-Content build-win.log -Tail 40 | ForEach-Object { Write-Host "::error::$_" }
+            exit $code
+          }
 
       - name: 📤 上传构建日志（失败时排查）
         if: failure()
@@ -64,10 +80,26 @@ jobs:
       - name: 📦 安装依赖
         run: npm install
 
-      - name: 🔨 打包（仅构建，不发布）
+      - name: 🔨 打包（仅构建，不发布，失败重试 3 次）
         run: |
-          npm run build-mac -- --x64 --arm64 2>&1 | tee build-mac.log
-          exit ${PIPESTATUS[0]}
+          max=3
+          attempt=0
+          code=1
+          while [ "$attempt" -lt "$max" ]; do
+            attempt=$((attempt+1))
+            echo "=== build-mac attempt $attempt ==="
+            npm run build-mac -- --x64 --arm64 > build-mac.log 2>&1
+            code=$?
+            cat build-mac.log
+            if [ "$code" -eq 0 ]; then break; fi
+            echo "build-mac exited $code，5 秒后重试…"
+            sleep 5
+          done
+          if [ "$code" -ne 0 ]; then
+            echo "::error::build-mac 最终失败，build-mac.log 末尾如下："
+            tail -n 40 build-mac.log | while IFS= read -r line; do echo "::error::$line"; done
+            exit "$code"
+          fi
 
       - name: 📤 上传构建日志（失败时排查）
         if: failure()
