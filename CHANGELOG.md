@@ -15,16 +15,17 @@
 
 ### 工程
 
-- 恢复并固化「经过验证」的发布配置：每个打包作业携带 `GH_TOKEN` 并运行 `electron-builder ... --publish always`，`package.json` 的 `build.publish` 指向 `github/likeweixue/Writingpanelsystem`。该配置（提交 `a3ee956`）实测曾成功产出 GitHub Release。
-- 新增幂等的 `publish-release` 兜底作业：构建完成后确保同名 Release 处于「已发布」且为 `latest` 状态（非草稿）。
-- 增加诊断能力：打包作业在失败时通过 `upload-artifact` 上传 `build-win.log` / `build-mac.log`，便于在构建失败时拿到真实报错（此前数轮失败仅暴露 `Process completed with exit code 1`，无详细日志，根因未能定位）。
-- 固定构建机镜像：`windows-2022` / `macos-14`；手动触发（`workflow_dispatch`）仅构建并上传产物、不发布 Release。
+- **重写发布架构为「构建与发布分离 + 确定性 `gh` 发布」**：两个打包作业（Windows / macOS）**只构建、不发布**，把 `dist/*.exe` / `dist/*.dmg` 作为 artifact 上传；独立的 `publish-release` 作业下载两平台产物后，用官方 `gh` CLI（`gh release create` / `gh release upload --clobber`）创建或更新 Release 并附带资产。该方式不依赖 electron-builder 的发布器，可被 API 直接核验。
+- 从 `package.json` 移除 `build.publish` 配置（构建作业不再尝试自行发布，发布完全由 `publish-release` 作业负责）。
+- 增加诊断能力：打包作业在失败时通过 `upload-artifact` 上传 `build-win.log` / `build-mac.log`，便于在构建失败时拿到真实报错。
+- 固定构建机镜像：`windows-2022` / `macos-14`；手动触发（`workflow_dispatch`）仅构建并上传产物、不发布 Release；`publish-release` 仅在「推送标签 且 两个打包作业均成功」时运行。
 
-#### 过程中排查与未决项
+#### 过程中排查（重要结论）
 
-- `v1.13.0`（`a3ee956`）之后，曾尝试把发布从打包作业剥离为独立 `release` 作业（提交 `c8f76ab` → `c0f384b` → `857e381`），即打包作业不再带 `GH_TOKEN`、也不再 `--publish always`、并一度删除 `build.publish`。这三轮**打包步骤均 `exit 1` 失败**，独立 `release` 作业因此被跳过、从未生成 Release。
-- 由于失败日志仅有一句 `exit code 1`，无法确认去掉发布是否为真正根因；但可确认的是：带 `--publish always` + `GH_TOKEN` 的 `a3ee956` 配置**实测成功**，而无该配置的三轮**实测失败**。故 `v1.13.1` 回退到验证可用的配置，并补上日志 artifact 以便未来若再失败可定位真实原因。
-- 原 `v1.13.0` 标签继续保留（仅作纯标签，无对应 Release）；以 **v1.13.1** 重新发版。
+- 此前数轮（提交 `a3ee956` → `c8f76ab` → `c0f384b` → `857e381` → `773d4d2`）无论采用「打包作业 `--publish always` + `GH_TOKEN`」还是「独立 `release` 作业 `gh` 兜底」，**均未真正生成过 Release**——经 GitHub Releases API 与网页双向核验，仓库 `latest` 仍为 `v1.12.0`，根本不存在 `v1.13.0` / `v1.13.1` 的 Release。即 electron-builder 的 `--publish always` 在本仓库 CI 中**静默跳过发布**（run 仍显示 success），旧方案并不可靠。
+- 上述 run 中 `773d4d2`（恢复 `--publish always` + `GH_TOKEN`）的构建作业虽 success，但 Release 依旧缺失，证实「依赖 electron-builder 发布器」此路不通。
+- 故 `v1.13.1` 最终改用「构建作业只产出 artifact + `gh release create` 确定性发布」的方案，移除 `build.publish`，并以标签 `v1.13.1` 重新发版验证。
+- 原 `v1.13.0` 标签继续保留（仅作纯标签，无对应 Release）。
 
 ---
 
