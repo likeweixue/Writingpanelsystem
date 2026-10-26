@@ -75,8 +75,8 @@ function openDialogueSidebar(tool) {
     if (rightSidebar) {
         rightSidebar.classList.remove('collapsed');
         rightSidebar.style.display = 'flex';
-        rightSidebar.style.width = '48px';
-        rightSidebar.style.minWidth = '48px';
+        rightSidebar.style.width = '60px';
+        rightSidebar.style.minWidth = '60px';
         localStorage.setItem('rightSidebar_collapsed', 'false');
     }
     
@@ -117,8 +117,8 @@ function closeDialogueFloatingPanel() {
     if (panel) { panel.remove(); }
     var rightSidebar = document.getElementById('rightSidebar');
     if (rightSidebar) {
-        rightSidebar.style.width = '48px';
-        rightSidebar.style.minWidth = '48px';
+        rightSidebar.style.width = '60px';
+        rightSidebar.style.minWidth = '60px';
     }
     var toolItems = document.querySelectorAll('.sidebar-tool-item');
     toolItems.forEach(function(item) {

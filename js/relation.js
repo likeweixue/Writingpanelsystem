@@ -605,8 +605,8 @@ function openRelationSidebar(tool) {
     if (rightSidebar) {
         rightSidebar.classList.remove('collapsed');
         rightSidebar.style.display = 'flex';
-        rightSidebar.style.width = '48px';
-        rightSidebar.style.minWidth = '48px';
+        rightSidebar.style.width = '60px';
+        rightSidebar.style.minWidth = '60px';
         localStorage.setItem('rightSidebar_collapsed', 'false');
     }
     var detailMain = document.querySelector('.detail-main');
@@ -648,8 +648,8 @@ function closeRelationFloatingPanel() {
     if (panel) { panel.remove(); }
     var rightSidebar = document.getElementById('rightSidebar');
     if (rightSidebar) {
-        rightSidebar.style.width = '48px';
-        rightSidebar.style.minWidth = '48px';
+        rightSidebar.style.width = '60px';
+        rightSidebar.style.minWidth = '60px';
     }
 }
 
@@ -965,8 +965,8 @@ function bindCompactRelationEvents() {
             closeRelationFloatingPanel();
             var rightSidebar = document.getElementById('rightSidebar');
             if (rightSidebar) {
-                rightSidebar.style.width = '48px';
-                rightSidebar.style.minWidth = '48px';
+                rightSidebar.style.width = '60px';
+                rightSidebar.style.minWidth = '60px';
             }
         };
     }
@@ -1106,9 +1106,7 @@ function saveRelationData() {
     var key = 'openwrite_relation_' + (currentBookId || 'global');
     var data = { entities: relationData.entities, relations: relationData.relations, selectedId: selectedId, nextId: relationData.nextId || 1 };
     localStorage.setItem(key, JSON.stringify(data));
-    if (window.opener && window.opener.window) {
-        try { window.opener.window.location.reload(); } catch(e) {}
-    }
+    if (window.WPSPanel) { try { window.WPSPanel.notify('relation', { entities: relationData.entities, relations: relationData.relations, selectedId: selectedId, nextId: relationData.nextId }); } catch(e) {} }
 }
 function selectEntity(id) { selectedId = id; saveRelationData(); renderEntities(); renderRelations(); renderCanvas(); }
 function renderEntities() {

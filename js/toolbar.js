@@ -1467,10 +1467,12 @@ function exportBookToDocxFolderStructure(book) {
 
 // 生成单个章节的 DOCX 文件内容（返回 Blob）
 function generateSingleChapterDocx(bookTitle, volName, chapterTitle, content) {
-    // 提取纯文本
+    // 提取纯文本：先把块级结束标签和 <br> 转成换行，否则 detached 元素的 innerText 可能没有分段
     var tempDiv = document.createElement('div');
-    tempDiv.innerHTML = content;
-    var textContent = tempDiv.innerText;
+    tempDiv.innerHTML = String(content || '')
+        .replace(/<br\s*\/?>/gi, '\n')
+        .replace(/<\/(p|div|h[1-6]|li|blockquote|tr)>/gi, '\n');
+    var textContent = tempDiv.textContent || tempDiv.innerText || '';
     
     // 处理段落
     var paragraphs = textContent.split(/\n+/);

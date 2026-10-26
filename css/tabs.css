@@ -1,0 +1,1011 @@
+/* ============================================================
+   浏览器风格标签页 + 统一图标外观
+   该文件在主题样式之后加载，用来覆盖各主题里旧的胶囊标签样式。
+   ============================================================ */
+
+:root {
+    --wps-accent: #2563eb;
+    --wps-accent-soft: rgba(37, 99, 235, 0.12);
+    --wps-tabstrip-bg: #dfe3e8;
+    --wps-tabstrip-border: #c7ccd4;
+    --wps-tab-bg: transparent;
+    --wps-tab-hover: rgba(255, 255, 255, 0.42);
+    --wps-tab-active: #ffffff;
+    --wps-tab-text: #4b5563;
+    --wps-tab-active-text: #1f2937;
+    --wps-tab-icon: #64748b;
+    --wps-tab-active-icon: #2563eb;
+    --wps-tab-divider: rgba(0, 0, 0, 0.13);
+    --wps-tab-close-hover: rgba(0, 0, 0, 0.1);
+    --wps-tab-shadow: rgba(15, 23, 42, 0.1);
+    --wps-toolbar-text: #374151;
+}
+
+body.theme-eye {
+    --wps-accent: #2f6b3d;
+    --wps-accent-soft: rgba(47, 107, 61, 0.14);
+    --wps-tabstrip-bg: #aebfa9;
+    --wps-tabstrip-border: #99ad96;
+    --wps-tab-hover: rgba(200, 219, 197, 0.55);
+    --wps-tab-active: #c8dbc5;
+    --wps-tab-text: #3f5a43;
+    --wps-tab-active-text: #21351f;
+    --wps-tab-icon: #54705a;
+    --wps-tab-active-icon: #2f6b3d;
+    --wps-tab-divider: rgba(44, 62, 47, 0.16);
+    --wps-tab-close-hover: rgba(44, 62, 47, 0.12);
+    --wps-toolbar-text: #2c3e2f;
+}
+
+body.theme-warm {
+    --wps-accent: #8a6a3a;
+    --wps-accent-soft: rgba(138, 106, 58, 0.14);
+    --wps-tabstrip-bg: #c6baa1;
+    --wps-tabstrip-border: #b3a58a;
+    --wps-tab-hover: rgba(223, 213, 189, 0.55);
+    --wps-tab-active: #dfd5bd;
+    --wps-tab-text: #6b5941;
+    --wps-tab-active-text: #3a2d1f;
+    --wps-tab-icon: #7d6a4f;
+    --wps-tab-active-icon: #8a6a3a;
+    --wps-tab-divider: rgba(74, 59, 44, 0.16);
+    --wps-tab-close-hover: rgba(74, 59, 44, 0.12);
+    --wps-toolbar-text: #4a3b2c;
+}
+
+body.theme-dark {
+    --wps-accent: #8ab4ff;
+    --wps-accent-soft: rgba(138, 180, 255, 0.16);
+    --wps-tabstrip-bg: #12121e;
+    --wps-tabstrip-border: #2b2b40;
+    --wps-tab-hover: rgba(255, 255, 255, 0.07);
+    --wps-tab-active: #1e1e2e;
+    --wps-tab-text: #a9b0c6;
+    --wps-tab-active-text: #f1f5f9;
+    --wps-tab-icon: #8b93ad;
+    --wps-tab-active-icon: #8ab4ff;
+    --wps-tab-divider: rgba(255, 255, 255, 0.09);
+    --wps-tab-close-hover: rgba(255, 255, 255, 0.12);
+    --wps-tab-shadow: rgba(0, 0, 0, 0.35);
+    --wps-toolbar-text: #d7dcec;
+}
+
+body.theme-open {
+    --wps-accent: #2563eb;
+    --wps-accent-soft: rgba(37, 99, 235, 0.14);
+    --wps-tabstrip-bg: rgba(255, 255, 255, 0.14);
+    --wps-tabstrip-border: rgba(255, 255, 255, 0.2);
+    --wps-tab-hover: rgba(255, 255, 255, 0.24);
+    --wps-tab-active: rgba(255, 255, 255, 0.5);
+    --wps-tab-text: #334155;
+    --wps-tab-active-text: #0f172a;
+    --wps-tab-icon: #475569;
+    --wps-tab-active-icon: #1d4ed8;
+    --wps-tab-divider: rgba(0, 0, 0, 0.1);
+    --wps-tab-close-hover: rgba(0, 0, 0, 0.1);
+}
+
+body.has-custom-bg {
+    --wps-accent: #ffffff;
+    --wps-accent-soft: rgba(255, 255, 255, 0.16);
+    --wps-tabstrip-bg: rgba(12, 16, 24, 0.34);
+    --wps-tabstrip-border: rgba(255, 255, 255, 0.14);
+    --wps-tab-hover: rgba(255, 255, 255, 0.13);
+    --wps-tab-active: rgba(255, 255, 255, 0.24);
+    --wps-tab-text: rgba(255, 255, 255, 0.78);
+    --wps-tab-active-text: #ffffff;
+    --wps-tab-icon: rgba(255, 255, 255, 0.7);
+    --wps-tab-active-icon: #ffffff;
+    --wps-tab-divider: rgba(255, 255, 255, 0.16);
+    --wps-tab-close-hover: rgba(255, 255, 255, 0.2);
+    --wps-toolbar-text: rgba(255, 255, 255, 0.85);
+}
+
+/* ---------- 标签栏 ---------- */
+
+body .app-container > .tabs-container {
+    display: flex !important;
+    align-items: flex-end !important;
+    flex-shrink: 0 !important;
+    height: 42px !important;
+    min-height: 42px !important;
+    padding: 8px 10px 0 10px !important;
+    margin: 0 !important;
+    gap: 2px !important;
+    background: var(--wps-tabstrip-bg) !important;
+    border: 0 !important;
+    border-bottom: 1px solid var(--wps-tabstrip-border) !important;
+    border-radius: 0 !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+    backdrop-filter: blur(16px);
+    overflow-x: auto;
+    overflow-y: hidden;
+    position: relative;
+    z-index: 20;
+    scrollbar-width: none;
+}
+
+body .tabs-container::-webkit-scrollbar {
+    height: 0;
+    display: none;
+}
+
+body .tabs-container .tab {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    flex: 0 1 200px;
+    min-width: 108px;
+    max-width: 230px;
+    height: 34px;
+    padding: 0 8px 0 12px;
+    margin: 0 !important;
+    border: 1px solid transparent;
+    border-bottom: 0 !important;
+    border-radius: 9px 9px 0 0 !important;
+    background: var(--wps-tab-bg) !important;
+    color: var(--wps-tab-text) !important;
+    font-size: 12.5px;
+    font-weight: 500;
+    line-height: 1;
+    cursor: pointer;
+    user-select: none;
+    overflow: hidden;
+    transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+body .tabs-container .tab:hover {
+    background: var(--wps-tab-hover) !important;
+    color: var(--wps-tab-active-text) !important;
+}
+
+body .tabs-container .tab.active {
+    height: 35px;
+    margin-bottom: -1px !important;
+    background: var(--wps-tab-active) !important;
+    color: var(--wps-tab-active-text) !important;
+    border-color: var(--wps-tabstrip-border) !important;
+    border-bottom-color: transparent !important;
+    box-shadow: 0 -1px 2px var(--wps-tab-shadow) !important;
+    z-index: 2;
+    font-weight: 600;
+}
+
+/* 非活动标签之间的细分隔线 */
+body .tabs-container .tab::before {
+    content: '';
+    position: absolute;
+    left: -1px;
+    top: 9px;
+    bottom: 9px;
+    width: 1px;
+    background: var(--wps-tab-divider);
+    opacity: 1;
+    transition: opacity 0.12s;
+}
+
+body .tabs-container .tab:first-child::before,
+body .tabs-container .tab:hover::before,
+body .tabs-container .tab.active::before,
+body .tabs-container .tab.active + .tab::before,
+body .tabs-container .tab.dragging::before {
+    opacity: 0;
+}
+
+body .tabs-container .tab.dragging {
+    opacity: 0.45;
+}
+
+body .tabs-container .tab.drag-over-left::after,
+body .tabs-container .tab.drag-over-right::after {
+    content: '';
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    width: 2px;
+    border-radius: 2px;
+    background: var(--wps-accent);
+    z-index: 4;
+}
+
+body .tabs-container .tab.drag-over-left::after { left: -1px; }
+body .tabs-container .tab.drag-over-right::after { right: -1px; }
+
+body .tabs-container .tab-icon .wps-icon {
+    width: 15px;
+    height: 15px;
+}
+
+body .tabs-container .tab-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 15px;
+    height: 15px;
+    flex: 0 0 15px;
+    color: var(--wps-tab-icon);
+}
+
+body .tabs-container .tab.active .tab-icon {
+    color: var(--wps-tab-active-icon);
+}
+
+body .tabs-container .tab-title {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: inherit !important;
+}
+
+body .tabs-container .tab-close {
+    display: inline-flex;
+    pointer-events: none;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    flex: 0 0 18px;
+    margin-left: 1px;
+    border-radius: 50%;
+    color: inherit;
+    opacity: 0;
+    transition: opacity 0.12s, background 0.12s;
+}
+
+body .tabs-container .tab:hover .tab-close,
+body .tabs-container .tab.active .tab-close {
+    opacity: 0.6;
+    pointer-events: auto;
+}
+
+body .tabs-container .tab-close:hover {
+    opacity: 1 !important;
+    background: var(--wps-tab-close-hover);
+}
+
+body .tabs-container .new-tab-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    flex: 0 0 28px;
+    margin: 0 0 3px 4px;
+    border: 0;
+    border-radius: 7px;
+    background: transparent;
+    color: var(--wps-tab-text);
+    cursor: pointer;
+    transition: background 0.12s, color 0.12s;
+}
+
+body .tabs-container .new-tab-btn:hover {
+    background: var(--wps-tab-hover);
+    color: var(--wps-tab-active-text);
+}
+
+body .tabs-container .tab-strip-filler {
+    flex: 1 1 auto;
+    min-width: 20px;
+    height: 100%;
+    -webkit-app-region: drag;
+}
+
+/* ---------- 标签页右键菜单 ---------- */
+
+.wps-tab-menu {
+    position: fixed;
+    z-index: 100000;
+    min-width: 164px;
+    padding: 5px;
+    border-radius: 10px;
+    border: 1px solid var(--border-color, rgba(0, 0, 0, 0.08));
+    background: #ffffff;
+    box-shadow: 0 12px 34px rgba(15, 23, 42, 0.22);
+}
+
+.wps-tab-menu button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 7px 10px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: #374151;
+    font-size: 12.5px;
+    text-align: left;
+    cursor: pointer;
+}
+
+.wps-tab-menu button:hover {
+    background: rgba(37, 99, 235, 0.1);
+    color: #1d4ed8;
+}
+
+.wps-tab-menu .wps-icon {
+    width: 14px;
+    height: 14px;
+}
+
+body.theme-dark .wps-tab-menu {
+    background: #25253a;
+    border-color: #3a3a52;
+}
+
+body.theme-dark .wps-tab-menu button {
+    color: #d7dcec;
+}
+
+body.theme-dark .wps-tab-menu button:hover {
+    background: rgba(138, 180, 255, 0.14);
+    color: #ffffff;
+}
+
+/* ---------- 左侧导航 ---------- */
+
+body .sidebar-menu {
+    width: 196px;
+    min-width: 196px;
+}
+
+body .logo-area {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 14px !important;
+}
+
+body .logo-mark {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+    border-radius: 11px;
+    background: linear-gradient(135deg, #9b784e, #c8a96e);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(155, 120, 78, 0.28);
+}
+
+body .logo-mark .wps-icon {
+    width: 21px;
+    height: 21px;
+}
+
+body .logo-text h3 {
+    font-size: 16px;
+    line-height: 1.2;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    white-space: nowrap;
+}
+
+body .logo-en {
+    margin-top: 2px;
+    font-size: 8.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.45;
+    white-space: nowrap;
+}
+
+body .logo-text .slogan {
+    margin-top: 4px;
+    font-size: 9.5px;
+    opacity: 0.55;
+    white-space: nowrap;
+}
+
+body .menu-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: auto;
+    margin: 2px 8px;
+    padding: 9px 12px;
+    border: 0 !important;
+    border-radius: 8px;
+    font-size: 13.5px;
+    color: inherit;
+    transition: background 0.12s, color 0.12s;
+}
+
+body .menu-item:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+body .menu-item.active {
+    background: var(--wps-accent-soft) !important;
+    color: var(--wps-accent) !important;
+    font-weight: 600;
+}
+
+body .menu-item .menu-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    flex: 0 0 18px;
+    color: #6b7280;
+}
+
+body .menu-item.active .menu-icon {
+    color: var(--wps-accent);
+}
+
+body .menu-item .wps-icon {
+    width: 17px;
+    height: 17px;
+}
+
+body .menu-footer {
+    font-size: 10px;
+    letter-spacing: 0.02em;
+}
+
+body.theme-dark .menu-item:hover {
+    background: rgba(255, 255, 255, 0.07);
+}
+
+body.theme-dark .menu-item .menu-icon {
+    color: #8b93ad;
+}
+
+body.theme-dark .menu-item.active .menu-icon {
+    color: var(--wps-accent);
+}
+
+body.has-custom-bg .menu-item:hover {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+body.has-custom-bg .menu-item.active {
+    background: rgba(255, 255, 255, 0.18) !important;
+    color: #ffffff !important;
+}
+
+body.has-custom-bg .menu-item .menu-icon {
+    color: rgba(255, 255, 255, 0.75);
+}
+
+/* ---------- 顶部工具栏 / 书籍页 ---------- */
+
+body .main-toolbar {
+    padding: 7px 14px !important;
+    gap: 3px !important;
+    border-bottom: 1px solid var(--border-color, rgba(0, 0, 0, 0.08));
+}
+
+body .toolbar-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px !important;
+    border-radius: 7px;
+    font-size: 12.5px;
+    color: var(--wps-toolbar-text);
+}
+
+body .toolbar-btn:hover {
+    background: rgba(0, 0, 0, 0.06);
+}
+
+body .toolbar-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    flex: 0 0 16px;
+}
+
+body .toolbar-icon .wps-icon {
+    width: 16px;
+    height: 16px;
+}
+
+body .books-header h2 {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 22px;
+}
+
+body .page-heading-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    color: #9b784e;
+}
+
+body .page-heading-icon .wps-icon {
+    width: 23px;
+    height: 23px;
+}
+
+body .books-header-buttons button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+body .books-header-buttons .wps-icon-slot {
+    width: 15px;
+    height: 15px;
+}
+
+body .books-header-buttons .wps-icon {
+    width: 15px;
+    height: 15px;
+}
+
+body .group-header h3 {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+body .group-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 17px;
+    height: 17px;
+    color: #9b784e;
+}
+
+body .group-icon .wps-icon {
+    width: 17px;
+    height: 17px;
+}
+
+body .book-cover-watermark {
+    position: relative;
+    z-index: 1;
+    margin-bottom: 6px;
+    color: #9b784e;
+    opacity: 0.22;
+}
+
+body .book-cover-watermark .wps-icon {
+    width: 52px;
+    height: 52px;
+}
+
+/* ---------- 工具图标尺寸 ---------- */
+
+body .right-sidebar:not(.expanded):not(.collapsed) {
+    width: 60px !important;
+    min-width: 60px !important;
+    max-width: 60px !important;
+}
+
+body .right-sidebar-content {
+    padding: 8px 0 !important;
+}
+
+body .right-sidebar .sidebar-tool-item {
+    padding: 9px 2px !important;
+    margin: 2px 0 !important;
+}
+
+body .right-sidebar .sidebar-tool-label {
+    display: block !important;
+    font-size: 10.5px !important;
+    line-height: 1.2 !important;
+    letter-spacing: 0 !important;
+    white-space: nowrap !important;
+}
+
+body .sidebar-tool-icon .wps-icon,
+body .icon-sidebar-icon .wps-icon {
+    width: 24px;
+    height: 24px;
+}
+
+body .sidebar-tool-icon .wps-icon-slot,
+body .icon-sidebar-icon .wps-icon-slot {
+    width: 24px;
+    height: 24px;
+}
+
+body .settings-menu-item .wps-icon {
+    width: 19px;
+    height: 19px;
+}
+
+body .tool-expand-btn .wps-icon {
+    width: 13px;
+    height: 13px;
+}
+
+body .right-sidebar-header .wps-icon {
+    width: 16px;
+    height: 16px;
+}
+
+/* 深色主题下固定白底按钮里的图标保持深色 */
+body.theme-dark .btn-primary .wps-icon,
+body.theme-dark .btn-danger .wps-icon {
+    color: inherit;
+}
+
+/* 自定义背景优先级最高：确保标签在玻璃层上仍然清晰 */
+body.has-custom-bg {
+    --wps-accent: #ffffff;
+    --wps-accent-soft: rgba(255, 255, 255, 0.16);
+    --wps-tabstrip-bg: rgba(12, 16, 24, 0.38);
+    --wps-tabstrip-border: rgba(255, 255, 255, 0.16);
+    --wps-tab-hover: rgba(255, 255, 255, 0.14);
+    --wps-tab-active: rgba(255, 255, 255, 0.26);
+    --wps-tab-text: rgba(255, 255, 255, 0.8);
+    --wps-tab-active-text: #ffffff;
+    --wps-tab-icon: rgba(255, 255, 255, 0.72);
+    --wps-tab-active-icon: #ffffff;
+    --wps-tab-divider: rgba(255, 255, 255, 0.18);
+    --wps-tab-close-hover: rgba(255, 255, 255, 0.2);
+}
+
+/* 暗色主题下的书籍卡片（书封原本是固定的浅灰底，文字会跟着变白导致看不清） */
+body.theme-dark .book-card {
+    background: #25253a !important;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+body.theme-dark .book-cover {
+    background: #2a2a3a !important;
+}
+
+body.theme-dark .book-cover h4 {
+    color: #f1f5f9 !important;
+}
+
+body.theme-dark .book-cover p {
+    color: #a9b0c6 !important;
+}
+
+body.theme-dark .book-cover-watermark {
+    color: #c8a96e !important;
+    opacity: 0.35;
+}
+
+body.theme-dark .group-header h3 {
+    color: #e6e9f2;
+}
+
+/* ---------- 输入框主题变量（很多模块用 var(--input-bg, #f8f8f8)） ---------- */
+:root {
+    --input-bg: #f8f8f8;
+}
+
+body.theme-eye { --input-bg: rgba(255, 255, 255, 0.42); }
+body.theme-warm { --input-bg: rgba(255, 255, 255, 0.4); }
+body.theme-dark { --input-bg: #25253a; }
+body.theme-open { --input-bg: rgba(255, 255, 255, 0.58); }
+body.has-custom-bg { --input-bg: rgba(0, 0, 0, 0.3); }
+
+body.theme-dark #settingsContainer [style*="background:rgba(255,255,255,0.6)"],
+body.theme-dark #settingsContainer [style*="background:rgba(255,255,255,0.3)"],
+body.theme-dark #settingsContainer [style*="background:rgba(255,255,255,0.5)"] {
+    background: rgba(255, 255, 255, 0.055) !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+body.theme-dark #settingsContainer [style*="background:rgba(0,0,0,0.02)"] {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+body.theme-dark #settingsContainer input,
+body.theme-dark #settingsContainer textarea,
+body.theme-dark #settingsContainer select {
+    background: var(--input-bg) !important;
+    color: var(--text-color) !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+body.theme-dark #settingsContainer input::placeholder,
+body.theme-dark #settingsContainer textarea::placeholder {
+    color: rgba(255, 255, 255, 0.35) !important;
+}
+
+body.theme-dark #settingsContainer .settings-menu-item.active {
+    background: rgba(138, 180, 255, 0.12) !important;
+    color: #8ab4ff !important;
+}
+
+body.theme-dark #settingsContainer .settings-menu-item.active .wps-icon {
+    color: #8ab4ff;
+}
+
+/* 暗色主题下书籍编辑器的输入框/按钮可读性 */
+body.theme-dark .title-input,
+body.theme-dark #chapterTitle {
+    color: #f1f5f9 !important;
+}
+
+body.theme-dark #chapterTitle::placeholder {
+    color: rgba(255, 255, 255, 0.35) !important;
+}
+
+body.theme-dark .top-actions #addVolumeBtn {
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: #e6e9f2 !important;
+}
+
+body.theme-dark .top-actions #addChapterBtn {
+    background: rgba(40, 167, 69, 0.32) !important;
+    color: #ffffff !important;
+}
+
+body.theme-dark .top-actions .trash-btn {
+    background: rgba(255, 255, 255, 0.06) !important;
+    color: #e6e9f2 !important;
+}
+
+body.theme-dark .chapter-item.active {
+    background: rgba(138, 180, 255, 0.14) !important;
+}
+
+body.theme-dark .chapter-item.active .chapter-title {
+    color: #8ab4ff !important;
+}
+
+/* ============================================================
+   标签页与主内容融为一体 + 主题色卡片
+   ============================================================ */
+
+:root {
+    --wps-surface: #ffffff;
+    --wps-tab-active: #ffffff;
+    --stats-card-bg: #ffffff;
+    --stats-card-border: rgba(15, 23, 42, 0.08);
+    --stats-tile-bg: #f8fafc;
+    --stats-tile-border: rgba(15, 23, 42, 0.05);
+    --book-cover-bg: #f0f1f3;
+}
+
+body.theme-eye {
+    --wps-surface: #c8dbc5;
+    --wps-tab-active: #c8dbc5;
+    --stats-card-bg: rgba(255, 255, 255, 0.28);
+    --stats-card-border: rgba(44, 62, 47, 0.12);
+    --stats-tile-bg: rgba(255, 255, 255, 0.36);
+    --stats-tile-border: rgba(44, 62, 47, 0.08);
+    --book-cover-bg: #b9cdb5;
+}
+
+body.theme-warm {
+    --wps-surface: #dfd5bd;
+    --wps-tab-active: #dfd5bd;
+    --stats-card-bg: rgba(255, 255, 255, 0.28);
+    --stats-card-border: rgba(74, 59, 44, 0.12);
+    --stats-tile-bg: rgba(255, 255, 255, 0.36);
+    --stats-tile-border: rgba(74, 59, 44, 0.08);
+    --book-cover-bg: #cfc3a8;
+}
+
+body.theme-dark {
+    --wps-surface: #1e1e2e;
+    --wps-tab-active: #1e1e2e;
+    --stats-card-bg: #242438;
+    --stats-card-border: rgba(255, 255, 255, 0.08);
+    --stats-tile-bg: rgba(255, 255, 255, 0.06);
+    --stats-tile-border: rgba(255, 255, 255, 0.07);
+    --book-cover-bg: #2a2a3a;
+}
+
+body.theme-open {
+    --stats-card-bg: rgba(255, 255, 255, 0.55);
+    --stats-card-border: rgba(15, 23, 42, 0.06);
+    --stats-tile-bg: rgba(255, 255, 255, 0.5);
+    --stats-tile-border: rgba(15, 23, 42, 0.05);
+    --book-cover-bg: rgba(255, 255, 255, 0.34);
+}
+
+body.has-custom-bg {
+    --text-color: #ffffff;
+    --border-color: rgba(255, 255, 255, 0.18);
+    --stats-card-bg: rgba(15, 23, 42, 0.32);
+    --stats-card-border: rgba(255, 255, 255, 0.13);
+    --stats-tile-bg: rgba(255, 255, 255, 0.08);
+    --stats-tile-border: rgba(255, 255, 255, 0.1);
+    --book-cover-bg: rgba(15, 23, 42, 0.35);
+}
+
+/* 标签和下方主区域使用同一块“纸张”表面 */
+body:not(.theme-open):not(.has-custom-bg) .main-wrapper,
+body:not(.theme-open):not(.has-custom-bg) .main-content,
+body:not(.theme-open):not(.has-custom-bg) .main-toolbar,
+body:not(.theme-open):not(.has-custom-bg) .sidebar-menu {
+    background: var(--wps-surface) !important;
+}
+
+body .tabs-container .tab.active {
+    background: var(--wps-tab-active) !important;
+    border-bottom-color: transparent !important;
+    overflow: visible !important;
+    z-index: 6;
+    box-shadow: 0 1px 0 0 var(--wps-tab-active), 0 -1px 2px var(--wps-tab-shadow) !important;
+}
+
+/* 底部两个向外翻的圆弧 */
+body .tabs-container .tab-flare {
+    position: absolute;
+    bottom: -1px;
+    width: 12px;
+    height: 12px;
+    display: block;
+    pointer-events: none;
+    z-index: 5;
+}
+
+body .tabs-container .tab-flare-left {
+    left: -12px;
+    background: radial-gradient(circle at 100% 0, transparent 11.4px, var(--wps-tab-active) 12px);
+}
+
+body .tabs-container .tab-flare-right {
+    right: -12px;
+    background: radial-gradient(circle at 0 0, transparent 11.4px, var(--wps-tab-active) 12px);
+}
+
+/* 统计页卡片跟随主题色 */
+#statsContainer .drag-item {
+    background: var(--stats-card-bg) !important;
+    border-color: var(--stats-card-border) !important;
+    backdrop-filter: blur(16px);
+}
+
+#statsContainer .stat-tile {
+    background: var(--stats-tile-bg) !important;
+    border-color: var(--stats-tile-border) !important;
+}
+
+body.has-custom-bg #statsContainer .drag-item {
+    color: #ffffff;
+}
+
+/* 设置页卡片在彩色主题下也透出主题底色 */
+body.theme-eye #settingsContainer [style*="background:rgba(255,255,255,0.6)"],
+body.theme-warm #settingsContainer [style*="background:rgba(255,255,255,0.6)"] {
+    background: rgba(255, 255, 255, 0.3) !important;
+}
+
+body.theme-open #settingsContainer [style*="background:rgba(255,255,255,0.6)"] {
+    background: rgba(255, 255, 255, 0.5) !important;
+}
+
+body.has-custom-bg #settingsContainer [style*="background:rgba(255,255,255,0.6)"] {
+    background: rgba(15, 23, 42, 0.3) !important;
+    border-color: rgba(255, 255, 255, 0.14) !important;
+    color: #ffffff;
+}
+
+/* 书籍封面底色跟随主题 */
+body .book-cover {
+    background: var(--book-cover-bg) !important;
+}
+
+body.has-custom-bg .book-cover h4,
+body.has-custom-bg .book-cover p {
+    color: #ffffff !important;
+}
+
+/* 文字颜色跟随变量 */
+body.has-custom-bg #statsContainer .drag-item [style*="color:#888"] {
+    color: rgba(255, 255, 255, 0.62) !important;
+}
+
+/* 让底部细线只存在于标签栏空白处，活动标签与主内容之间不再被切开 */
+body .app-container > .tabs-container {
+    border-bottom: 0 !important;
+}
+
+body .app-container > .tabs-container::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    background: var(--wps-tabstrip-border);
+    pointer-events: none;
+    z-index: 0;
+}
+
+body .tabs-container .tab {
+    z-index: 1;
+}
+
+body .tabs-container .tab.active {
+    z-index: 6;
+}
+
+/* 用背景渐变画底部细线，避免父级 border 画在活动标签上面 */
+body .app-container > .tabs-container {
+    border-bottom: 0 !important;
+    box-shadow: none !important;
+    background: linear-gradient(
+        to bottom,
+        var(--wps-tabstrip-bg) calc(100% - 1px),
+        var(--wps-tabstrip-border) calc(100% - 1px)
+    ) !important;
+}
+
+body .app-container > .tabs-container::after {
+    display: none !important;
+}
+
+/* 深色/自定义背景下统计页的日历格子与趋势零值 */
+body.theme-dark #statsContainer [style*="background:#ebedf0"],
+body.theme-dark #statsContainer [style*="background: #ebedf0"] {
+    background: #2a2a3a !important;
+    color: rgba(255, 255, 255, 0.55) !important;
+}
+
+body.theme-dark #statsContainer [style*="background:#e8e8e8"],
+body.theme-dark #statsContainer [style*="background: #e8e8e8"] {
+    background: #2a2a3a !important;
+}
+
+body.has-custom-bg #statsContainer [style*="background:#ebedf0"],
+body.has-custom-bg #statsContainer [style*="background: #ebedf0"] {
+    background: rgba(255, 255, 255, 0.09) !important;
+    color: rgba(255, 255, 255, 0.55) !important;
+}
+
+body.has-custom-bg #statsContainer [style*="background:#e8e8e8"],
+body.has-custom-bg #statsContainer [style*="background: #e8e8e8"] {
+    background: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* 自定义背景的变量必须放在所有主题变量之后，否则会被主题色覆盖 */
+body.has-custom-bg {
+    --text-color: #ffffff !important;
+    --border-color: rgba(255, 255, 255, 0.18) !important;
+    --wps-tabstrip-bg: rgba(12, 16, 24, 0.38);
+    --wps-tabstrip-border: rgba(255, 255, 255, 0.16);
+    --wps-tab-hover: rgba(255, 255, 255, 0.14);
+    --wps-tab-active: rgba(255, 255, 255, 0.26);
+    --wps-tab-text: rgba(255, 255, 255, 0.8);
+    --wps-tab-active-text: #ffffff;
+    --wps-tab-icon: rgba(255, 255, 255, 0.72);
+    --wps-tab-active-icon: #ffffff;
+    --wps-tab-divider: rgba(255, 255, 255, 0.18);
+    --wps-tab-close-hover: rgba(255, 255, 255, 0.2);
+    --wps-surface: transparent;
+    --stats-card-bg: rgba(15, 23, 42, 0.32);
+    --stats-card-border: rgba(255, 255, 255, 0.13);
+    --stats-tile-bg: rgba(255, 255, 255, 0.08);
+    --stats-tile-border: rgba(255, 255, 255, 0.1);
+    --book-cover-bg: rgba(15, 23, 42, 0.35);
+    --wps-accent: #ffffff;
+    --wps-accent-soft: rgba(255, 255, 255, 0.16);
+}
+
+/* 自定义背景时页面正文使用白色文字（卡片/输入框已有独立深色底） */
+body.has-custom-bg .page {
+    color: #ffffff !important;
+}
+
+body.has-custom-bg #settingsContent h3,
+body.has-custom-bg #settingsContent h4 {
+    color: #ffffff !important;
+}
+
+/* 自定义背景时，设置/数据页的底层不遮挡背景图 */
+body.has-custom-bg #settingsContainer,
+body.has-custom-bg #settingsContainer > div,
+body.has-custom-bg #statsContainer > div {
+    background: transparent !important;
+}

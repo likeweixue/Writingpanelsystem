@@ -9,6 +9,32 @@
 
 ---
 
+## [Unreleased]
+
+### 修复
+
+- **Windows 安装包点击「设置」没有反应**：`getDefaultBackupPath()` 在渲染进程读取 `process.env.USERNAME`，而 Electron 开启了 `contextIsolation`，Windows 上会直接抛 `ReferenceError`，导致设置页渲染中断。现改为优先使用 preload 暴露的真实用户目录，浏览器预览回退到 `%USERPROFILE%` / `~/Documents`，并给设置初始化加了兜底。
+- **全屏大纲窗口保存时主窗口「卡住 / 刷新」**：9 个工具面板的保存函数里都有 `window.opener.location.reload()`，面板每自动保存一次就重载主窗口。现统一改为 `postMessage` 增量同步，只重绘对应工具，不再刷新页面；关闭面板也不会影响写作界面。
+- **多本书标签页串数据**：书籍编辑器只保留一份页面 DOM，切换书籍时先保存再重建，避免两个页面同时存在 `#editor` / `#chapterTitle` 时 `getElementById` 永远命中第一份、把 B 书写进 A 书的问题。
+- **大纲紧凑面板搜索框失效**：绑定时查找的 `compactOutlineSearch` 与真实 id `outlineSearchInput` 不一致。
+- **树节点箭头点击误选中**：图标替换后事件目标变成 SVG，原 `e.target === toggle` 判断失效，统一改为 `toggle.contains(e.target)`。
+- **删除失效的 docx CDN 引用**：原地址 `docx@8.5.0/build/index.min.js` 在 npm 包中并不存在，且项目实际用 JSZip 手写 DOCX，已移除无用外部依赖，离线启动不再受它影响。
+- **DOCX 导出的段落丢失**：detached 元素的 `innerText` 不可靠，改为先把 `<br>` / 块级结束标签转成换行再取文本。
+- **重复的右侧工具栏**：`sidebar.js` 会在页面加载 500ms 后自动创建一份 `#rightSidebar`，打开书籍后又生成第二份，产生重复 id。现只保留书籍编辑器内的一份。
+- **暗色 / Open 主题数据页可读性**：补充统计卡片与日历格子的主题覆盖。
+
+### 变更
+
+- **顶部标签栏改为浏览器风格**：圆角标签、类型图标、悬停关闭、中键关闭、右键菜单（关闭其他/右侧）、拖动排序、横向滚动、`+` 新建标签；标签栏高度与工具栏对齐。
+- **标签页与主内容融为一体**：活动标签与下方主内容使用同一块主题表面，底部左右两个角改为 Chrome 式向外翻的圆弧，标签栏底部细线不再穿过活动标签。
+- **数据页/设置页卡片跟随主题**：去掉统计卡片写死的白色背景，改为主题变量；书籍封面底色也跟随主题，暗色/护眼绿/经典黄/自定义背景都不再突兀。
+- **全量图标替换**：引入 Lucide v0.468.0（ISC）统一线性图标，生成离线 sprite；`<img src="icons/*.svg">` 与界面 Emoji 图标会自动替换为跟随主题变色的内联 SVG，下拉框中的 Emoji 会清理为纯文本。新增 `scripts/build-icons.mjs` 可重新生成。
+- 左侧导航增加图标、应用 Logo、菜单高亮；书籍页按钮、分组标题、书封水印、右侧工具栏标签统一视觉。
+- 标签页切换时保留侧边栏导航（数据/设置/关于/回收站），仅在书籍编辑器与全屏工具页隐藏。
+- 清理 `temp_switchpage.js`、`openbook_fix.js`、`temp_books.js` 等未加载的旧代码。
+
+---
+
 ## [1.13.1] - 2026-10-20
 
 本版本为 **v1.13.0 的发布工程热修**：代码功能与 v1.13.0 完全一致，仅修复 CI 自动发布流程，确保推送标签后能正常生成 GitHub Release（附带 Windows exe 与 macOS dmg）。

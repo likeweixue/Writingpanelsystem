@@ -687,8 +687,8 @@ function openDictionarySidebar(tool) {
     if (rightSidebar) {
         rightSidebar.classList.remove('collapsed');
         rightSidebar.style.display = 'flex';
-        rightSidebar.style.width = '48px';
-        rightSidebar.style.minWidth = '48px';
+        rightSidebar.style.width = '60px';
+        rightSidebar.style.minWidth = '60px';
         localStorage.setItem('rightSidebar_collapsed', 'false');
     }
     var detailMain = document.querySelector('.detail-main');
@@ -740,8 +740,8 @@ function closeDictionaryFloatingPanel() {
     if (panel) { panel.remove(); }
     var rightSidebar = document.getElementById('rightSidebar');
     if (rightSidebar) {
-        rightSidebar.style.width = '48px';
-        rightSidebar.style.minWidth = '48px';
+        rightSidebar.style.width = '60px';
+        rightSidebar.style.minWidth = '60px';
     }
 }
 
@@ -963,8 +963,8 @@ function bindCompactDictionaryEvents() {
             closeDictionaryFloatingPanel();
             var rightSidebar = document.getElementById('rightSidebar');
             if (rightSidebar) {
-                rightSidebar.style.width = '48px';
-                rightSidebar.style.minWidth = '48px';
+                rightSidebar.style.width = '60px';
+                rightSidebar.style.minWidth = '60px';
             }
             var toolItems = document.querySelectorAll('.sidebar-tool-item');
             toolItems.forEach(function(item) {
@@ -1134,9 +1134,7 @@ function saveDictionaryData() {
     var key = 'openwrite_dictionary_' + (currentBookId || 'global');
     var data = { entries: dictionaryData.entries, categories: dictionaryData.categories, selectedId: selectedId, nextId: dictionaryData.nextId || 1 };
     localStorage.setItem(key, JSON.stringify(data));
-    if (window.opener && window.opener.window) {
-        try { window.opener.window.location.reload(); } catch(e) {}
-    }
+    if (window.WPSPanel) { try { window.WPSPanel.notify('dictionary', { entries: dictionaryData.entries, categories: dictionaryData.categories, selectedId: selectedId, nextId: dictionaryData.nextId }); } catch(e) {} }
 }
 function selectEntry(id) { selectedId = id; renderTree(); updateEditor(); saveDictionaryData(); }
 function renderTree() {

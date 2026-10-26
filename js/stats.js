@@ -321,7 +321,7 @@ function renderStatsPage() {
         <div id="${panelId}" style="padding:24px; background:var(--panel-bg, rgba(255,255,255,0.95)); min-height:100%;">
             
             <!-- ===== 第一部分：书籍分组（最上面） ===== -->
-            <div class="drag-item" data-drag-id="group" style="background:rgba(255,255,255,0.8); border-radius:12px; padding:16px; border:1px solid var(--border-color, rgba(0,0,0,0.06)); margin-bottom:16px; transition: all 0.2s;">
+            <div class="drag-item" data-drag-id="group" style="border-radius:12px; padding:16px; border:1px solid var(--border-color, rgba(0,0,0,0.06)); margin-bottom:16px; transition: all 0.2s;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
                     <div style="font-size:14px; font-weight:600;">📂 书籍分组</div>
                     <div style="font-size:11px; color:#888; opacity:0.5;">↕ 拖拽排序</div>
@@ -332,33 +332,33 @@ function renderStatsPage() {
             </div>
             
             <!-- ===== 第二部分：顶部统计卡片 - 6个一排 ===== -->
-            <div class="drag-item" data-drag-id="stats1" style="background:rgba(255,255,255,0.8); border-radius:12px; padding:16px; border:1px solid var(--border-color, rgba(0,0,0,0.06)); margin-bottom:16px; transition: all 0.2s;">
+            <div class="drag-item" data-drag-id="stats1" style="border-radius:12px; padding:16px; border:1px solid var(--border-color, rgba(0,0,0,0.06)); margin-bottom:16px; transition: all 0.2s;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
                     <div style="font-size:14px; font-weight:600;">📊 核心指标</div>
                     <div style="font-size:11px; color:#888; opacity:0.5;">↕ 拖拽排序</div>
                 </div>
                 <div style="display:grid; grid-template-columns:repeat(6, 1fr); gap:12px;">
-                    <div style="background:rgba(255,255,255,0.6); border-radius:10px; padding:14px 10px; text-align:center; border:1px solid var(--border-color, rgba(0,0,0,0.04));">
+                    <div class="stat-tile" style="border-radius:10px; padding:14px 10px; text-align:center; border:1px solid var(--border-color, rgba(0,0,0,0.04));">
                         <div style="font-size:24px; font-weight:700; color:#007aff;">${stats.totalWords.toLocaleString()}</div>
                         <div style="font-size:11px; color:#888;">总字数</div>
                     </div>
-                    <div style="background:rgba(255,255,255,0.6); border-radius:10px; padding:14px 10px; text-align:center; border:1px solid var(--border-color, rgba(0,0,0,0.04));">
+                    <div class="stat-tile" style="border-radius:10px; padding:14px 10px; text-align:center; border:1px solid var(--border-color, rgba(0,0,0,0.04));">
                         <div style="font-size:24px; font-weight:700; color:#28a745;">${stats.todayWords.toLocaleString()}</div>
                         <div style="font-size:11px; color:#888;">今日码字</div>
                     </div>
-                    <div style="background:rgba(255,255,255,0.6); border-radius:10px; padding:14px 10px; text-align:center; border:1px solid var(--border-color, rgba(0,0,0,0.04));">
+                    <div class="stat-tile" style="border-radius:10px; padding:14px 10px; text-align:center; border:1px solid var(--border-color, rgba(0,0,0,0.04));">
                         <div style="font-size:24px; font-weight:700; color:#ff6b35;">${stats.speedPerHour}</div>
                         <div style="font-size:11px; color:#888;">速度 (字/时)</div>
                     </div>
-                    <div style="background:rgba(255,255,255,0.6); border-radius:10px; padding:14px 10px; text-align:center; border:1px solid var(--border-color, rgba(0,0,0,0.04));">
+                    <div class="stat-tile" style="border-radius:10px; padding:14px 10px; text-align:center; border:1px solid var(--border-color, rgba(0,0,0,0.04));">
                         <div style="font-size:24px; font-weight:700; color:#ffd93d;">🔥 ${stats.consecutiveDays}</div>
                         <div style="font-size:11px; color:#888;">连续码字</div>
                     </div>
-                    <div style="background:rgba(255,255,255,0.6); border-radius:10px; padding:14px 10px; text-align:center; border:1px solid var(--border-color, rgba(0,0,0,0.04));">
+                    <div class="stat-tile" style="border-radius:10px; padding:14px 10px; text-align:center; border:1px solid var(--border-color, rgba(0,0,0,0.04));">
                         <div style="font-size:24px; font-weight:700; color:#9b784e;">${stats.totalBooks}</div>
                         <div style="font-size:11px; color:#888;">📚 书籍</div>
                     </div>
-                    <div style="background:rgba(255,255,255,0.6); border-radius:10px; padding:14px 10px; text-align:center; border:1px solid var(--border-color, rgba(0,0,0,0.04));">
+                    <div class="stat-tile" style="border-radius:10px; padding:14px 10px; text-align:center; border:1px solid var(--border-color, rgba(0,0,0,0.04));">
                         <div style="font-size:24px; font-weight:700; color:#a29bfe;">${stats.totalChapters}</div>
                         <div style="font-size:11px; color:#888;">📖 章节</div>
                     </div>
@@ -366,25 +366,25 @@ function renderStatsPage() {
             </div>
             
             <!-- ===== 第三部分：本周/本月/今年/总字数 ===== -->
-            <div class="drag-item" data-drag-id="stats2" style="background:rgba(255,255,255,0.8); border-radius:12px; padding:16px; border:1px solid var(--border-color, rgba(0,0,0,0.06)); margin-bottom:16px; transition: all 0.2s;">
+            <div class="drag-item" data-drag-id="stats2" style="border-radius:12px; padding:16px; border:1px solid var(--border-color, rgba(0,0,0,0.06)); margin-bottom:16px; transition: all 0.2s;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
                     <div style="font-size:14px; font-weight:600;">📅 时间统计</div>
                     <div style="font-size:11px; color:#888; opacity:0.5;">↕ 拖拽排序</div>
                 </div>
                 <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:12px;">
-                    <div style="background:rgba(255,255,255,0.6); border-radius:10px; padding:12px 10px; text-align:center; border:1px solid var(--border-color, rgba(0,0,0,0.04));">
+                    <div class="stat-tile" style="border-radius:10px; padding:12px 10px; text-align:center; border:1px solid var(--border-color, rgba(0,0,0,0.04));">
                         <div style="font-size:20px; font-weight:700; color:#e67e22;">${stats.weekWords.toLocaleString()}</div>
                         <div style="font-size:11px; color:#888;">📅 本周</div>
                     </div>
-                    <div style="background:rgba(255,255,255,0.6); border-radius:10px; padding:12px 10px; text-align:center; border:1px solid var(--border-color, rgba(0,0,0,0.04));">
+                    <div class="stat-tile" style="border-radius:10px; padding:12px 10px; text-align:center; border:1px solid var(--border-color, rgba(0,0,0,0.04));">
                         <div style="font-size:20px; font-weight:700; color:#8e44ad;">${stats.monthWords.toLocaleString()}</div>
                         <div style="font-size:11px; color:#888;">📅 本月</div>
                     </div>
-                    <div style="background:rgba(255,255,255,0.6); border-radius:10px; padding:12px 10px; text-align:center; border:1px solid var(--border-color, rgba(0,0,0,0.04));">
+                    <div class="stat-tile" style="border-radius:10px; padding:12px 10px; text-align:center; border:1px solid var(--border-color, rgba(0,0,0,0.04));">
                         <div style="font-size:20px; font-weight:700; color:#2ecc71;">${stats.yearWords.toLocaleString()}</div>
                         <div style="font-size:11px; color:#888;">📅 今年</div>
                     </div>
-                    <div style="background:rgba(255,255,255,0.6); border-radius:10px; padding:12px 10px; text-align:center; border:1px solid var(--border-color, rgba(0,0,0,0.04));">
+                    <div class="stat-tile" style="border-radius:10px; padding:12px 10px; text-align:center; border:1px solid var(--border-color, rgba(0,0,0,0.04));">
                         <div style="font-size:20px; font-weight:700; color:#007aff;">${stats.totalWords.toLocaleString()}</div>
                         <div style="font-size:11px; color:#888;">📚 总字数</div>
                     </div>
@@ -392,7 +392,7 @@ function renderStatsPage() {
             </div>
             
             <!-- ===== 第四部分：月度趋势（全宽） ===== -->
-            <div class="drag-item" data-drag-id="trend" style="background:rgba(255,255,255,0.8); border-radius:12px; padding:16px; border:1px solid var(--border-color, rgba(0,0,0,0.06)); margin-bottom:16px; transition: all 0.2s;">
+            <div class="drag-item" data-drag-id="trend" style="border-radius:12px; padding:16px; border:1px solid var(--border-color, rgba(0,0,0,0.06)); margin-bottom:16px; transition: all 0.2s;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
                     <div style="font-size:14px; font-weight:600;">📈 月度码字趋势</div>
                     <div style="font-size:11px; color:#888; opacity:0.5;">↕ 拖拽排序</div>
@@ -403,7 +403,7 @@ function renderStatsPage() {
             </div>
             
             <!-- ===== 第五部分：码字日历 - GitHub 风格（最下面） ===== -->
-            <div class="drag-item" data-drag-id="calendar" style="background:rgba(255,255,255,0.8); border-radius:12px; padding:16px; border:1px solid var(--border-color, rgba(0,0,0,0.06)); transition: all 0.2s;">
+            <div class="drag-item" data-drag-id="calendar" style="border-radius:12px; padding:16px; border:1px solid var(--border-color, rgba(0,0,0,0.06)); transition: all 0.2s;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
                     <div style="font-size:14px; font-weight:600;">📆 码字日历</div>
                     <div style="font-size:11px; color:#888; opacity:0.5;">↕ 拖拽排序</div>
@@ -657,48 +657,6 @@ function renderCalendarHeatmap(dailyStats) {
     return html;
 }
 
-// ========== 打开数据面板 ==========
-
-function openStatsPanel() {
-    console.log('📊 打开数据面板');
-    
-    // 先确保数据已加载
-    if (typeof loadAllData === 'function') {
-        loadAllData();
-    }
-    
-    // 使用现有的 stats 页面
-    var existingPage = document.querySelector('.page[data-page="stats"]');
-    if (existingPage) {
-        switchToTab('stats');
-        setTimeout(function() {
-            renderStatsPage();
-        }, 50);
-        return;
-    }
-    
-    // 创建新标签页
-    var tabId = 'stats_panel';
-    openTabs.push({ id: tabId, title: '📊 数据', type: 'page', pageId: 'stats_panel' });
-    renderTabs();
-    
-    var pagesContainer = document.getElementById('pagesContainer');
-    var pageDiv = document.createElement('div');
-    pageDiv.className = 'page';
-    pageDiv.setAttribute('data-page', tabId);
-    pageDiv.innerHTML = '<div id="statsContainer" style="height:100%; overflow:auto;"></div>';
-    pagesContainer.appendChild(pageDiv);
-    
-    setTimeout(function() {
-        renderStatsPage();
-    }, 50);
-    
-    switchToTab(tabId);
-    
-    var sidebar = document.querySelector('.sidebar-menu');
-    if (sidebar) sidebar.style.display = 'none';
-}
-
 // ========== 加载数据页面 ==========
 
 function loadStatsPage() {
@@ -710,7 +668,6 @@ function loadStatsPage() {
 
 // ========== 导出 ==========
 
-window.openStatsPanel = openStatsPanel;
 window.renderStatsPage = renderStatsPage;
 window.getStatsData = getStatsData;
 window.loadStatsPage = loadStatsPage;

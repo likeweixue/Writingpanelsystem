@@ -1,6 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="18px" height="18px" viewBox="0 0 18 18">
-  <path d="M3.75,3.25h7.5c.552,0,1,.448,1,1v5H3.75" fill="none" stroke="#1c1f21" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path>
-  <path d="M12.25,5.75h2c.552,0,1,.448,1,1v4c0,.552-.448,1-1,1h-3.5c-.552,0-1-.448-1-1v-1.5" fill="none" stroke="#1c1f21" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path>
-  <line x1="10.043" y1="11.457" x2="12.25" y2="9.25" fill="none" stroke="#1c1f21" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></line>
-  <line x1="3.75" y1="1.75" x2="3.75" y2="16.25" fill="none" stroke="#1c1f21" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" data-color="color-2"></line>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4b5563" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" /> <path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7" /> <path d="M7 3v4a1 1 0 0 0 1 1h7" /></svg>

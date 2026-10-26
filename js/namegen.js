@@ -635,9 +635,7 @@ var currentBookId = ${bookId};
 function saveNameGenSettings() {
     var key = 'openwrite_namegen_' + (currentBookId || 'global');
     localStorage.setItem(key, JSON.stringify(nameGenData));
-    if (window.opener && window.opener.window) {
-        try { window.opener.window.location.reload(); } catch(e) {}
-    }
+    if (window.WPSPanel) { try { window.WPSPanel.notify('namegen', nameGenData); } catch(e) {} }
 }
 var nameGenChars = {
     person: ["吕斯","龚湛","周峻峰","庄非凡","宫瑜","乔森","杜敬","史宗裕","刘津卫","游京","朱柯礼","涂湛","邹尚","白凛","殷乔","马奔","冯竣","虞归舟","成然","汪昀","纪云霆","叶尘","雪灵儿","墨渊"],

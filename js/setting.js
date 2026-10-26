@@ -123,7 +123,7 @@ function createSettingNodeElement(node, depth) {
     nameSpan.textContent = node.name || '未命名';
     header.appendChild(nameSpan);
     header.onclick = function(e) {
-        if (e.target === toggle) return;
+        if (toggle.contains(e.target)) return;
         selectSettingNode(node.id);
     };
     header.ondblclick = function(e) {
@@ -732,8 +732,8 @@ function openSettingSidebar(tool) {
     if (rightSidebar) {
         rightSidebar.classList.remove('collapsed');
         rightSidebar.style.display = 'flex';
-        rightSidebar.style.width = '48px';
-        rightSidebar.style.minWidth = '48px';
+        rightSidebar.style.width = '60px';
+        rightSidebar.style.minWidth = '60px';
         localStorage.setItem('rightSidebar_collapsed', 'false');
     }
     var detailMain = document.querySelector('.detail-main');
@@ -772,8 +772,8 @@ function closeSettingFloatingPanel() {
     if (panel) { panel.remove(); }
     var rightSidebar = document.getElementById('rightSidebar');
     if (rightSidebar) {
-        rightSidebar.style.width = '48px';
-        rightSidebar.style.minWidth = '48px';
+        rightSidebar.style.width = '60px';
+        rightSidebar.style.minWidth = '60px';
     }
 }
 
@@ -876,7 +876,7 @@ function createCompactSettingNode(node, depth) {
     nameSpan.textContent = node.name || '未命名';
     header.appendChild(nameSpan);
     header.onclick = function(e) {
-        if (e.target === toggle) return;
+        if (toggle.contains(e.target)) return;
         settingData.selectedId = node.id;
         saveSettingData();
         renderCompactSettingTree();
@@ -1077,8 +1077,8 @@ function bindCompactSettingEvents() {
             closeSettingFloatingPanel();
             var rightSidebar = document.getElementById('rightSidebar');
             if (rightSidebar) {
-                rightSidebar.style.width = '48px';
-                rightSidebar.style.minWidth = '48px';
+                rightSidebar.style.width = '60px';
+                rightSidebar.style.minWidth = '60px';
             }
         };
     }
@@ -1189,9 +1189,7 @@ function saveSettingData() {
     var key = 'openwrite_setting_' + (currentBookId || 'global');
     var data = { nodes: settingData.nodes, selectedId: selectedId, nextId: settingData.nextId || 100 };
     localStorage.setItem(key, JSON.stringify(data));
-    if (window.opener && window.opener.window) {
-        try { window.opener.window.location.reload(); } catch(e) {}
-    }
+    if (window.WPSPanel) { try { window.WPSPanel.notify('setting', { nodes: settingData.nodes, selectedId: selectedId, nextId: settingData.nextId }); } catch(e) {} }
 }
 function selectNode(id) { selectedId = id; renderTree(); updateEditor(); saveSettingData(); }
 function renderTree() {
@@ -1234,7 +1232,7 @@ function createNodeElement(node, depth) {
     nameSpan.className = 'name';
     nameSpan.textContent = node.name || '未命名';
     header.appendChild(nameSpan);
-    header.onclick = function(e) { if (e.target === toggle) return; selectNode(node.id); };
+    header.onclick = function(e) { if (toggle.contains(e.target)) return; selectNode(node.id); };
     header.ondblclick = function(e) { e.stopPropagation(); var newName = prompt('重命名：', node.name); if (newName && newName.trim()) { node.name = newName.trim(); saveSettingData(); renderTree(); updateEditor(); } };
     header.oncontextmenu = function(e) { e.preventDefault(); e.stopPropagation();
         var menu = document.createElement('div');

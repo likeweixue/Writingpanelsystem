@@ -122,9 +122,13 @@
             position: absolute;
             bottom: 0;
             right: 0;
-            font-size: 120px;
-            opacity: 0.06;
+            opacity: 0.08;
             pointer-events: none;
+        }
+        .deco img {
+            display: block;
+            width: 150px;
+            height: 150px;
         }
     </style>
 </head>
@@ -137,8 +141,8 @@
             <div class="progress-fill"></div>
         </div>
         <div class="loading-text">系统加载中...</div>
-        <div class="version" id="splashVersion">v1.13.0</div>
-        <div class="deco">📝</div>
+        <div class="version" id="splashVersion">v1.13.1</div>
+        <div class="deco"><img src="icons/pen-line.svg" alt=""></div>
     </div>
     <script>
         // 版本号由主进程通过 query 传入（app.getVersion()），仅保留静态值作为兜底

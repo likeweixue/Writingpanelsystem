@@ -1,4 +1,6 @@
 const { contextBridge, ipcRenderer, shell } = require('electron');
+const path = require('path');
+const os = require('os');
 
 contextBridge.exposeInMainWorld('electron', {
     // 备份相关
@@ -16,6 +18,9 @@ contextBridge.exposeInMainWorld('electron', {
     saveZipFile: (fileName, data) => ipcRenderer.invoke('save-zip-file', { fileName, data }),
     
     platform: process.platform,
+
+    // 默认备份目录（与 main.js 中的 documentsPath 保持一致）
+    defaultBackupPath: path.join(os.homedir(), 'Documents', '写作面板系统备份'),
 
     // 版本号唯一真源：package.json，渲染进程直接读取，避免各处硬编码漂移
     appVersion: require('./package.json').version,

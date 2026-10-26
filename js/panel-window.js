@@ -138,6 +138,12 @@
         var width = opts.width || 1200;
         var height = opts.height || 800;
 
+        // 给面板统一补上图标运行时、数据同步桥和正确的相对路径基准。
+        // （Electron 会把面板写到用户数据目录，不补 base 的话 icons/*.svg 会 404）
+        if (global.WPS && typeof global.WPS.enhancePanelHtml === 'function') {
+            html = global.WPS.enhancePanelHtml(html);
+        }
+
         var promise;
         if (isElectronApp()) {
             promise = openViaFile(name, html, width, height).catch(function (err) {

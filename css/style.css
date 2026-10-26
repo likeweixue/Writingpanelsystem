@@ -401,7 +401,7 @@ body {
     position: fixed;
     right: 0;
     top: 100px;
-    width: 48px;
+    width: 60px;
     height: calc(100vh - 100px);
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(8px);
@@ -413,7 +413,7 @@ body {
     border-left: 1px solid rgba(0,0,0,0.08);
 }
 .right-sidebar.hidden {
-    right: -60px;
+    right: -72px;
 }
 .right-sidebar-content {
     flex: 1;

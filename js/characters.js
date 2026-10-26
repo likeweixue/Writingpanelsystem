@@ -116,7 +116,7 @@ function createCharacterNodeElement(node, depth) {
     nameSpan.textContent = node.name || '未命名';
     header.appendChild(nameSpan);
     header.onclick = function(e) {
-        if (e.target === toggle) return;
+        if (toggle.contains(e.target)) return;
         selectCharacterNode(node.id);
     };
     header.ondblclick = function(e) {
@@ -698,8 +698,8 @@ function openCharacterSidebar(tool) {
     if (rightSidebar) {
         rightSidebar.classList.remove('collapsed');
         rightSidebar.style.display = 'flex';
-        rightSidebar.style.width = '48px';
-        rightSidebar.style.minWidth = '48px';
+        rightSidebar.style.width = '60px';
+        rightSidebar.style.minWidth = '60px';
         localStorage.setItem('rightSidebar_collapsed', 'false');
     }
     var detailMain = document.querySelector('.detail-main');
@@ -738,8 +738,8 @@ function closeCharacterFloatingPanel() {
     if (panel) { panel.remove(); }
     var rightSidebar = document.getElementById('rightSidebar');
     if (rightSidebar) {
-        rightSidebar.style.width = '48px';
-        rightSidebar.style.minWidth = '48px';
+        rightSidebar.style.width = '60px';
+        rightSidebar.style.minWidth = '60px';
     }
 }
 
@@ -841,7 +841,7 @@ function createCompactCharacterNode(node, depth) {
     nameSpan.textContent = node.name || '未命名';
     header.appendChild(nameSpan);
     header.onclick = function(e) {
-        if (e.target === toggle) return;
+        if (toggle.contains(e.target)) return;
         characterData.selectedId = node.id;
         saveCharacterData();
         renderCompactCharacterTree();
@@ -1035,8 +1035,8 @@ function bindCompactCharacterEvents() {
             closeCharacterFloatingPanel();
             var rightSidebar = document.getElementById('rightSidebar');
             if (rightSidebar) {
-                rightSidebar.style.width = '48px';
-                rightSidebar.style.minWidth = '48px';
+                rightSidebar.style.width = '60px';
+                rightSidebar.style.minWidth = '60px';
             }
         };
     }
@@ -1150,9 +1150,7 @@ function saveCharacterData() {
     var key = 'openwrite_character_' + (currentBookId || 'global');
     var data = { nodes: characterData.nodes, selectedId: selectedId, nextId: characterData.nextId || 100 };
     localStorage.setItem(key, JSON.stringify(data));
-    if (window.opener && window.opener.window) {
-        try { window.opener.window.location.reload(); } catch(e) {}
-    }
+    if (window.WPSPanel) { try { window.WPSPanel.notify('characters', { nodes: characterData.nodes, selectedId: selectedId, nextId: characterData.nextId }); } catch(e) {} }
 }
 function selectNode(id) { selectedId = id; renderTree(); updateEditor(); saveCharacterData(); }
 function renderTree() {
@@ -1195,7 +1193,7 @@ function createNodeElement(node, depth) {
     nameSpan.className = 'name';
     nameSpan.textContent = node.name || '未命名';
     header.appendChild(nameSpan);
-    header.onclick = function(e) { if (e.target === toggle) return; selectNode(node.id); };
+    header.onclick = function(e) { if (toggle.contains(e.target)) return; selectNode(node.id); };
     header.ondblclick = function(e) { e.stopPropagation(); var newName = prompt('重命名：', node.name); if (newName && newName.trim()) { node.name = newName.trim(); saveCharacterData(); renderTree(); updateEditor(); } };
     header.oncontextmenu = function(e) { e.preventDefault(); e.stopPropagation();
         var menu = document.createElement('div');

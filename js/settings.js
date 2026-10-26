@@ -46,9 +46,14 @@ function loadAppSettings() {
             console.error('加载设置失败:', e);
         }
     }
-    // 如果没有设置路径，使用默认路径
+    // 如果没有设置路径，使用默认路径（即使取默认路径失败也不能影响设置页渲染）
     if (!appSettings.backup.path) {
-        appSettings.backup.path = getDefaultBackupPath();
+        try {
+            appSettings.backup.path = getDefaultBackupPath();
+        } catch (e) {
+            console.warn('获取默认备份路径失败:', e);
+            appSettings.backup.path = './备份';
+        }
     }
     return appSettings;
 }
@@ -60,15 +65,16 @@ function saveAppSettings() {
 }
 
 function getDefaultBackupPath() {
-    // 根据平台返回默认备份路径
-    var platform = navigator.platform;
-    if (platform.indexOf('Win') !== -1) {
-        return 'C:/Users/' + (process.env.USERNAME || 'User') + '/Documents/写作面板系统备份';
-    } else if (platform.indexOf('Mac') !== -1) {
-        return '~/Documents/写作面板系统备份';
-    } else {
-        return './备份';
+    // Electron 下由 preload 提供真实用户目录；浏览器预览时退回通用路径。
+    // 注意：渲染进程没有 Node 的 process，不能再用 process.env.USERNAME，
+    // 否则 Windows 打包后这里会直接抛 ReferenceError，整页设置都渲染不出来。
+    if (window.electron && window.electron.defaultBackupPath) {
+        return window.electron.defaultBackupPath;
     }
+    var platform = (window.electron && window.electron.platform) || navigator.platform || '';
+    if (/^win|win32|windows/i.test(platform)) return '%USERPROFILE%\\Documents\\写作面板系统备份';
+    if (/darwin|mac/i.test(platform)) return '~/Documents/写作面板系统备份';
+    return './备份';
 }
 
 // ========== 应用设置 ==========
@@ -143,7 +149,6 @@ function verifySecurityAnswers(answers) {
 
 // ========== 渲染设置页面 ==========
 
-var settingsInitialized = false;  // 确保这个变量在文件顶部定义
 
 function renderSettingsPage() {
     console.log('🔧 renderSettingsPage 被调用');
@@ -706,9 +711,13 @@ function escapeHtml(str) {
 // ========== 初始化 ==========
 // ============================================================
 
-// 加载设置并应用
-loadAppSettings();
-applySettings();
+// 加载设置并应用。任何一条设置损坏都不应该阻断设置页的渲染。
+try {
+    loadAppSettings();
+    applySettings();
+} catch (e) {
+    console.error('初始化设置失败:', e);
+}
 
 // 暴露到全局
 window.renderSettingsPage = renderSettingsPage;

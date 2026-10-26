@@ -589,9 +589,7 @@ function getWhiteboardCard(id) {
 function saveWhiteboardData() {
     var key = 'openwrite_whiteboard_' + (currentBookId || 'global');
     localStorage.setItem(key, JSON.stringify(whiteboardData));
-    if (window.opener && window.opener.window) {
-        try { window.opener.window.location.reload(); } catch(e) {}
-    }
+    if (window.WPSPanel) { try { window.WPSPanel.notify('whiteboard', { cards: whiteboardData.cards, connections: whiteboardData.connections, nextId: whiteboardData.nextId, zoom: whiteboardData.zoom, panX: whiteboardData.panX, panY: whiteboardData.panY }); } catch(e) {} }
 }
 function genWhiteboardId(prefix) {
     return prefix + '_' + (whiteboardData.nextId++);

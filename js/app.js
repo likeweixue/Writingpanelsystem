@@ -57,84 +57,14 @@ function loadAllData() {
 function bindMenuEvents() {
     var menuItems = document.querySelectorAll('.menu-item');
     for (var i = 0; i < menuItems.length; i++) {
-        menuItems[i].onclick = (function(page) {
-            return function() {
-                if (page === 'stats') {
-                    // 数据页面
-                    if (typeof switchPage === 'function') {
-                        switchPage('stats');
-                    }
-                } else if (page === 'settings') {
-                    // 设置页面
-                    if (typeof switchPage === 'function') {
-                        switchPage('settings');
-                    }
-                } else if (page === 'books') {
-                    // ===== 关键修复：切换到首页时，确保关闭其他页面 =====
-                    switchToTab('home');
-                    // 隐藏所有其他页面
-                    var allPages = document.querySelectorAll('.page');
-                    for (var j = 0; j < allPages.length; j++) {
-                        var p = allPages[j];
-                        if (p.getAttribute('data-page') !== 'home') {
-                            p.style.display = 'none';
-                        } else {
-                            p.style.display = 'block';
-                            p.classList.add('active');
-                        }
-                    }
-                } else {
-                    switchPage(page);
-                }
-                var allItems = document.querySelectorAll('.menu-item');
-                for (var j = 0; j < allItems.length; j++) {
-                    allItems[j].classList.remove('active');
-                }
-                this.classList.add('active');
-                updateSidebarVisibility();
-            };
-        })(menuItems[i].getAttribute('data-page'));
-    }
-}
-
-// 新增：手动打开设置标签页（备用方案）
-function openSettingsTab() {
-    // 检查是否已经打开
-    var existingPage = document.querySelector('.page[data-page="settings"]');
-    if (existingPage) {
-        switchToTab('page_settings');
-        return;
-    }
-    
-    var tabId = 'page_settings';
-    openTabs.push({ id: tabId, title: '⚙️ 设置', type: 'page', pageId: 'settings' });
-    renderTabs();
-    
-    var pagesContainer = document.getElementById('pagesContainer');
-    var pageDiv = document.createElement('div');
-    pageDiv.className = 'page';
-    pageDiv.setAttribute('data-page', tabId);
-    pageDiv.innerHTML = '<div class="settings-container" id="settingsContainer" style="height:100%; overflow:auto;"></div>';
-    pagesContainer.appendChild(pageDiv);
-    
-    setTimeout(function() {
-        if (typeof renderSettingsPage === 'function') {
-            renderSettingsPage();
-        }
-    }, 100);
-    
-    switchToTab(tabId);
-    var sidebar = document.querySelector('.sidebar-menu');
-    if (sidebar) sidebar.style.display = 'none';
-}
-
-function updateSidebarVisibility() {
-    var sidebar = document.querySelector('.sidebar-menu');
-    var isEditing = document.querySelector('.book-detail-page') !== null;
-    if (isEditing) {
-        sidebar.style.display = 'none';
-    } else {
-        sidebar.style.display = 'flex';
+        menuItems[i].onclick = function() {
+            var page = this.getAttribute('data-page');
+            if (page === 'books') {
+                switchToTab('home');
+            } else {
+                switchPage(page);
+            }
+        };
     }
 }
 
@@ -304,43 +234,163 @@ function updateStats() {
     if (totalEl) totalEl.innerText = total;
 }
 
-function fixToolbarVisibility() {
-    var toolbar = document.getElementById('mainToolbar');
-    if (!toolbar) return;
-    var activePage = document.querySelector('.page.active');
-    var isEditing = activePage && activePage.getAttribute('data-page') && activePage.getAttribute('data-page').indexOf('book_') === 0;
-    if (isEditing) {
-        toolbar.classList.add('visible');
-    } else {
-        toolbar.classList.remove('visible');
+// ========== 全屏面板数据同步（不刷新主窗口） ==========
+function applyPanelDataChange(message) {
+    if (!message || !message.tool || !message.data) return;
+    var msgBook = String(message.bookId || 'global');
+    var curBook = String(currentBookId || 'global');
+    // 面板属于另一本书时，数据已经由面板自己写进对应 localStorage，主窗口无需处理
+    if (msgBook !== curBook) {
+        console.log('📥 面板数据属于其它书籍，跳过同步:', msgBook);
+        return;
     }
-}
 
-var originalSwitchToTab = window.switchToTab;
-if (originalSwitchToTab) {
-    window.switchToTab = function(tabId) {
-        originalSwitchToTab(tabId);
-        setTimeout(fixToolbarVisibility, 50);
-    };
-}
+    var data = message.data;
+    switch (message.tool) {
+        case 'outline':
+            if (typeof outlineData === 'undefined') return;
+            outlineData.nodes = data.nodes || outlineData.nodes;
+            outlineData.selectedId = data.selectedId;
+            outlineData.nextId = data.nextId || outlineData.nextId;
+            saveOutlineData();
+            if (document.getElementById('outlineTree')) {
+                renderOutlineTree();
+                updateOutlineEditor();
+            }
+            if (document.getElementById('compactOutlineTree')) {
+                renderCompactOutlineTree();
+                updateCompactEditor();
+            }
+            break;
 
-var originalCloseTab = window.closeTab;
-if (originalCloseTab) {
-    window.closeTab = function(tabId) {
-        originalCloseTab(tabId);
-        setTimeout(fixToolbarVisibility, 50);
-    };
-}
+        case 'characters':
+            if (typeof characterData === 'undefined') return;
+            characterData.nodes = data.nodes || characterData.nodes;
+            characterData.selectedId = data.selectedId;
+            characterData.nextId = data.nextId || characterData.nextId;
+            saveCharacterData();
+            if (document.getElementById('characterTree')) {
+                renderCharacterTree();
+                updateCharacterEditor();
+            }
+            if (document.getElementById('compactCharacterTree')) {
+                renderCompactCharacterTree();
+                updateCompactCharacterEditor();
+            }
+            break;
 
-var originalOpenBookTab = window.openBookTab;
-if (originalOpenBookTab) {
-    window.openBookTab = function(bookId) {
-        originalOpenBookTab(bookId);
-        setTimeout(fixToolbarVisibility, 100);
-    };
-}
+        case 'dictionary':
+            if (typeof dictionaryData === 'undefined') return;
+            dictionaryData.entries = data.entries || dictionaryData.entries;
+            dictionaryData.categories = data.categories || dictionaryData.categories;
+            dictionaryData.selectedId = data.selectedId;
+            dictionaryData.nextId = data.nextId || dictionaryData.nextId;
+            saveDictionaryData();
+            if (document.getElementById('dictionaryTree')) {
+                renderDictionaryTree();
+                updateDictionaryEditor();
+            }
+            if (document.getElementById('compactDictionaryTree')) {
+                renderCompactDictionaryTree();
+                updateCompactDictionaryEditor();
+                renderCompactDictionaryStats();
+            }
+            break;
 
-setTimeout(fixToolbarVisibility, 100);
+        case 'notes':
+            if (typeof noteData === 'undefined') return;
+            noteData.nodes = data.nodes || noteData.nodes;
+            noteData.selectedId = data.selectedId;
+            noteData.nextId = data.nextId || noteData.nextId;
+            saveNoteData();
+            if (document.getElementById('noteTree')) {
+                renderNoteTree();
+                updateNoteEditor();
+            }
+            if (document.getElementById('compactNoteTree')) {
+                renderCompactNoteTree();
+                updateCompactNoteEditor();
+            }
+            break;
+
+        case 'relation':
+            if (typeof relationData === 'undefined') return;
+            relationData.entities = data.entities || relationData.entities;
+            relationData.relations = data.relations || relationData.relations;
+            relationData.selectedId = data.selectedId;
+            relationData.nextId = data.nextId || relationData.nextId;
+            saveRelationData();
+            if (document.getElementById('relationEntities')) {
+                renderRelationEntities();
+                renderRelationList();
+                renderRelationCanvas();
+            }
+            if (document.getElementById('compactRelationEntityList')) {
+                renderCompactRelationEntities();
+                renderCompactRelationList();
+                setTimeout(function() {
+                    if (typeof initCompactRelationCanvas === 'function') initCompactRelationCanvas();
+                    if (typeof renderCompactRelationCanvas === 'function') renderCompactRelationCanvas();
+                }, 50);
+            }
+            break;
+
+        case 'setting':
+            if (typeof settingData === 'undefined') return;
+            settingData.nodes = data.nodes || settingData.nodes;
+            settingData.selectedId = data.selectedId;
+            settingData.nextId = data.nextId || settingData.nextId;
+            saveSettingData();
+            if (document.getElementById('settingTree')) {
+                renderSettingTree();
+                updateSettingEditor();
+            }
+            if (document.getElementById('compactSettingTree')) {
+                renderCompactSettingTree();
+                updateCompactSettingEditor();
+            }
+            break;
+
+        case 'timeline':
+            if (typeof timelineData === 'undefined') return;
+            timelineData.nodes = data.nodes || timelineData.nodes;
+            timelineData.selectedId = data.selectedId;
+            timelineData.nextId = data.nextId || timelineData.nextId;
+            saveTimelineData();
+            if (document.getElementById('timelineTree')) {
+                renderTimelineTree();
+                updateTimelineEditor();
+            }
+            if (document.getElementById('compactTimelineTree')) {
+                renderCompactTimelineTree();
+                updateCompactTimelineEditor();
+            }
+            break;
+
+        case 'whiteboard':
+            if (typeof whiteboardData === 'undefined') return;
+            whiteboardData.cards = data.cards || whiteboardData.cards;
+            whiteboardData.connections = data.connections || whiteboardData.connections;
+            whiteboardData.nextId = data.nextId || whiteboardData.nextId;
+            saveWhiteboardData();
+            if (document.getElementById('compactWbCards')) {
+                renderCompactWhiteboardCards();
+                renderCompactWhiteboardLines();
+            }
+            break;
+
+        case 'namegen':
+            if (typeof nameGenData === 'undefined') return;
+            nameGenData = data;
+            saveNameGenSettings();
+            if (document.getElementById('nameGenFavoriteList')) {
+                renderCompactNameGenFavorites();
+            }
+            break;
+    }
+    console.log('📥 已同步面板数据:', message.tool);
+}
+window.applyPanelDataChange = applyPanelDataChange;
 
 init();
 
@@ -349,6 +399,7 @@ init();
 var shortcutKeys = {
     // 全局
     'Ctrl+N': function() { openNewBookPanelV2(); },
+    'Ctrl+T': function(e) { e.preventDefault(); switchToTab('home'); },
     'Ctrl+O': function() { switchToTab('home'); },
     'Ctrl+W': function() { 
         if (activeTabId && activeTabId !== 'home') {
@@ -604,7 +655,7 @@ document.addEventListener('keydown', function(e) {
     if (handler) {
         // 对于编辑器快捷键，即使在输入框中也可以触发
         var editorShortcuts = ['Ctrl+S', 'Ctrl+F', 'Ctrl+H', 'Ctrl+Z', 'Ctrl+Y', 'Ctrl+B', 'Ctrl+I', 'Ctrl+U', 'Ctrl+Shift+F', 'Ctrl+Shift+C', 'Ctrl+Shift+P'];
-        var globalShortcuts = ['Ctrl+N', 'Ctrl+O', 'Ctrl+W', 'Ctrl+Tab', 'Ctrl+Shift+Tab', 'F11', 'Escape', 'Ctrl+Shift+L'];
+        var globalShortcuts = ['Ctrl+N', 'Ctrl+T', 'Ctrl+O', 'Ctrl+W', 'Ctrl+Tab', 'Ctrl+Shift+Tab', 'F11', 'Escape', 'Ctrl+Shift+L'];
         var toolShortcuts = ['Ctrl+Shift+O', 'Ctrl+Shift+T', 'Ctrl+Shift+R', 'Ctrl+Shift+E', 'Ctrl+Shift+G', 'Ctrl+Shift+W', 'Ctrl+Shift+N', 'Ctrl+Shift+M', 'Ctrl+Shift+D'];
         
         // 如果是编辑器快捷键，即使在输入框中也可以触发（Ctrl+S 等）

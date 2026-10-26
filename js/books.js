@@ -70,7 +70,8 @@ function renderBooks() {
         var groupDiv = document.createElement('div');
         groupDiv.className = 'group-section';
         groupDiv.setAttribute('data-group-id', group.id);
-        groupDiv.innerHTML = '<div class="group-header"><h3>' + escapeHtml(group.name) + ' <span style="font-size:12px;opacity:0.6;">(' + groupBooks.length + '本)</span></h3><button class="group-menu-btn" data-id="' + group.id + '" style="background:none;border:none;font-size:18px;cursor:pointer;">⋯</button></div><div class="books-grid" data-group="' + group.id + '"></div>';
+        var groupIcon = (typeof WPS !== 'undefined' && WPS.icon) ? WPS.icon('folder') : '';
+        groupDiv.innerHTML = '<div class="group-header"><h3><span class="group-icon">' + groupIcon + '</span>' + escapeHtml(group.name) + ' <span style="font-size:12px;opacity:0.6;">(' + groupBooks.length + '本)</span></h3><button class="group-menu-btn" data-id="' + group.id + '" style="background:none;border:none;font-size:18px;cursor:pointer;">⋯</button></div><div class="books-grid" data-group="' + group.id + '"></div>';
         var grid = groupDiv.querySelector('.books-grid');
         
         for (var i = 0; i < groupBooks.length; i++) {
@@ -104,7 +105,7 @@ function renderBooks() {
             card.innerHTML = '<div class="book-menu" data-id="' + book.id + '" style="position:absolute; top:8px; right:8px; background:rgba(0,0,0,0.5); border-radius:50%; width:28px; height:28px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:white; z-index:10;">⋯</div>' +
                 '<div class="book-cover" style="background: #e0e0e0; height:100%; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; padding:20px; position:relative;">' +
                 coverHtml +
-                '<div style="font-size:48px; position:relative; z-index:1;"></div>' +
+                '<div class="book-cover-watermark">' + ((typeof WPS !== 'undefined' && WPS.icon) ? WPS.icon('book-open') : '') + '</div>' +
                 '<h4 style="position:relative; z-index:1;">' + escapeHtml(book.title) + '</h4>' +
                 '<p style="position:relative; z-index:1;">' + (book.volumes ? book.volumes.length : 0) + '卷 · ' + totalChapters + '章 · ' + totalWords + '字</p>' +
                 '</div>';
@@ -287,20 +288,38 @@ function openBookTab(bookId) {
     for (var i = 0; i < openTabs.length; i++) {
         if (openTabs[i].id === tabId) { switchToTab(tabId); return; }
     }
-    openTabs.push({ id: tabId, title: book.title, type: 'book', bookId: bookId });
+    openTabs.push({ id: tabId, title: book.title, type: 'book', bookId: bookId, icon: 'book-open' });
     renderTabs();
-    var pagesContainer = document.getElementById('pagesContainer');
-    var pageDiv = document.createElement('div');
-    pageDiv.className = 'page';
-    pageDiv.setAttribute('data-page', tabId);
-    pageDiv.innerHTML = renderBookEditor(bookId);
-    pagesContainer.appendChild(pageDiv);
-    initBookEditor(tabId, bookId);
     switchToTab(tabId);
-    var sidebar = document.querySelector('.sidebar-menu');
-    if (sidebar) sidebar.style.display = 'none';
-    var toolbar = document.getElementById('mainToolbar');
-    if (toolbar) toolbar.classList.add('visible');
+}
+
+/**
+ * 书籍编辑器只保留一份页面 DOM。
+ * 以前打开两本书会生成两个都包含 #editor / #chapterTitle 的页面，
+ * document.getElementById 永远拿到第一份，保存时就会把 B 的内容写进 A。
+ * 现在切换书籍时先保存当前书，再复用同一个 .page 重建编辑器。
+ */
+function ensureBookPage(tab) {
+    if (!tab || !tab.bookId) return null;
+    var pagesContainer = document.getElementById('pagesContainer');
+    if (!pagesContainer) return null;
+
+    var existing = document.querySelector('.page[data-page^="book_"]');
+    var samePage = existing && existing.getAttribute('data-page') === tab.id && String(currentBookId) === String(tab.bookId);
+    if (samePage) return existing;
+
+    if (existing && currentBookId) {
+        try { saveCurrentChapter(); } catch (e) { console.warn('切换书籍前保存失败:', e); }
+    }
+
+    var pageDiv = existing || document.createElement('div');
+    pageDiv.className = 'page';
+    pageDiv.setAttribute('data-page', tab.id);
+    pageDiv.innerHTML = renderBookEditor(tab.bookId);
+    if (!existing) pagesContainer.appendChild(pageDiv);
+
+    initBookEditor(tab.id, tab.bookId);
+    return pageDiv;
 }
 
 function renderBookEditor(bookId) {
@@ -989,8 +1008,8 @@ window.closeFloatingPanel = function() {
     }
     var rightSidebar = document.getElementById('rightSidebar');
     if (rightSidebar) {
-        rightSidebar.style.width = '48px';
-        rightSidebar.style.minWidth = '48px';
+        rightSidebar.style.width = '60px';
+        rightSidebar.style.minWidth = '60px';
         rightSidebar.style.display = 'flex';
     }
     localStorage.setItem('rightSidebar_collapsed', 'false');
@@ -1737,35 +1756,10 @@ function initChapterSearch() {
 initChapterSearch();
 
 function initRightSidebar() {
-    if (document.getElementById('rightSidebar')) return;
-    var sidebarHtml = '<div id="rightSidebar" class="right-sidebar"><div class="right-sidebar-content"><div class="sidebar-tool-item" data-tool="outline"><div class="sidebar-tool-icon">📋</div><div class="sidebar-tool-label">大纲</div></div><div class="sidebar-tool-item" data-tool="timeline"><div class="sidebar-tool-icon">⏱️</div><div class="sidebar-tool-label">时间线</div></div><div class="sidebar-tool-item" data-tool="characters"><div class="sidebar-tool-icon">👥</div><div class="sidebar-tool-label">角色</div></div><div class="sidebar-tool-item" data-tool="setting"><div class="sidebar-tool-icon">⚙️</div><div class="sidebar-tool-label">设定</div></div><div class="sidebar-tool-item" data-tool="relation"><div class="sidebar-tool-icon">🔗</div><div class="sidebar-tool-label">关系图</div></div><div class="sidebar-tool-item" data-tool="whiteboard"><div class="sidebar-tool-icon">📝</div><div class="sidebar-tool-label">无边记</div></div><div class="sidebar-tool-item" data-tool="namegen"><div class="sidebar-tool-icon">✏️</div><div class="sidebar-tool-label">起名</div></div><div class="sidebar-tool-item" data-tool="notes"><div class="sidebar-tool-icon">📓</div><div class="sidebar-tool-label">笔记</div></div></div></div>';
-    document.body.insertAdjacentHTML('beforeend', sidebarHtml);
-    
-    var tools = document.querySelectorAll('.sidebar-tool-item');
-    for (var i = 0; i < tools.length; i++) {
-        tools[i].onclick = function() {
-            var tool = this.getAttribute('data-tool');
-            openSecondaryWindow(tool);
-        };
-    }
-}
-
-function openSecondaryWindow(tool) {
-    var fileMap = {
-        whiteboard: 'html/html/whiteboard.html',
-        namegen: 'html/html/namegen.html',
-        notes: 'html/html/notes.html',
-        outline: 'html/html/outline.html',
-        timeline: 'html/html/timeline.html',
-        characters: 'html/html/characters.html',
-        setting: 'html/html/setting.html',
-        relation: 'html/html/relation.html'
-    };
-    var file = fileMap[tool];
-    if (file) {
-        window.open(file, '_blank', 'width=1000,height=750,left=100,top=50,resizable=yes');
-    } else {
-        alert(tool + '功能开发中');
+    // 右侧工具栏已经包含在 renderBookEditor() 的模板里，这里只做存在性检查。
+    // 旧版本会在这里再插入一份 #rightSidebar，导致重复 id 与两套工具图标。
+    if (!document.getElementById('rightSidebar')) {
+        console.warn('右侧工具栏未找到，请检查 renderBookEditor 模板');
     }
 }
 
@@ -1928,7 +1922,7 @@ function updateSaveStatus(message, isAuto) {
         saveSpan.textContent = message || (isAuto ? '⏳ 自动保存中...' : '✅ 已保存');
         if (!isAuto) {
             setTimeout(function() {
-                if (saveSpan && saveSpan.textContent === '✅ 已保存') {
+                if (saveSpan && saveSpan.textContent.indexOf('已保存') !== -1) {
                     saveSpan.textContent = '已同步';
                 }
             }, 2000);

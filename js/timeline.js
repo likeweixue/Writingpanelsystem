@@ -122,7 +122,7 @@ function createTimelineNodeElement(node, depth) {
         header.appendChild(dateSpan);
     }
     header.onclick = function(e) {
-        if (e.target === toggle) return;
+        if (toggle.contains(e.target)) return;
         selectTimelineNode(node.id);
     };
     header.ondblclick = function(e) {
@@ -748,8 +748,8 @@ function openTimelineSidebar(tool) {
     if (rightSidebar) {
         rightSidebar.classList.remove('collapsed');
         rightSidebar.style.display = 'flex';
-        rightSidebar.style.width = '48px';
-        rightSidebar.style.minWidth = '48px';
+        rightSidebar.style.width = '60px';
+        rightSidebar.style.minWidth = '60px';
         localStorage.setItem('rightSidebar_collapsed', 'false');
     }
     var detailMain = document.querySelector('.detail-main');
@@ -788,8 +788,8 @@ function closeTimelineFloatingPanel() {
     if (panel) { panel.remove(); }
     var rightSidebar = document.getElementById('rightSidebar');
     if (rightSidebar) {
-        rightSidebar.style.width = '48px';
-        rightSidebar.style.minWidth = '48px';
+        rightSidebar.style.width = '60px';
+        rightSidebar.style.minWidth = '60px';
     }
 }
 
@@ -901,7 +901,7 @@ function createCompactTimelineNode(node, depth) {
         header.appendChild(dateSpan);
     }
     header.onclick = function(e) {
-        if (e.target === toggle) return;
+        if (toggle.contains(e.target)) return;
         timelineData.selectedId = node.id;
         saveTimelineData();
         renderCompactTimelineTree();
@@ -1061,8 +1061,8 @@ function bindCompactTimelineEvents() {
             closeTimelineFloatingPanel();
             var rightSidebar = document.getElementById('rightSidebar');
             if (rightSidebar) {
-                rightSidebar.style.width = '48px';
-                rightSidebar.style.minWidth = '48px';
+                rightSidebar.style.width = '60px';
+                rightSidebar.style.minWidth = '60px';
             }
         };
     }
@@ -1186,9 +1186,7 @@ function saveTimelineData() {
     var key = 'openwrite_timeline_' + (currentBookId || 'global');
     var data = { nodes: timelineData.nodes, selectedId: selectedId, nextId: timelineData.nextId || 100 };
     localStorage.setItem(key, JSON.stringify(data));
-    if (window.opener && window.opener.window) {
-        try { window.opener.window.location.reload(); } catch(e) {}
-    }
+    if (window.WPSPanel) { try { window.WPSPanel.notify('timeline', { nodes: timelineData.nodes, selectedId: selectedId, nextId: timelineData.nextId }); } catch(e) {} }
 }
 function selectNode(id) { selectedId = id; renderTree(); updateEditor(); saveTimelineData(); }
 function renderTree() {
@@ -1237,7 +1235,7 @@ function createNodeElement(node, depth) {
         dateSpan.textContent = '📅 ' + node.date;
         header.appendChild(dateSpan);
     }
-    header.onclick = function(e) { if (e.target === toggle) return; selectNode(node.id); };
+    header.onclick = function(e) { if (toggle.contains(e.target)) return; selectNode(node.id); };
     header.ondblclick = function(e) { e.stopPropagation(); var newName = prompt('重命名：', node.name); if (newName && newName.trim()) { node.name = newName.trim(); saveTimelineData(); renderTree(); updateEditor(); } };
     header.oncontextmenu = function(e) { e.preventDefault(); e.stopPropagation();
         var menu = document.createElement('div');
