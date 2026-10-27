@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>标签页底角调节器 · WritingPanelSystem</title>
+<style>
+    * { box-sizing: border-box; }
+    :root {
+        color-scheme: light;
+        --page-bg: #eef2f6;
+        --card-bg: #ffffff;
+        --ink: #1f2937;
+        --muted: #6b7280;
+        --line: #e5e7eb;
+        --accent: #2563eb;
+        --accent-soft: rgba(37, 99, 235, 0.1);
+        --shadow: 0 18px 50px rgba(15, 23, 42, 0.12);
+        --radius: 16px;
+    }
+    body {
+        margin: 0;
+        min-height: 100vh;
+        background: var(--page-bg);
+        color: var(--ink);
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    }
+    .icon-sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
+    .icon { width: 16px; height: 16px; display: inline-block; vertical-align: -0.125em; flex: none; }
+
+    .app { max-width: 1500px; margin: 0 auto; padding: 24px 28px 40px; }
+    .topbar {
+        display: flex; align-items: center; justify-content: space-between; gap: 20px;
+        padding: 18px 22px; margin-bottom: 18px;
+        background: var(--card-bg); border-radius: var(--radius); box-shadow: 0 4px 18px rgba(15, 23, 42, 0.04);
+    }
+    .topbar h1 { margin: 0; font-size: 22px; letter-spacing: 0.2px; }
+    .topbar p { margin: 5px 0 0; color: var(--muted); font-size: 13px; }
+    .topbar .badge {
+        flex: none; padding: 7px 12px; border-radius: 999px;
+        background: var(--accent-soft); color: var(--accent); font-size: 12px; font-weight: 600;
+    }
+
+    .layout { display: grid; grid-template-columns: minmax(0, 1fr) 350px; gap: 18px; align-items: start; }
+    .preview-card, .control-card, .zoom-card {
+        background: var(--card-bg); border-radius: var(--radius); box-shadow: 0 4px 18px rgba(15, 23, 42, 0.05);
+    }
+    .preview-card { padding: 18px; }
+    .preview-label { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .preview-label strong { font-size: 14px; }
+    .preview-label span { color: var(--muted); font-size: 12px; }
+
+    .stage {
+        position: relative; padding: 18px;
+        border-radius: 14px; background: #dfe4ea;
+        overflow: hidden;
+    }
+    .mock-window {
+        border-radius: 12px; overflow: hidden;
+        box-shadow: 0 10px 26px rgba(15, 23, 42, 0.18);
+        background: var(--surface);
+        color: var(--text);
+        --strip: #dfe3e8; --surface: #ffffff; --tab-active: #ffffff;
+        --text: #1f2937; --muted-text: #4b5563; --line: #c7ccd4; --accent: #2563eb;
+    }
+    .mock-window[data-theme="eye"] {
+        --strip: #aebfa9; --surface: #c8dbc5; --tab-active: #c8dbc5;
+        --text: #21351f; --muted-text: #3f5a43; --line: #99ad96; --accent: #2f6b3d;
+    }
+    .mock-window[data-theme="warm"] {
+        --strip: #c6baa1; --surface: #dfd5bd; --tab-active: #dfd5bd;
+        --text: #3a2d1f; --muted-text: #6b5941; --line: #b3a58a; --accent: #8a6a3a;
+    }
+    .mock-window[data-theme="dark"] {
+        --strip: #12121e; --surface: #1e1e2e; --tab-active: #1e1e2e;
+        --text: #f1f5f9; --muted-text: #a9b0c6; --line: #2b2b40; --accent: #8ab4ff;
+    }
+
+    .mock-tabstrip {
+        position: relative; z-index: 2;
+        display: flex; align-items: flex-end;
+        height: 42px; padding: 8px 10px 0;
+        gap: 2px;
+        background: linear-gradient(
+            to bottom,
+            var(--strip) calc(100% - 1px),
+            var(--line) calc(100% - 1px)
+        );
+        overflow: hidden;
+    }
+    .mock-tab {
+        position: relative;
+        display: flex; align-items: center; gap: 7px;
+        flex: 0 0 190px; height: 34px;
+        padding: 0 12px;
+        border: 1px solid transparent;
+        border-bottom: 0;
+        border-radius: 9px 9px 0 0;
+        color: var(--muted-text);
+        font-size: 12.5px; font-weight: 500;
+        white-space: nowrap;
+    }
+    .mock-tab .tab-title { flex: 1; overflow: hidden; text-overflow: ellipsis; }
+    .mock-tab .tab-close { display: flex; opacity: .55; }
+    .mock-tab.active {
+        height: 34px; margin-bottom: 0;
+        background: var(--tab-active);
+        color: var(--text);
+        border-color: var(--line);
+        border-left-color: transparent;
+        border-right-color: transparent;
+        overflow: visible;
+        z-index: 6;
+        box-shadow: 0 0 0 1px transparent;
+    }
+    .mock-tab.active .tab-close { opacity: .65; }
+    .new-tab {
+        display: flex; align-items: center; justify-content: center;
+        width: 28px; height: 28px; margin: 0 0 3px 4px;
+        border: 0; border-radius: 7px; background: transparent;
+        color: var(--muted-text); cursor: pointer;
+    }
+    .new-tab:hover { background: rgba(127, 127, 127, .12); }
+
+    .flare { position: absolute; bottom: 0; display: block; pointer-events: none; background: var(--tab-active); z-index: 5; }
+    .flare-left { left: -46px; }
+    .flare-right { right: -46px; }
+
+    .flare-guide {
+        position: absolute; bottom: 0; z-index: 8;
+        overflow: visible; pointer-events: none;
+        display: none;
+    }
+    .show-guides .flare-guide { display: block; }
+    .flare-guide path {
+        fill: none;
+        stroke: #ef4444;
+        stroke-width: 1.2;
+        vector-effect: non-scaling-stroke;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+    .guide-left { left: -46px; }
+    .guide-right { right: -46px; }
+
+    .mock-toolbar {
+        display: flex; align-items: center; gap: 4px;
+        height: 44px; padding: 0 16px;
+        background: var(--surface); color: var(--text);
+        border-bottom: 1px solid rgba(127, 127, 127, .16);
+        font-size: 12.5px;
+    }
+    .mock-toolbar .tool {
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 6px 9px; border-radius: 7px; color: var(--text);
+    }
+    .mock-toolbar .tool:hover { background: rgba(127, 127, 127, .08); }
+    .mock-toolbar .tool .icon { width: 15px; height: 15px; }
+    .mock-toolbar .spacer { flex: 1; }
+    .mock-toolbar .hint { color: var(--muted-text); opacity: .65; font-size: 11px; }
+
+    .mock-content {
+        min-height: 150px; padding: 24px 32px;
+        background: var(--surface);
+    }
+    .mock-content .content-title { font-size: 22px; font-weight: 700; margin-bottom: 18px; }
+    .mock-content p { margin: 0; color: var(--muted-text); font-size: 14px; line-height: 1.9; }
+
+    .zoom-card { margin-top: 18px; padding: 18px; }
+    .zoom-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 13px; font-weight: 600; color: var(--ink); }
+    .zoom-title span { font-weight: 400; font-size: 12px; color: var(--muted); }
+    .zoom-clip {
+        position: relative; height: 250px; overflow: hidden;
+        border-radius: 12px; background: #dfe4ea;
+    }
+    .zoom-inner {
+        width: 560px; transform: scale(2); transform-origin: top left;
+        position: absolute; left: 50%; margin-left: -520px; top: 14px;
+    }
+    .zoom-inner .mock-window { box-shadow: 0 6px 18px rgba(15, 23, 42, .18); }
+    .zoom-inner .mock-tabstrip { height: 42px; }
+    .zoom-inner .mock-tab { flex-basis: 190px; }
+    .zoom-inner .mock-toolbar { height: 44px; font-size: 12px; }
+    .zoom-inner .zoom-toolbar-placeholder { height: 58px; background: var(--surface); display: flex; align-items: center; justify-content: center; color: var(--muted-text); font-size: 12px; }
+
+    .control-card { padding: 16px; position: sticky; top: 16px; }
+    .control-card h2 { margin: 0 0 4px; font-size: 15px; }
+    .control-card .desc { margin: 0 0 16px; color: var(--muted); font-size: 12px; line-height: 1.6; }
+    .control { padding: 13px 0; border-top: 1px solid var(--line); }
+    .control:first-of-type { border-top: 0; padding-top: 4px; }
+    .control-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 7px; }
+    .control-head label { font-size: 12.5px; font-weight: 600; }
+    .control-head output { color: var(--accent); font-size: 12px; font-variant-numeric: tabular-nums; }
+    input[type="range"] { width: 100%; margin: 0; accent-color: var(--accent); }
+    .hintline { margin: 5px 0 0; color: var(--muted); font-size: 11px; line-height: 1.5; }
+    .guide-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 0 2px; border-top: 1px solid var(--line); font-size: 11px; color: var(--muted); }
+    .guide-label { display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 600; color: var(--ink); cursor: pointer; }
+    .guide-label input { accent-color: var(--accent); }
+    .theme-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 0 2px; border-top: 1px solid var(--line); }
+    .theme-row label { font-size: 12.5px; font-weight: 600; }
+    .theme-row select {
+        padding: 6px 8px; border: 1px solid var(--line); border-radius: 7px;
+        background: #fff; color: var(--ink); font: inherit; font-size: 12px;
+    }
+    .result {
+        margin-top: 14px; padding: 12px; border-radius: 12px;
+        background: #f8fafc; border: 1px solid var(--line);
+    }
+    .result .result-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; color: var(--muted); font-size: 11px; letter-spacing: .04em; text-transform: uppercase; }
+    .result code {
+        display: block; width: 100%; padding: 0; background: transparent; border: 0;
+        color: var(--ink); font-family: 'SF Mono', ui-monospace, Menlo, Consolas, monospace;
+        font-size: 11.5px; line-height: 1.7; white-space: pre-wrap; word-break: break-all;
+    }
+    .actions { display: flex; gap: 8px; margin-top: 12px; }
+    .btn {
+        flex: 1; padding: 9px 10px; border: 0; border-radius: 8px; cursor: pointer;
+        font: inherit; font-size: 12px; font-weight: 600;
+    }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { filter: brightness(.95); }
+    .btn-secondary { background: #eef2f6; color: var(--ink); }
+    .btn-secondary:hover { background: #e2e8f0; }
+    .footer-note { margin-top: 12px; font-size: 11px; line-height: 1.65; color: var(--muted); }
+    .toast {
+        position: fixed; left: 50%; bottom: 30px; transform: translateX(-50%) translateY(12px);
+        padding: 9px 16px; border-radius: 999px; background: rgba(15, 23, 42, .88); color: #fff;
+        font-size: 12px; opacity: 0; pointer-events: none; transition: .2s ease; z-index: 99;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    @media (max-width: 980px) {
+        .layout { grid-template-columns: 1fr; }
+        .control-card { position: static; }
+        .stage { padding: 10px; }
+        .mock-tab { flex-basis: 150px; }
+        .mock-toolbar .tool span { display: none; }
+    }
+</style>
+</head>
+<body>
+<svg class="icon-sprite" aria-hidden="true">
+    <symbol id="i-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 12h14M12 5v14"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></symbol>
+    <symbol id="i-image" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></symbol>
+    <symbol id="i-max" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></symbol>
+    <symbol id="i-palette" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.9 0 2-.7 2-2 0-.5-.2-.9-.5-1.3-.3-.4-.5-.8-.5-1.2 0-1.1.9-2 2-2h2.4c2.5 0 4.6-2.1 4.6-4.6C22 6.6 17.5 2 12 2z"/></symbol>
+    <symbol id="i-type" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" x2="15" y1="20" y2="20"/><line x1="12" x2="12" y1="4" y2="20"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></symbol>
+    <symbol id="i-rotate" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></symbol>
+</svg>
+
+<div class="app">
+    <div class="topbar">
+        <div>
+            <h1>标签页底角调节器</h1>
+            <p>拖动滑杆调弧度，调好后把参数发给我，我按这组数值改到软件里。</p>
+        </div>
+        <div class="badge">实时预览</div>
+    </div>
+
+    <div class="layout">
+        <div class="preview-column">
+            <section class="preview-card">
+                <div class="preview-label">
+                    <strong>整体效果</strong>
+                    <span>活动标签：我的作品</span>
+                </div>
+                <div class="stage">
+                    <div class="mock-window" data-theme="default" id="mockWindow">
+                        <div class="mock-tabstrip">
+                            <div class="mock-tab"><svg class="icon"><use href="#i-home"/></svg><span class="tab-title">首页</span></div>
+                            <div class="mock-tab active" id="activeTab">
+                                <span class="flare flare-left"></span>
+                                <span class="flare flare-right"></span>
+                                <svg class="flare-guide guide-left" aria-hidden="true"><path/></svg>
+                                <svg class="flare-guide guide-right" aria-hidden="true"><path/></svg>
+                                <svg class="icon"><use href="#i-book"/></svg>
+                                <span class="tab-title">我的作品</span>
+                                <span class="tab-close"><svg class="icon"><use href="#i-x"/></svg></span>
+                            </div>
+                            <div class="mock-tab"><svg class="icon"><use href="#i-settings"/></svg><span class="tab-title">设置</span></div>
+                            <button class="new-tab" title="新建标签页"><svg class="icon"><use href="#i-plus"/></svg></button>
+                        </div>
+                        <div class="mock-toolbar">
+                            <span class="tool"><svg class="icon"><use href="#i-download"/></svg>导入</span>
+                            <span class="tool"><svg class="icon"><use href="#i-image"/></svg>插入图片</span>
+                            <span class="tool"><svg class="icon"><use href="#i-max"/></svg>全屏</span>
+                            <span class="tool"><svg class="icon"><use href="#i-palette"/></svg>主题</span>
+                            <span class="tool"><svg class="icon"><use href="#i-type"/></svg>字体</span>
+                            <span class="tool"><svg class="icon"><use href="#i-trash"/></svg>清理</span>
+                            <span class="spacer"></span>
+                            <span class="hint">活动标签与工具栏连成一体</span>
+                        </div>
+                        <div class="mock-content">
+                            <div class="content-title">第一章</div>
+                            <p>这里是一个开始……<br>拖动右侧的圆弧宽度、高度和曲率，观察底部两个角的形状。</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="zoom-card">
+                <div class="zoom-title">
+                    <strong>局部放大（2×）</strong>
+                    <span>看两个底角的曲线</span>
+                </div>
+                <div class="zoom-clip">
+                    <div class="zoom-inner">
+                        <div class="mock-window" data-theme="default" id="zoomWindow">
+                            <div class="mock-tabstrip">
+                                <div class="mock-tab"><svg class="icon"><use href="#i-home"/></svg><span class="tab-title">首页</span></div>
+                                <div class="mock-tab active" id="zoomActiveTab">
+                                    <span class="flare flare-left"></span>
+                                    <span class="flare flare-right"></span>
+                                <svg class="flare-guide guide-left" aria-hidden="true"><path/></svg>
+                                <svg class="flare-guide guide-right" aria-hidden="true"><path/></svg>
+                                    <svg class="icon"><use href="#i-book"/></svg>
+                                    <span class="tab-title">我的作品</span>
+                                    <span class="tab-close"><svg class="icon"><use href="#i-x"/></svg></span>
+                                </div>
+                                <div class="mock-tab"><svg class="icon"><use href="#i-settings"/></svg><span class="tab-title">设置</span></div>
+                                <button class="new-tab"><svg class="icon"><use href="#i-plus"/></svg></button>
+                            </div>
+                            <div class="zoom-toolbar-placeholder">工具栏 / 内容区</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <aside class="control-card">
+            <h2>参数</h2>
+            <p class="desc">滑杆会实时更新预览。圆弧的起手和收尾可以分别调。</p>
+
+            <div class="control">
+                <div class="control-head"><label for="wRange">圆弧宽度 W</label><output id="wOut">26 px</output></div>
+                <input id="wRange" type="range" min="20" max="90" step="1" value="26">
+                <p class="hintline">越大，底角向外延伸越远。</p>
+            </div>
+            <div class="control">
+                <div class="control-head"><label for="hRange">圆弧高度 H</label><output id="hOut">18 px</output></div>
+                <input id="hRange" type="range" min="2" max="30" step="1" value="18">
+                <p class="hintline">越大，曲线占的高度越高；越小越平缓。</p>
+            </div>
+            <div class="control">
+                <div class="control-head"><label for="c1Range">起手曲率 C1</label><output id="c1Out">0.79</output></div>
+                <input id="c1Range" type="range" min="0.10" max="1.20" step="0.01" value="0.79">
+                <p class="hintline">控制曲线从标签侧边离开的速度。</p>
+            </div>
+            <div class="control">
+                <div class="control-head"><label for="c2Range">收尾曲率 C2</label><output id="c2Out">0.27</output></div>
+                <input id="c2Range" type="range" min="0.10" max="1.20" step="0.01" value="0.27">
+                <p class="hintline">控制曲线接近底部时的收尾弧度。</p>
+            </div>
+            <div class="control">
+                <div class="control-head"><label for="oRange">底部偏移</label><output id="oOut">0 px</output></div>
+                <input id="oRange" type="range" min="-4" max="2" step="1" value="0">
+                <p class="hintline">让底角稍微压进工具栏，通常保持 -1。</p>
+            </div>
+
+            <div class="guide-row">
+                <label class="guide-label" for="guideToggle"><input type="checkbox" id="guideToggle" checked> 显示辅助轮廓</label>
+                <span>红色细线不会出现在软件里</span>
+            </div>
+
+            <div class="theme-row">
+                <label for="themeSelect">预览主题</label>
+                <select id="themeSelect">
+                    <option value="default">默认白</option>
+                    <option value="eye">护眼绿</option>
+                    <option value="warm">经典黄</option>
+                    <option value="dark">暗夜黑</option>
+                </select>
+            </div>
+
+            <div class="result">
+                <div class="result-title"><span>当前参数</span><span>w / h / c1 / c2 / offset</span></div>
+                <code id="paramText">{"w":26,"h":18,"c1":0.79,"c2":0.27,"offset":0}</code>
+                <div class="actions">
+                    <button class="btn btn-primary" id="copyBtn"><svg class="icon" style="width:14px;height:14px"><use href="#i-copy"/></svg> 复制参数</button>
+                    <button class="btn btn-secondary" id="resetBtn"><svg class="icon" style="width:14px;height:14px"><use href="#i-rotate"/></svg> 重置</button>
+                </div>
+            </div>
+
+            <p class="footer-note">调好后把这行 JSON 发给我就行。当前采用的是你确认的 26 / 18 / 0.79 / 0.27 / 0，也可以继续微调。</p>
+        </aside>
+    </div>
+</div>
+<div class="toast" id="toast">参数已复制</div>
+
+<script>
+(function () {
+    'use strict';
+    const state = { w: 26, h: 18, c1: 0.79, c2: 0.27, offset: 0, theme: 'default' };
+    const $ = (id) => document.getElementById(id);
+    const round = (n) => Math.round(n * 100) / 100;
+
+    function leftPath(w, h, c1, c2) {
+        return `M ${w} 0 C ${w} ${round(h * c1)}, ${round(w * c2)} ${h}, 0 ${h} L ${w} ${h} Z`;
+    }
+    function rightPath(w, h, c1, c2) {
+        return `M 0 0 C 0 ${round(h * c1)}, ${round(w * c2)} ${h}, ${w} ${h} L 0 ${h} Z`;
+    }
+
+    function paintGuides(w, h, offset, left, right) {
+        document.querySelectorAll('.guide-left').forEach((el) => {
+            el.style.width = w + 'px';
+            el.style.height = h + 'px';
+            el.style.left = (-w) + 'px';
+            el.style.bottom = offset + 'px';
+            const path = el.querySelector('path');
+            if (path) path.setAttribute('d', left);
+        });
+        document.querySelectorAll('.guide-right').forEach((el) => {
+            el.style.width = w + 'px';
+            el.style.height = h + 'px';
+            el.style.right = (-w) + 'px';
+            el.style.bottom = offset + 'px';
+            const path = el.querySelector('path');
+            if (path) path.setAttribute('d', right);
+        });
+    }
+
+    function paintFlares() {
+        const w = state.w, h = state.h, c1 = state.c1, c2 = state.c2;
+        const left = leftPath(w, h, c1, c2);
+        const right = rightPath(w, h, c1, c2);
+        paintGuides(w, h, state.offset, left, right);
+        document.querySelectorAll('.flare-left').forEach((el) => {
+            el.style.width = w + 'px';
+            el.style.height = h + 'px';
+            el.style.left = (-w) + 'px';
+            el.style.bottom = state.offset + 'px';
+            el.style.clipPath = `path("${left}")`;
+            el.style.webkitClipPath = `path("${left}")`;
+        });
+        document.querySelectorAll('.flare-right').forEach((el) => {
+            el.style.width = w + 'px';
+            el.style.height = h + 'px';
+            el.style.right = (-w) + 'px';
+            el.style.bottom = state.offset + 'px';
+            el.style.clipPath = `path("${right}")`;
+            el.style.webkitClipPath = `path("${right}")`;
+        });
+    }
+
+    function render() {
+        $('wOut').textContent = state.w + ' px';
+        $('hOut').textContent = state.h + ' px';
+        $('c1Out').textContent = state.c1.toFixed(2);
+        $('c2Out').textContent = state.c2.toFixed(2);
+        $('oOut').textContent = state.offset + ' px';
+        const json = { w: state.w, h: state.h, c1: Number(state.c1.toFixed(2)), c2: Number(state.c2.toFixed(2)), offset: state.offset };
+        $('paramText').textContent = JSON.stringify(json);
+        document.querySelectorAll('#mockWindow, #zoomWindow').forEach((el) => {
+            el.setAttribute('data-theme', state.theme);
+        });
+        paintFlares();
+    }
+
+    ['w', 'h', 'c1', 'c2', 'offset'].forEach((key) => {
+        const range = $({ w: 'wRange', h: 'hRange', c1: 'c1Range', c2: 'c2Range', offset: 'oRange' }[key]);
+        range.addEventListener('input', () => {
+            state[key] = Number(range.value);
+            render();
+        });
+    });
+    $('themeSelect').addEventListener('change', () => {
+        state.theme = $('themeSelect').value;
+        render();
+    });
+    $('guideToggle').addEventListener('change', () => {
+        document.body.classList.toggle('show-guides', $('guideToggle').checked);
+    });
+    $('resetBtn').addEventListener('click', () => {
+        state.w = 26; state.h = 18; state.c1 = 0.79; state.c2 = 0.27; state.offset = 0; state.theme = 'default';
+        $('wRange').value = state.w; $('hRange').value = state.h;
+        $('c1Range').value = state.c1; $('c2Range').value = state.c2;
+        $('oRange').value = state.offset; $('themeSelect').value = state.theme;
+        render();
+    });
+
+    function toast(message) {
+        const el = $('toast');
+        el.textContent = message;
+        el.classList.add('show');
+        clearTimeout(toast._t);
+        toast._t = setTimeout(() => el.classList.remove('show'), 1600);
+    }
+
+    $('copyBtn').addEventListener('click', async () => {
+        const text = $('paramText').textContent;
+        try {
+            await navigator.clipboard.writeText(text);
+            toast('参数已复制');
+        } catch (err) {
+            const range = document.createRange();
+            range.selectNodeContents($('paramText'));
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(range);
+            toast('已选中，按 Ctrl/Cmd+C 复制');
+        }
+    });
+
+    document.body.classList.toggle('show-guides', $('guideToggle').checked);
+    render();
+})();
+</script>
+</body>
+</html>

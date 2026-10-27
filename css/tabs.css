@@ -109,7 +109,7 @@ body .app-container > .tabs-container {
     flex-shrink: 0 !important;
     height: 42px !important;
     min-height: 42px !important;
-    padding: 8px 10px 0 10px !important;
+    padding: 8px 10px 0 0 !important;
     margin: 0 !important;
     gap: 2px !important;
     background: var(--wps-tabstrip-bg) !important;
@@ -161,8 +161,8 @@ body .tabs-container .tab:hover {
 }
 
 body .tabs-container .tab.active {
-    height: 35px;
-    margin-bottom: -1px !important;
+    height: 34px;
+    margin-bottom: 0 !important;
     background: var(--wps-tab-active) !important;
     color: var(--wps-tab-active-text) !important;
     border-color: var(--wps-tabstrip-border) !important;
@@ -833,30 +833,36 @@ body:not(.theme-open):not(.has-custom-bg) .sidebar-menu {
 body .tabs-container .tab.active {
     background: var(--wps-tab-active) !important;
     border-bottom-color: transparent !important;
+    border-left-color: transparent !important;
+    border-right-color: transparent !important;
     overflow: visible !important;
     z-index: 6;
-    box-shadow: 0 1px 0 0 var(--wps-tab-active), 0 -1px 2px var(--wps-tab-shadow) !important;
+    box-shadow: 0 -1px 2px var(--wps-tab-shadow) !important;
 }
 
-/* 底部两个向外翻的圆弧 */
+/* 底部两个向外翻的圆弧：按调节器选定的参数 W=26 H=18 C1=0.79 C2=0.27 */
 body .tabs-container .tab-flare {
     position: absolute;
-    bottom: -1px;
-    width: 12px;
-    height: 12px;
+    bottom: 0;
+    width: 26px;
+    height: 18px;
     display: block;
     pointer-events: none;
     z-index: 5;
 }
 
 body .tabs-container .tab-flare-left {
-    left: -12px;
-    background: radial-gradient(circle at 100% 0, transparent 11.4px, var(--wps-tab-active) 12px);
+    left: -26px;
+    background: var(--wps-tab-active) !important;
+    -webkit-clip-path: path("M 26 0 C 26 14.22, 7.02 18, 0 18 L 26 18 Z");
+    clip-path: path("M 26 0 C 26 14.22, 7.02 18, 0 18 L 26 18 Z");
 }
 
 body .tabs-container .tab-flare-right {
-    right: -12px;
-    background: radial-gradient(circle at 0 0, transparent 11.4px, var(--wps-tab-active) 12px);
+    right: -26px;
+    background: var(--wps-tab-active) !important;
+    -webkit-clip-path: path("M 0 0 C 0 14.22, 7.02 18, 26 18 L 0 18 Z");
+    clip-path: path("M 0 0 C 0 14.22, 7.02 18, 26 18 L 0 18 Z");
 }
 
 /* 统计页卡片跟随主题色 */
