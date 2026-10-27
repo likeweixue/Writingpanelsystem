@@ -1361,6 +1361,10 @@ function showCompactContextMenu(x, y, nodeId) {
 
 function openOutlineInNewWindow() {
     closeFloatingPanel();
+    // 全屏窗口使用当前书的数据；如果还没加载过，先读一次
+    if (!outlineData.nodes || outlineData.nodes.length === 0) {
+        getOutlineData();
+    }
     
     // ===== 主题 + 自定义背景（统一由 js/panel-window.js 提供，9 个模块共用） =====
     var panelTheme = getPanelTheme();
@@ -1556,8 +1560,65 @@ function openOutlineInNewWindow() {
 </div>
 <script>
 var outlineData = ${JSON.stringify(outlineData)};
-var currentBookId = ${currentBookId || 'null'};
+var currentBookId = ${JSON.stringify(currentBookId || null)};
 var selectedId = ${outlineData.selectedId ? JSON.stringify(outlineData.selectedId) : 'null'};
+
+// 兜底：如果嵌入的数据为空，从主窗口取当前大纲
+if ((!outlineData || !outlineData.nodes || outlineData.nodes.length === 0) && window.opener) {
+    try {
+        var openerData = window.opener.outlineData;
+        if (openerData && openerData.nodes && openerData.nodes.length) {
+            outlineData = { nodes: openerData.nodes, selectedId: openerData.selectedId, nextId: openerData.nextId };
+            currentBookId = window.opener.currentBookId || currentBookId;
+        }
+    } catch (e) {}
+}
+if (!outlineData || !Array.isArray(outlineData.nodes)) {
+    outlineData = { nodes: [], selectedId: null, nextId: 100 };
+}
+if (!selectedId && outlineData.selectedId) selectedId = outlineData.selectedId;
+
+// 全屏窗口在 Electron 的临时 file:// 环境里可能无法访问 localStorage。
+// 用内存兜底保证树照常渲染，保存时仍通过 postMessage / WPSPanel 同步回主窗口。
+var store = (function () {
+    try {
+        var ls = window['localStorage'];
+        var probe = '__wps_outline_probe__';
+        ls.setItem(probe, '1');
+        ls.removeItem(probe);
+        return {
+            getItem: function (k) { return ls.getItem(k); },
+            setItem: function (k, v) { ls.setItem(k, v); },
+            removeItem: function (k) { ls.removeItem(k); }
+        };
+    } catch (e) {
+        var memory = {};
+        return {
+            getItem: function (k) { return Object.prototype.hasOwnProperty.call(memory, k) ? memory[k] : null; },
+            setItem: function (k, v) { memory[k] = String(v); },
+            removeItem: function (k) { delete memory[k]; }
+        };
+    }
+})();
+
+function notifyParent() {
+    var payload = { nodes: outlineData.nodes, selectedId: selectedId, nextId: outlineData.nextId || 100 };
+    if (window.WPSPanel && typeof window.WPSPanel.notify === 'function') {
+        try { if (window.WPSPanel.notify('outline', payload)) return; } catch (e) {}
+    }
+    try {
+        if (window.opener && !window.opener.closed) {
+            window.opener.postMessage({
+                source: 'wps-panel',
+                type: 'data-changed',
+                tool: 'outline',
+                data: payload,
+                bookId: currentBookId || 'global',
+                at: Date.now()
+            }, '*');
+        }
+    } catch (e) {}
+}
 
 function getOutlineChildren(parentId) {
     return outlineData.nodes.filter(function(n) { return n.parentId === parentId; }).sort(function(a,b) { return (a.order||0)-(b.order||0); });
@@ -1580,18 +1641,19 @@ function numberToChinese(num) {
 function saveOutlineData() {
     var key = 'openwrite_outline_' + (currentBookId || 'global');
     var data = { nodes: outlineData.nodes, selectedId: selectedId, nextId: outlineData.nextId || 100 };
-    localStorage.setItem(key, JSON.stringify(data));
-    if (window.WPSPanel) { try { window.WPSPanel.notify('outline', { nodes: outlineData.nodes, selectedId: selectedId, nextId: outlineData.nextId }); } catch(e) {} }
+    try { store.setItem(key, JSON.stringify(data)); } catch (e) {}
+    notifyParent();
 }
 function selectNode(id) { selectedId = id; renderTree(); updateEditor(); saveOutlineData(); }
 function renderTree() {
     var container = document.getElementById('outlineTree');
     if (!container) return;
     container.innerHTML = '';
+    var countEl = document.getElementById('winNodeCount');
+    if (countEl) countEl.textContent = outlineData.nodes.length;
     var roots = outlineData.nodes.filter(function(n) { return n.parentId === null; }).sort(function(a,b) { return (a.order||0)-(b.order||0); });
     if (roots.length === 0) { container.innerHTML = '<div style="padding:20px;text-align:center;color:#888;font-size:13px;">暂无大纲节点</div>'; return; }
     roots.forEach(function(root) { container.appendChild(createNodeElement(root, 0)); });
-    document.getElementById('winNodeCount').textContent = outlineData.nodes.length;
 }
 function createNodeElement(node, depth) {
     var div = document.createElement('div');
@@ -1606,12 +1668,12 @@ function createNodeElement(node, depth) {
     var toggle = document.createElement('span');
     toggle.className = 'toggle';
     if (hasChildren) {
-        var isExpanded = localStorage.getItem('outline_expanded_' + node.id) !== 'false';
+        var isExpanded = store.getItem('outline_expanded_' + node.id) !== 'false';
         toggle.textContent = isExpanded ? '▾' : '▸';
         toggle.onclick = function(e) { e.stopPropagation();
-            var current = localStorage.getItem('outline_expanded_' + node.id);
+            var current = store.getItem('outline_expanded_' + node.id);
             var newState = current === 'false' ? 'true' : 'false';
-            localStorage.setItem('outline_expanded_' + node.id, newState);
+            store.setItem('outline_expanded_' + node.id, newState);
             renderTree();
         };
     } else { toggle.textContent = '·'; toggle.style.color = '#ccc'; }
@@ -1652,7 +1714,7 @@ function createNodeElement(node, depth) {
                         outlineData.nextId = (outlineData.nextId || 100) + 1;
                         outlineData.nodes.push(newNode);
                         selectedId = newNode.id;
-                        localStorage.setItem('outline_expanded_' + node.id, 'true');
+                        store.setItem('outline_expanded_' + node.id, 'true');
                         saveOutlineData();
                         renderTree();
                         updateEditor();
@@ -1693,7 +1755,7 @@ function createNodeElement(node, depth) {
     if (children.length > 0) {
         var childrenDiv = document.createElement('div');
         childrenDiv.className = 'outline-tree-children';
-        var isExpanded = localStorage.getItem('outline_expanded_' + node.id) !== 'false';
+        var isExpanded = store.getItem('outline_expanded_' + node.id) !== 'false';
         childrenDiv.style.display = isExpanded ? 'block' : 'none';
         children.forEach(function(child) { childrenDiv.appendChild(createNodeElement(child, depth + 1)); });
         div.appendChild(childrenDiv);
@@ -1781,7 +1843,7 @@ document.getElementById('winAddChapterBtn').onclick = function() {
             outlineData.nextId = (outlineData.nextId || 100) + 1;
             outlineData.nodes.push(newNode);
             selectedId = newNode.id;
-            localStorage.setItem('outline_expanded_' + selectedId, 'true');
+            store.setItem('outline_expanded_' + selectedId, 'true');
             saveOutlineData();
             renderTree();
             updateEditor();
@@ -1826,7 +1888,7 @@ document.getElementById('winAddFolderBtn').onclick = function() {
             outlineData.nextId = (outlineData.nextId || 100) + 1;
             outlineData.nodes.push(newNode);
             selectedId = newNode.id;
-            localStorage.setItem('outline_expanded_' + selectedId, 'true');
+            store.setItem('outline_expanded_' + selectedId, 'true');
             saveOutlineData();
             renderTree();
             updateEditor();
@@ -1910,8 +1972,14 @@ document.getElementById('winTitle').oninput = function() {
 document.addEventListener('keydown', function(e) {
     if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); saveNode(); }
 });
-renderTree();
-updateEditor();
+try {
+    renderTree();
+    updateEditor();
+} catch (err) {
+    console.error('大纲窗口初始化失败：', err);
+    var tree = document.getElementById('outlineTree');
+    if (tree) tree.innerHTML = '<div style="padding:20px;text-align:center;color:#c0392b;font-size:13px;">大纲加载失败：' + (err && err.message ? err.message : err) + '</div>';
+}
 console.log('大纲窗口已打开');
 </script>
 </body>

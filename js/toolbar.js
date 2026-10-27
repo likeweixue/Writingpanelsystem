@@ -2480,3 +2480,40 @@ setTimeout(function() {
     addToolbarResetHint();
     console.log('拖拽排序模块启动完成');
 }, 500);
+// ===== 工具栏单行横向滚动 =====
+// 窄窗口不再折成两行：按钮保持一行，滚轮在工具栏上直接横向滚动。
+function initToolbarHorizontalScroll() {
+    var toolbar = document.getElementById('mainToolbar');
+    if (!toolbar || toolbar.dataset.hScrollReady === '1') return;
+    toolbar.dataset.hScrollReady = '1';
+
+    function updateOverflow() {
+        var max = toolbar.scrollWidth - toolbar.clientWidth;
+        toolbar.classList.toggle('is-overflowing', max > 1);
+    }
+
+    toolbar.addEventListener('wheel', function(e) {
+        if (e.ctrlKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+        var max = toolbar.scrollWidth - toolbar.clientWidth;
+        if (max <= 1) return;
+        var delta = e.deltaY;
+        if (e.deltaMode === 1) delta *= 16;
+        else if (e.deltaMode === 2) delta *= toolbar.clientWidth;
+        if (!delta) return;
+        if ((delta < 0 && toolbar.scrollLeft <= 0) || (delta > 0 && toolbar.scrollLeft >= max - 1)) return;
+        e.preventDefault();
+        toolbar.scrollLeft = Math.max(0, Math.min(max, toolbar.scrollLeft + delta));
+    }, { passive: false });
+
+    if (window.ResizeObserver) {
+        try {
+            new ResizeObserver(updateOverflow).observe(toolbar);
+        } catch (e) {}
+    }
+    window.addEventListener('resize', updateOverflow);
+    setTimeout(updateOverflow, 0);
+    setTimeout(updateOverflow, 600);
+}
+
+setTimeout(initToolbarHorizontalScroll, 650);
+setTimeout(initToolbarHorizontalScroll, 1600);

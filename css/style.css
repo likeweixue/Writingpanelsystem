@@ -101,7 +101,10 @@ body {
     backdrop-filter: blur(4px);
     border-bottom: 1px solid rgba(0,0,0,0.08);
     gap: 8px;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
 }
 .main-toolbar.visible {
     display: flex;
@@ -114,6 +117,8 @@ body {
     cursor: pointer;
     font-size: 13px;
     transition: all 0.2s;
+    flex: 0 0 auto;
+    white-space: nowrap;
 }
 .toolbar-btn:hover {
     background: rgba(0,0,0,0.08);

@@ -497,6 +497,42 @@ body .toolbar-btn:hover {
     background: rgba(0, 0, 0, 0.06);
 }
 
+/* 工具栏只保留一行：超出时横向滚动，滚轮可直接滑动 */
+body .main-toolbar {
+    /* 覆盖全局 * 的 thin 滚动条，让 4px 的横向滚动条样式生效 */
+    scrollbar-width: auto !important;
+    scrollbar-color: auto !important;
+}
+body .main-toolbar::-webkit-scrollbar {
+    height: 4px;
+}
+body .main-toolbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+body .main-toolbar::-webkit-scrollbar-thumb {
+    background: var(--wps-toolbar-scroll-thumb, rgba(0, 0, 0, 0.18));
+    border-radius: 999px;
+}
+body .main-toolbar:hover::-webkit-scrollbar-thumb {
+    background: var(--wps-toolbar-scroll-thumb-hover, rgba(0, 0, 0, 0.32));
+}
+body .main-toolbar::-webkit-scrollbar-button {
+    display: none;
+    width: 0;
+    height: 0;
+}
+body .main-toolbar.is-overflowing .toolbar-drag-tip {
+    display: none !important;
+}
+body.theme-dark .main-toolbar {
+    --wps-toolbar-scroll-thumb: rgba(255, 255, 255, 0.16);
+    --wps-toolbar-scroll-thumb-hover: rgba(255, 255, 255, 0.3);
+}
+body.has-custom-bg .main-toolbar {
+    --wps-toolbar-scroll-thumb: rgba(255, 255, 255, 0.28);
+    --wps-toolbar-scroll-thumb-hover: rgba(255, 255, 255, 0.45);
+}
+
 body .toolbar-icon {
     display: inline-flex;
     align-items: center;

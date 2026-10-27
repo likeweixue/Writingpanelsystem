@@ -9,10 +9,12 @@
 
 ---
 
-## [Unreleased]
+## [1.14.0] - 2026-10-27
 
 ### 修复
 
+- **窄窗口工具栏折成两行**：`main-toolbar` 改为单行 `nowrap` + 横向滚动，按钮不压缩；在工具栏上滚动鼠标滚轮即可横向滑动，底部显示 4px 滚动条，溢出时自动隐藏拖拽提示。
+- **全屏大纲窗口没有数据**：全屏大纲窗口在 Electron 的临时 `file://` 环境里可能无法访问 `localStorage`，导致渲染到第一个节点时抛错、树为空。现增加内存存储兜底、主窗口数据回退和保存同步兜底，窗口内节点可正常显示并回同步。
 - **Windows 安装包点击「设置」没有反应**：`getDefaultBackupPath()` 在渲染进程读取 `process.env.USERNAME`，而 Electron 开启了 `contextIsolation`，Windows 上会直接抛 `ReferenceError`，导致设置页渲染中断。现改为优先使用 preload 暴露的真实用户目录，浏览器预览回退到 `%USERPROFILE%` / `~/Documents`，并给设置初始化加了兜底。
 - **全屏大纲窗口保存时主窗口「卡住 / 刷新」**：9 个工具面板的保存函数里都有 `window.opener.location.reload()`，面板每自动保存一次就重载主窗口。现统一改为 `postMessage` 增量同步，只重绘对应工具，不再刷新页面；关闭面板也不会影响写作界面。
 - **多本书标签页串数据**：书籍编辑器只保留一份页面 DOM，切换书籍时先保存再重建，避免两个页面同时存在 `#editor` / `#chapterTitle` 时 `getElementById` 永远命中第一份、把 B 书写进 A 书的问题。

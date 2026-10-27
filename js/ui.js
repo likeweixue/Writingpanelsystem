@@ -465,7 +465,7 @@ function refreshPageTab(pageId) {
 }
 
 function renderAboutPage() {
-    var version = (window.electron && window.electron.appVersion) || '1.13.1';
+    var version = (window.electron && window.electron.appVersion) || '1.14.0';
     return '<div class="about-content" style="padding:40px; max-width:620px; margin:0 auto;">' +
         '<h2 style="font-size:24px; margin-bottom:8px;">写作面板系统 WritingPanelSystem</h2>' +
         '<p style="color:#888; margin-bottom:4px;">免费，开源，自由的写作软件</p>' +
